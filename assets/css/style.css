@@ -194,25 +194,14 @@ section { padding: 100px 0; position: relative; }
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
 }
 
 .nav-logo img {
-  height: 38px;
+  height: 52px;
   width: auto;
   display: block;
-}
-
-.nav-logo-text {
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: var(--blue-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Nav links — centred */
@@ -1335,16 +1324,7 @@ footer {
   margin-bottom: 2px;
 }
 
-.footer-logo img { height: 34px; }
-
-.footer-logo-text {
-  font-size: 19px;
-  font-weight: 800;
-  background: var(--blue-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.footer-logo img { height: 60px; width: auto; }
 
 .footer-brand p {
   font-size: 13px;
