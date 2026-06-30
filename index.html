@@ -1,1009 +1,927 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nexora — Digital Marketing & IT Solutions</title>
-  <meta name="description" content="Nexora delivers cutting-edge Digital Marketing, BSS/SMS platforms, CRM, AI-powered Chatbots, and Agentic AI Solutions to transform your business." />
-  <meta name="keywords" content="digital marketing, IT solutions, CRM, SMS, BSS, chatbots, AI, agentic AI, Jordan" />
+  <meta name="description" content="Nexora delivers cutting-edge Digital Marketing, BSS/SMS platforms, CRM, AI-powered Chatbots, and Agentic AI Solutions." />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Nexora — Digital Marketing & IT Solutions" />
-  <meta property="og:description" content="Transform your business with Nexora's suite of digital solutions: Marketing, BSS, CRM, Chatbots, and AI." />
   <meta property="og:url" content="https://nexorajo.com" />
   <meta property="og:type" content="website" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
 
-  <!-- Fonts -->
+  <!-- Fonts: Inter (EN) + Cairo (AR) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- Styles -->
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
 
-  <!-- ══════════════════════════════════════
-       NAVBAR
-  ══════════════════════════════════════ -->
-  <nav id="navbar">
-    <div class="nav-inner">
-      <a href="#" class="nav-logo">
-        <img src="assets/images/logo.png" alt="Nexora Logo" onerror="this.style.display='none'" />
-        <span class="nav-logo-text">NEXORA</span>
-      </a>
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
 
-      <ul class="nav-links">
-        <li><a href="#services">Services</a></li>
-        <li><a href="#bss">BSS</a></li>
-        <li><a href="#ai">AI Solutions</a></li>
-        <li><a href="#crm">CRM</a></li>
-        <li><a href="#marketing">Marketing</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+    <!-- Logo -->
+    <a href="#" class="nav-logo">
+      <img src="assets/images/logo.png" alt="Nexora" onerror="this.style.display='none'" />
+      <span class="nav-logo-text">NEXORA</span>
+    </a>
 
-      <div class="nav-cta">
-        <a href="#contact" class="btn btn-outline" style="padding: 10px 22px; font-size: 14px;">Get in Touch</a>
-        <a href="#contact" class="btn btn-primary" style="padding: 10px 22px; font-size: 14px;">Start Project</a>
+    <!-- Centre links -->
+    <ul class="nav-links">
+      <li><a href="#services"  data-en="Services"     data-ar="خدماتنا">Services</a></li>
+      <li><a href="#bss"       data-en="BSS & SMS"    data-ar="منصة الرسائل">BSS & SMS</a></li>
+      <li><a href="#ai"        data-en="AI Solutions" data-ar="حلول الذكاء">AI Solutions</a></li>
+      <li><a href="#crm"       data-en="CRM"          data-ar="إدارة العملاء">CRM</a></li>
+      <li><a href="#marketing" data-en="Marketing"    data-ar="التسويق">Marketing</a></li>
+      <li><a href="#contact"   data-en="Contact"      data-ar="تواصل معنا">Contact</a></li>
+    </ul>
+
+    <!-- Right: CTA + language -->
+    <div class="nav-right">
+      <!-- Language toggle -->
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn"        data-lang="ar">عربي</button>
       </div>
-
-      <button class="hamburger" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
+      <a href="#contact" class="btn btn-outline" style="padding:9px 20px;font-size:13px;"
+         data-en="Get in Touch" data-ar="تواصل">Get in Touch</a>
+      <a href="#contact" class="btn btn-primary" style="padding:9px 20px;font-size:13px;"
+         data-en="Start Project" data-ar="ابدأ مشروعك">Start Project</a>
     </div>
-  </nav>
 
-  <!-- Mobile Menu -->
-  <div class="mobile-menu">
-    <button class="mobile-close" aria-label="Close menu">✕</button>
-    <a href="#services">Services</a>
-    <a href="#bss">BSS & SMS</a>
-    <a href="#ai">AI Solutions</a>
-    <a href="#crm">CRM</a>
-    <a href="#marketing">Marketing</a>
-    <a href="#contact">Contact</a>
-    <a href="#contact" class="btn btn-primary">Start Project</a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose">✕</button>
+  <!-- Language in mobile -->
+  <div class="mobile-lang">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn"        data-lang="ar">عربي</button>
+  </div>
+  <a href="#services"  data-en="Services"     data-ar="خدماتنا">Services</a>
+  <a href="#bss"       data-en="BSS & SMS"    data-ar="منصة الرسائل">BSS & SMS</a>
+  <a href="#ai"        data-en="AI Solutions" data-ar="حلول الذكاء الاصطناعي">AI Solutions</a>
+  <a href="#crm"       data-en="CRM"          data-ar="إدارة العملاء">CRM</a>
+  <a href="#marketing" data-en="Marketing"    data-ar="التسويق الرقمي">Marketing</a>
+  <a href="#contact"   data-en="Contact"      data-ar="تواصل معنا">Contact</a>
+  <a href="#contact" class="btn btn-primary"
+     data-en="Start Project" data-ar="ابدأ مشروعك">Start Project</a>
+</div>
+
+<!-- ══════════════════════════════════════
+     HERO
+══════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-particles">
+      <canvas id="particles" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+    </div>
   </div>
 
-  <!-- ══════════════════════════════════════
-       HERO
-  ══════════════════════════════════════ -->
-  <section id="hero">
-    <div class="hero-bg">
-      <div class="hero-glow"></div>
-      <div class="hero-grid"></div>
-      <div class="hero-particles">
-        <canvas id="particles" style="width:100%;height:100%;position:absolute;inset:0;"></canvas>
-      </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-en="Powering Digital Transformation" data-ar="نقود التحول الرقمي">Powering Digital Transformation</span>
     </div>
 
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="dot"></span>
-        Powering Digital Transformation
+    <h1 class="hero-title">
+      <span data-en="Intelligent Solutions" data-ar="حلول ذكية">Intelligent Solutions</span><br/>
+      <span class="line2" data-en="for the Digital Age" data-ar="لعصر الرقمي">for the Digital Age</span>
+    </h1>
+
+    <p class="hero-desc"
+       data-en="Nexora empowers businesses with cutting-edge Digital Marketing, BSS platforms, AI-driven CRM, Smart Chatbots, and next-generation Agentic AI — all from one partner."
+       data-ar="نيكسورا تمكّن الشركات بأحدث تقنيات التسويق الرقمي ومنصات BSS وإدارة العملاء الذكية وروبوتات المحادثة وحلول الذكاء الاصطناعي التوليدي — كل ذلك من شريك واحد.">
+      Nexora empowers businesses with cutting-edge Digital Marketing, BSS platforms, AI-driven CRM, Smart Chatbots, and next-generation Agentic AI — all from one partner.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#services" class="btn btn-primary btn-lg"
+         data-en="Explore Solutions" data-ar="استكشف الحلول">
+        Explore Solutions
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#contact" class="btn btn-outline btn-lg"
+         data-en="Schedule a Demo" data-ar="احجز عرضاً">Schedule a Demo</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number"><span data-target="150" data-suffix="+">0+</span></div>
+        <div class="stat-label" data-en="Projects Delivered" data-ar="مشروع مُنجز">Projects Delivered</div>
       </div>
+      <div class="stat-item">
+        <div class="stat-number"><span data-target="98" data-suffix="%">0%</span></div>
+        <div class="stat-label" data-en="Client Satisfaction" data-ar="رضا العملاء">Client Satisfaction</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number"><span data-target="50" data-suffix="M+">0M+</span></div>
+        <div class="stat-label" data-en="SMS Messages Sent" data-ar="رسالة مُرسلة">SMS Messages Sent</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number"><span data-target="10" data-suffix="+">0+</span></div>
+        <div class="stat-label" data-en="Years of Excellence" data-ar="سنوات من التميز">Years of Excellence</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <h1 class="hero-title">
-        Intelligent Solutions<br/>
-        <span class="line2">for the Digital Age</span>
-      </h1>
-
-      <p class="hero-desc">
-        Nexora empowers businesses with cutting-edge Digital Marketing, BSS platforms,
-        AI-driven CRM, Smart Chatbots, and next-generation Agentic AI — all from one partner.
+<!-- ══════════════════════════════════════
+     SERVICES
+══════════════════════════════════════ -->
+<section id="services">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label" data-en="What We Do" data-ar="ما نقدمه">What We Do</span>
+      <h2 class="section-title">
+        <span data-en="A Full Suite of" data-ar="مجموعة متكاملة من">A Full Suite of</span>
+        <span class="gradient-text" data-en=" Digital Solutions" data-ar=" الحلول الرقمية"> Digital Solutions</span>
+      </h2>
+      <p class="section-subtitle"
+         data-en="From customer engagement to business intelligence — Nexora covers every dimension of your digital growth."
+         data-ar="من تفاعل العملاء إلى ذكاء الأعمال — نيكسورا تغطي كل أبعاد نموك الرقمي.">
+        From customer engagement to business intelligence — Nexora covers every dimension of your digital growth.
       </p>
-
-      <div class="hero-actions">
-        <a href="#services" class="btn btn-primary btn-lg">
-          Explore Solutions
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#contact" class="btn btn-outline btn-lg">Schedule a Demo</a>
-      </div>
-
-      <div class="hero-stats">
-        <div class="stat-item">
-          <div class="stat-number"><span data-target="150" data-suffix="+">0+</span></div>
-          <div class="stat-label">Projects Delivered</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number"><span data-target="98" data-suffix="%">0%</span></div>
-          <div class="stat-label">Client Satisfaction</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number"><span data-target="50" data-suffix="M+">0M+</span></div>
-          <div class="stat-label">SMS Messages Sent</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number"><span data-target="10" data-suffix="+">0+</span></div>
-          <div class="stat-label">Years of Excellence</div>
-        </div>
-      </div>
     </div>
-  </section>
 
-  <!-- ══════════════════════════════════════
-       SERVICES OVERVIEW
-  ══════════════════════════════════════ -->
-  <section id="services">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">What We Do</span>
-        <h2 class="section-title">
-          A Full Suite of <span class="gradient-text">Digital Solutions</span>
-        </h2>
-        <p class="section-subtitle">
-          From customer engagement to business intelligence — Nexora covers every dimension
-          of your digital growth.
+    <div class="services-grid">
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-icon">📡</div>
+        <h3 class="service-name" data-en="BSS & SMS Platform" data-ar="منصة BSS والرسائل">BSS & SMS Platform</h3>
+        <p class="service-desc"
+           data-en="Enterprise-grade Business Support Systems with bulk SMS, OTP delivery, transactional messaging, and real-time analytics dashboards."
+           data-ar="أنظمة دعم أعمال على مستوى المؤسسات مع الرسائل الجماعية وكلمات المرور لمرة واحدة والرسائل التعاملية ولوحات تحليلات آنية.">
+          Enterprise-grade Business Support Systems with bulk SMS, OTP delivery, transactional messaging, and real-time analytics dashboards.
         </p>
+        <div class="service-tags">
+          <span class="tag">Bulk SMS</span>
+          <span class="tag">OTP</span>
+          <span class="tag">SMPP</span>
+          <span class="tag">Analytics</span>
+        </div>
       </div>
 
-      <div class="services-grid">
-
-        <div class="service-card reveal reveal-delay-1">
-          <div class="service-icon">📡</div>
-          <h3 class="service-name">BSS & SMS Platform</h3>
-          <p class="service-desc">Enterprise-grade Business Support Systems with bulk SMS, OTP delivery, transactional messaging, and real-time analytics dashboards.</p>
-          <div class="service-tags">
-            <span class="tag">Bulk SMS</span>
-            <span class="tag">OTP</span>
-            <span class="tag">SMPP</span>
-            <span class="tag">Analytics</span>
-          </div>
-        </div>
-
-        <div class="service-card reveal reveal-delay-2">
-          <div class="service-icon">📊</div>
-          <h3 class="service-name">Digital Marketing</h3>
-          <p class="service-desc">Data-driven campaigns across SEO, PPC, social media, and email that deliver measurable ROI and accelerate brand growth.</p>
-          <div class="service-tags">
-            <span class="tag">SEO</span>
-            <span class="tag">PPC</span>
-            <span class="tag">Social</span>
-            <span class="tag">Email</span>
-          </div>
-        </div>
-
-        <div class="service-card reveal reveal-delay-3">
-          <div class="service-icon">🤝</div>
-          <h3 class="service-name">CRM Solutions</h3>
-          <p class="service-desc">Customized CRM platforms that unify sales pipelines, customer data, and team workflows into one intelligent hub.</p>
-          <div class="service-tags">
-            <span class="tag">Sales Pipeline</span>
-            <span class="tag">Automation</span>
-            <span class="tag">Reports</span>
-          </div>
-        </div>
-
-        <div class="service-card reveal reveal-delay-1">
-          <div class="service-icon">💼</div>
-          <h3 class="service-name">Collecting CRM</h3>
-          <p class="service-desc">Specialized debt collection and receivables management CRM with workflow automation, escalation rules, and compliance tracking.</p>
-          <div class="service-tags">
-            <span class="tag">Collections</span>
-            <span class="tag">Workflows</span>
-            <span class="tag">Compliance</span>
-          </div>
-        </div>
-
-        <div class="service-card reveal reveal-delay-2">
-          <div class="service-icon">🤖</div>
-          <h3 class="service-name">AI Chatbots</h3>
-          <p class="service-desc">Intelligent conversational bots for WhatsApp, web, and social channels that handle queries, qualify leads, and boost engagement 24/7.</p>
-          <div class="service-tags">
-            <span class="tag">WhatsApp</span>
-            <span class="tag">NLP</span>
-            <span class="tag">Multi-channel</span>
-          </div>
-        </div>
-
-        <div class="service-card reveal reveal-delay-3">
-          <div class="service-icon">✨</div>
-          <h3 class="service-name">Agentic AI Solutions</h3>
-          <p class="service-desc">Next-generation autonomous AI agents that plan, reason, and act — automating complex workflows end-to-end with minimal human input.</p>
-          <div class="service-tags">
-            <span class="tag">AI Agents</span>
-            <span class="tag">LLM</span>
-            <span class="tag">Automation</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       BSS & SMS
-  ══════════════════════════════════════ -->
-  <section id="bss">
-    <div class="container">
-      <div class="bss-inner">
-
-        <div class="bss-visual reveal">
-          <div class="bss-mockup">
-            <div class="mockup-header">
-              <div class="mockup-dot" style="background:#ff5f57;"></div>
-              <div class="mockup-dot" style="background:#febc2e;"></div>
-              <div class="mockup-dot" style="background:#28c840;"></div>
-              <span class="mockup-title">Nexora SMS Dashboard</span>
-            </div>
-
-            <div class="sms-list">
-              <div class="sms-item">
-                <div class="sms-icon">📨</div>
-                <div class="sms-info">
-                  <div class="sms-title">Promo Campaign — Ramadan Offer</div>
-                  <div class="sms-sub">45,230 recipients · Sent 2 min ago</div>
-                </div>
-                <span class="sms-status status-delivered">Delivered</span>
-              </div>
-              <div class="sms-item">
-                <div class="sms-icon">🔐</div>
-                <div class="sms-info">
-                  <div class="sms-title">OTP Verification Batch</div>
-                  <div class="sms-sub">8,912 recipients · Sending now</div>
-                </div>
-                <span class="sms-status status-pending">In Progress</span>
-              </div>
-              <div class="sms-item">
-                <div class="sms-icon">📢</div>
-                <div class="sms-info">
-                  <div class="sms-title">Transactional Alert — Payment</div>
-                  <div class="sms-sub">3,100 recipients · Queued</div>
-                </div>
-                <span class="sms-status status-sent">Queued</span>
-              </div>
-              <div class="sms-item">
-                <div class="sms-icon">🎯</div>
-                <div class="sms-info">
-                  <div class="sms-title">Re-engagement — Inactive Users</div>
-                  <div class="sms-sub">12,450 recipients · Scheduled</div>
-                </div>
-                <span class="sms-status status-sent">Scheduled</span>
-              </div>
-            </div>
-
-            <div class="bss-metrics">
-              <div class="metric-box">
-                <div class="metric-val">99.4%</div>
-                <div class="metric-lbl">Delivery Rate</div>
-              </div>
-              <div class="metric-box">
-                <div class="metric-val">&lt;2s</div>
-                <div class="metric-lbl">Avg. Latency</div>
-              </div>
-              <div class="metric-box">
-                <div class="metric-val">50M+</div>
-                <div class="metric-lbl">Monthly SMS</div>
-              </div>
-              <div class="metric-box">
-                <div class="metric-val">24/7</div>
-                <div class="metric-lbl">Uptime SLA</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bss-content reveal reveal-delay-2">
-          <span class="section-label">BSS Platform</span>
-          <h2>Enterprise SMS &<br/><span class="gradient-text">Business Support Systems</span></h2>
-          <p>
-            Nexora's BSS platform powers mission-critical messaging for enterprises, banks,
-            telecom operators, and government entities. Built on carrier-grade infrastructure
-            for 99.99% uptime and sub-second delivery.
-          </p>
-
-          <ul class="feature-list">
-            <li>
-              <span class="check">✓</span>
-              <span>Bulk SMS, OTP, and transactional messaging at scale</span>
-            </li>
-            <li>
-              <span class="check">✓</span>
-              <span>SMPP & REST API integration with full documentation</span>
-            </li>
-            <li>
-              <span class="check">✓</span>
-              <span>Real-time delivery reports, analytics, and DLR tracking</span>
-            </li>
-            <li>
-              <span class="check">✓</span>
-              <span>Smart routing for highest delivery rate and lowest cost</span>
-            </li>
-            <li>
-              <span class="check">✓</span>
-              <span>Compliance with telecom regulations and GDPR</span>
-            </li>
-            <li>
-              <span class="check">✓</span>
-              <span>Dedicated account manager and 24/7 support</span>
-            </li>
-          </ul>
-
-          <a href="#contact" class="btn btn-primary">Get BSS Demo</a>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       AI SOLUTIONS
-  ══════════════════════════════════════ -->
-  <section id="ai">
-    <div class="container">
-      <div class="ai-inner">
-
-        <div class="ai-content reveal">
-          <span class="section-label">AI Solutions</span>
-          <h2>The Future of Work is<br/><span class="gradient-text">Agentic AI</span></h2>
-          <p>
-            Nexora's AI practice goes beyond simple automation. We design and deploy
-            intelligent agents that perceive, plan, and execute — dramatically reducing
-            manual effort while improving accuracy and speed.
-          </p>
-
-          <div class="ai-cards">
-            <div class="ai-card">
-              <div class="ai-card-icon">🧠</div>
-              <div class="ai-card-title">LLM Integration</div>
-              <div class="ai-card-desc">Connect GPT-4, Claude, and open-source models to your business data and workflows.</div>
-            </div>
-            <div class="ai-card">
-              <div class="ai-card-icon">⚙️</div>
-              <div class="ai-card-title">Agentic Workflows</div>
-              <div class="ai-card-desc">Autonomous agents that research, draft, decide, and act across tools without supervision.</div>
-            </div>
-            <div class="ai-card">
-              <div class="ai-card-icon">📄</div>
-              <div class="ai-card-title">Document AI</div>
-              <div class="ai-card-desc">Extract, classify, and process unstructured documents with human-level accuracy.</div>
-            </div>
-            <div class="ai-card">
-              <div class="ai-card-icon">🔮</div>
-              <div class="ai-card-title">Predictive Analytics</div>
-              <div class="ai-card-desc">ML models that forecast churn, demand, and revenue from your operational data.</div>
-            </div>
-          </div>
-
-          <div style="margin-top:32px;">
-            <a href="#contact" class="btn btn-primary">Explore AI Services</a>
-          </div>
-        </div>
-
-        <div class="ai-visual reveal reveal-delay-2">
-          <div class="neural-net">
-            <svg class="neural-svg" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Background circle -->
-              <circle cx="230" cy="230" r="200" stroke="rgba(26,127,232,0.08)" stroke-width="1"/>
-              <circle cx="230" cy="230" r="150" stroke="rgba(26,127,232,0.06)" stroke-width="1"/>
-              <circle cx="230" cy="230" r="100" stroke="rgba(26,127,232,0.05)" stroke-width="1"/>
-
-              <!-- Connections -->
-              <g class="connections" stroke="#1a7fe8" stroke-width="1" opacity="0.2">
-                <!-- Input to hidden -->
-                <line class="connection" x1="90" y1="130" x2="190" y2="160"/>
-                <line class="connection" x1="90" y1="130" x2="190" y2="230"/>
-                <line class="connection" x1="90" y1="130" x2="190" y2="300"/>
-                <line class="connection" x1="90" y1="230" x2="190" y2="160"/>
-                <line class="connection" x1="90" y1="230" x2="190" y2="230"/>
-                <line class="connection" x1="90" y1="230" x2="190" y2="300"/>
-                <line class="connection" x1="90" y1="330" x2="190" y2="160"/>
-                <line class="connection" x1="90" y1="330" x2="190" y2="230"/>
-                <line class="connection" x1="90" y1="330" x2="190" y2="300"/>
-                <!-- Hidden to hidden -->
-                <line class="connection" x1="190" y1="160" x2="270" y2="140"/>
-                <line class="connection" x1="190" y1="160" x2="270" y2="200"/>
-                <line class="connection" x1="190" y1="160" x2="270" y2="260"/>
-                <line class="connection" x1="190" y1="160" x2="270" y2="320"/>
-                <line class="connection" x1="190" y1="230" x2="270" y2="140"/>
-                <line class="connection" x1="190" y1="230" x2="270" y2="200"/>
-                <line class="connection" x1="190" y1="230" x2="270" y2="260"/>
-                <line class="connection" x1="190" y1="230" x2="270" y2="320"/>
-                <line class="connection" x1="190" y1="300" x2="270" y2="140"/>
-                <line class="connection" x1="190" y1="300" x2="270" y2="200"/>
-                <line class="connection" x1="190" y1="300" x2="270" y2="260"/>
-                <line class="connection" x1="190" y1="300" x2="270" y2="320"/>
-                <!-- Hidden to output -->
-                <line class="connection" x1="270" y1="140" x2="370" y2="180"/>
-                <line class="connection" x1="270" y1="140" x2="370" y2="280"/>
-                <line class="connection" x1="270" y1="200" x2="370" y2="180"/>
-                <line class="connection" x1="270" y1="200" x2="370" y2="280"/>
-                <line class="connection" x1="270" y1="260" x2="370" y2="180"/>
-                <line class="connection" x1="270" y1="260" x2="370" y2="280"/>
-                <line class="connection" x1="270" y1="320" x2="370" y2="180"/>
-                <line class="connection" x1="270" y1="320" x2="370" y2="280"/>
-              </g>
-
-              <!-- Input Nodes -->
-              <g class="nodes">
-                <circle class="node" cx="90" cy="130" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="90" cy="130" r="7" fill="#1a7fe8" opacity="0.7"/>
-                <circle class="node" cx="90" cy="230" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="90" cy="230" r="7" fill="#1a7fe8" opacity="0.7"/>
-                <circle class="node" cx="90" cy="330" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="90" cy="330" r="7" fill="#1a7fe8" opacity="0.7"/>
-
-                <!-- Hidden Layer 1 -->
-                <circle class="node" cx="190" cy="160" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="190" cy="160" r="7" fill="#1a7fe8" opacity="0.7"/>
-                <circle class="node" cx="190" cy="230" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="190" cy="230" r="7" fill="#1a7fe8" opacity="0.7"/>
-                <circle class="node" cx="190" cy="300" r="14" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/>
-                <circle cx="190" cy="300" r="7" fill="#1a7fe8" opacity="0.7"/>
-
-                <!-- Hidden Layer 2 -->
-                <circle class="node" cx="270" cy="140" r="14" fill="#070d1a" stroke="#00cfff" stroke-width="2"/>
-                <circle cx="270" cy="140" r="7" fill="#00cfff" opacity="0.7"/>
-                <circle class="node" cx="270" cy="200" r="14" fill="#070d1a" stroke="#00cfff" stroke-width="2"/>
-                <circle cx="270" cy="200" r="7" fill="#00cfff" opacity="0.7"/>
-                <circle class="node" cx="270" cy="260" r="14" fill="#070d1a" stroke="#00cfff" stroke-width="2"/>
-                <circle cx="270" cy="260" r="7" fill="#00cfff" opacity="0.7"/>
-                <circle class="node" cx="270" cy="320" r="14" fill="#070d1a" stroke="#00cfff" stroke-width="2"/>
-                <circle cx="270" cy="320" r="7" fill="#00cfff" opacity="0.7"/>
-
-                <!-- Output Nodes -->
-                <circle class="node" cx="370" cy="180" r="18" fill="#070d1a" stroke="url(#grad)" stroke-width="2.5"/>
-                <circle cx="370" cy="180" r="9" fill="url(#grad)" opacity="0.9"/>
-                <circle class="node" cx="370" cy="280" r="18" fill="#070d1a" stroke="url(#grad)" stroke-width="2.5"/>
-                <circle cx="370" cy="280" r="9" fill="url(#grad)" opacity="0.9"/>
-              </g>
-
-              <!-- Labels -->
-              <text x="90" y="370" fill="#4a6080" font-size="10" text-anchor="middle" font-family="Inter">Input</text>
-              <text x="190" y="370" fill="#4a6080" font-size="10" text-anchor="middle" font-family="Inter">Hidden</text>
-              <text x="270" y="370" fill="#4a6080" font-size="10" text-anchor="middle" font-family="Inter">Deep</text>
-              <text x="370" y="370" fill="#4a6080" font-size="10" text-anchor="middle" font-family="Inter">Output</text>
-
-              <!-- Glowing center -->
-              <circle cx="230" cy="230" r="6" fill="#00cfff" opacity="0.6">
-                <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
-                <animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite"/>
-              </circle>
-
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#1a7fe8"/>
-                  <stop offset="100%" stop-color="#00cfff"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       CRM
-  ══════════════════════════════════════ -->
-  <section id="crm">
-    <div class="container">
-      <div class="crm-inner">
-
-        <div class="crm-visual reveal">
-          <div class="crm-card" style="position:relative;">
-            <!-- Pipeline header -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-              <span style="font-size:14px;font-weight:700;color:var(--white);">Sales Pipeline</span>
-              <span style="font-size:12px;color:var(--accent);font-weight:600;">Q4 2024 · JOD 2.4M</span>
-            </div>
-
-            <div class="pipeline">
-              <div class="pipeline-stage">
-                <div class="stage-label">New Leads</div>
-                <div class="lead-card">
-                  <div class="lead-name">TechCorp Ltd.</div>
-                  <div class="lead-value">JOD 45K</div>
-                </div>
-                <div class="lead-card">
-                  <div class="lead-name">Alpha Solutions</div>
-                  <div class="lead-value">JOD 28K</div>
-                </div>
-              </div>
-              <div class="pipeline-stage">
-                <div class="stage-label">Qualified</div>
-                <div class="lead-card">
-                  <div class="lead-name">Zain Jordan</div>
-                  <div class="lead-value">JOD 120K</div>
-                </div>
-                <div class="lead-card">
-                  <div class="lead-name">Bank Al-Etihad</div>
-                  <div class="lead-value">JOD 88K</div>
-                </div>
-              </div>
-              <div class="pipeline-stage">
-                <div class="stage-label">Proposal</div>
-                <div class="lead-card">
-                  <div class="lead-name">JordanTech</div>
-                  <div class="lead-value">JOD 200K</div>
-                </div>
-              </div>
-              <div class="pipeline-stage">
-                <div class="stage-label">Closed Won</div>
-                <div class="lead-card" style="border-left: 2px solid #4ade80;">
-                  <div class="lead-name">MegaMall</div>
-                  <div class="lead-value" style="color:#4ade80;">JOD 95K ✓</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="padding-top:16px;border-top:1px solid var(--border);">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <span style="font-size:12px;color:var(--text-muted);">Pipeline Health</span>
-                <span style="font-size:12px;color:var(--accent);">87% on track</span>
-              </div>
-              <div style="background:rgba(26,127,232,0.1);border-radius:100px;height:6px;overflow:hidden;">
-                <div style="background:var(--blue-gradient);width:87%;height:100%;border-radius:100px;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="crm-content reveal reveal-delay-2">
-          <span class="section-label">CRM Solutions</span>
-          <h2>Smarter Relationships,<br/><span class="gradient-text">Stronger Revenue</span></h2>
-          <p>
-            Nexora CRM unifies every customer touchpoint — from first contact to long-term
-            loyalty. Purpose-built for the MENA market with Arabic-language support,
-            regional compliance, and seamless local integrations.
-          </p>
-
-          <div class="crm-features">
-            <div class="crm-feat">
-              <div class="crm-feat-icon">🎯</div>
-              <div class="crm-feat-title">Lead Management</div>
-              <div class="crm-feat-desc">Capture, score, and route leads automatically from any channel.</div>
-            </div>
-            <div class="crm-feat">
-              <div class="crm-feat-icon">🔄</div>
-              <div class="crm-feat-title">Workflow Automation</div>
-              <div class="crm-feat-desc">Automate follow-ups, reminders, and task assignments.</div>
-            </div>
-            <div class="crm-feat">
-              <div class="crm-feat-icon">📈</div>
-              <div class="crm-feat-title">Sales Analytics</div>
-              <div class="crm-feat-desc">Real-time dashboards with forecasting and team performance metrics.</div>
-            </div>
-            <div class="crm-feat">
-              <div class="crm-feat-icon">💳</div>
-              <div class="crm-feat-title">Collecting CRM</div>
-              <div class="crm-feat-desc">Specialized debt-collection workflows with legal escalation tracking.</div>
-            </div>
-          </div>
-
-          <a href="#contact" class="btn btn-primary">Request CRM Demo</a>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       PROCESS
-  ══════════════════════════════════════ -->
-  <section id="process">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">Our Approach</span>
-        <h2 class="section-title">
-          From Concept to <span class="gradient-text">Launch</span>
-        </h2>
-        <p class="section-subtitle">
-          A proven four-step delivery framework that ensures every project is on time, on budget, and above expectations.
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-icon">📊</div>
+        <h3 class="service-name" data-en="Digital Marketing" data-ar="التسويق الرقمي">Digital Marketing</h3>
+        <p class="service-desc"
+           data-en="Data-driven campaigns across SEO, PPC, social media, and email that deliver measurable ROI and accelerate brand growth."
+           data-ar="حملات مدعومة بالبيانات عبر تحسين محركات البحث والإعلانات المدفوعة ووسائل التواصل الاجتماعي والبريد الإلكتروني.">
+          Data-driven campaigns across SEO, PPC, social media, and email that deliver measurable ROI and accelerate brand growth.
         </p>
+        <div class="service-tags">
+          <span class="tag">SEO</span>
+          <span class="tag">PPC</span>
+          <span class="tag">Social</span>
+          <span class="tag">Email</span>
+        </div>
       </div>
 
-      <div class="process-steps">
-        <div class="process-step reveal reveal-delay-1">
-          <div class="step-number">01</div>
-          <h3 class="step-title">Discover</h3>
-          <p class="step-desc">We deep-dive into your business goals, audience, and technical landscape to define the right strategy.</p>
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-icon">🤝</div>
+        <h3 class="service-name" data-en="CRM Solutions" data-ar="حلول إدارة العملاء">CRM Solutions</h3>
+        <p class="service-desc"
+           data-en="Customized CRM platforms that unify sales pipelines, customer data, and team workflows into one intelligent hub."
+           data-ar="منصات CRM مخصصة تجمع خطوط المبيعات وبيانات العملاء وسير عمل الفرق في مركز ذكي واحد.">
+          Customized CRM platforms that unify sales pipelines, customer data, and team workflows into one intelligent hub.
+        </p>
+        <div class="service-tags">
+          <span class="tag" data-en="Sales Pipeline" data-ar="خط المبيعات">Sales Pipeline</span>
+          <span class="tag" data-en="Automation" data-ar="أتمتة">Automation</span>
+          <span class="tag" data-en="Reports" data-ar="تقارير">Reports</span>
         </div>
-        <div class="process-step reveal reveal-delay-2">
-          <div class="step-number">02</div>
-          <h3 class="step-title">Design</h3>
-          <p class="step-desc">Our architects design scalable solutions with clear milestones, KPIs, and technology blueprints.</p>
+      </div>
+
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-icon">💼</div>
+        <h3 class="service-name" data-en="Collecting CRM" data-ar="CRM التحصيل">Collecting CRM</h3>
+        <p class="service-desc"
+           data-en="Specialized debt collection and receivables management CRM with workflow automation, escalation rules, and compliance tracking."
+           data-ar="نظام CRM متخصص في إدارة تحصيل الديون مع أتمتة سير العمل وقواعد التصعيد وتتبع الامتثال.">
+          Specialized debt collection and receivables management CRM with workflow automation, escalation rules, and compliance tracking.
+        </p>
+        <div class="service-tags">
+          <span class="tag" data-en="Collections" data-ar="التحصيل">Collections</span>
+          <span class="tag" data-en="Workflows" data-ar="سير العمل">Workflows</span>
+          <span class="tag" data-en="Compliance" data-ar="الامتثال">Compliance</span>
         </div>
-        <div class="process-step reveal reveal-delay-3">
-          <div class="step-number">03</div>
-          <h3 class="step-title">Build</h3>
-          <p class="step-desc">Agile sprints with continuous feedback loops ensure quality delivery and rapid iteration.</p>
+      </div>
+
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-icon">🤖</div>
+        <h3 class="service-name" data-en="AI Chatbots" data-ar="روبوتات الدردشة الذكية">AI Chatbots</h3>
+        <p class="service-desc"
+           data-en="Intelligent conversational bots for WhatsApp, web, and social channels that handle queries, qualify leads, and boost engagement 24/7."
+           data-ar="روبوتات محادثة ذكية لواتساب والويب ووسائل التواصل تعالج الاستفسارات وتؤهل العملاء المحتملين على مدار الساعة.">
+          Intelligent conversational bots for WhatsApp, web, and social channels that handle queries, qualify leads, and boost engagement 24/7.
+        </p>
+        <div class="service-tags">
+          <span class="tag">WhatsApp</span>
+          <span class="tag">NLP</span>
+          <span class="tag" data-en="Multi-channel" data-ar="متعدد القنوات">Multi-channel</span>
         </div>
-        <div class="process-step reveal reveal-delay-4">
-          <div class="step-number">04</div>
-          <h3 class="step-title">Grow</h3>
-          <p class="step-desc">Post-launch support, optimization, and scaling — we stay with you as your business evolves.</p>
+      </div>
+
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-icon">✨</div>
+        <h3 class="service-name" data-en="Agentic AI Solutions" data-ar="حلول الذكاء الاصطناعي الوكيل">Agentic AI Solutions</h3>
+        <p class="service-desc"
+           data-en="Next-generation autonomous AI agents that plan, reason, and act — automating complex workflows end-to-end with minimal human input."
+           data-ar="وكلاء ذكاء اصطناعي من الجيل القادم يخططون ويستدلون ويتصرفون — لأتمتة سير العمل المعقد من البداية للنهاية.">
+          Next-generation autonomous AI agents that plan, reason, and act — automating complex workflows end-to-end with minimal human input.
+        </p>
+        <div class="service-tags">
+          <span class="tag" data-en="AI Agents" data-ar="وكلاء الذكاء">AI Agents</span>
+          <span class="tag">LLM</span>
+          <span class="tag" data-en="Automation" data-ar="أتمتة">Automation</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ══════════════════════════════════════
-       CHATBOTS
-  ══════════════════════════════════════ -->
-  <section id="chatbot">
-    <div class="container">
-      <div class="chatbot-inner">
+<!-- ══════════════════════════════════════
+     BSS & SMS
+══════════════════════════════════════ -->
+<section id="bss">
+  <div class="container">
+    <div class="two-col">
+      <!-- Visual -->
+      <div class="reveal">
+        <div class="bss-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dot" style="background:#ff5f57"></div>
+            <div class="mockup-dot" style="background:#febc2e"></div>
+            <div class="mockup-dot" style="background:#28c840"></div>
+            <span class="mockup-title" data-en="Nexora SMS Dashboard" data-ar="لوحة تحكم رسائل نيكسورا">Nexora SMS Dashboard</span>
+          </div>
+          <div class="sms-list">
+            <div class="sms-item">
+              <div class="sms-icon">📨</div>
+              <div class="sms-info">
+                <div class="sms-title" data-en="Promo Campaign — Ramadan Offer" data-ar="حملة ترويجية — عرض رمضان">Promo Campaign — Ramadan Offer</div>
+                <div class="sms-sub"  data-en="45,230 recipients · Sent 2 min ago" data-ar="٤٥٬٢٣٠ مستقبل · أُرسلت منذ دقيقتين">45,230 recipients · Sent 2 min ago</div>
+              </div>
+              <span class="sms-status status-delivered" data-en="Delivered" data-ar="تم التسليم">Delivered</span>
+            </div>
+            <div class="sms-item">
+              <div class="sms-icon">🔐</div>
+              <div class="sms-info">
+                <div class="sms-title" data-en="OTP Verification Batch" data-ar="دفعة رموز التحقق">OTP Verification Batch</div>
+                <div class="sms-sub"  data-en="8,912 recipients · Sending now" data-ar="٨٬٩١٢ مستقبل · جارٍ الإرسال">8,912 recipients · Sending now</div>
+              </div>
+              <span class="sms-status status-pending" data-en="In Progress" data-ar="قيد التنفيذ">In Progress</span>
+            </div>
+            <div class="sms-item">
+              <div class="sms-icon">📢</div>
+              <div class="sms-info">
+                <div class="sms-title" data-en="Transactional Alert — Payment" data-ar="تنبيه معاملة — دفع">Transactional Alert — Payment</div>
+                <div class="sms-sub"  data-en="3,100 recipients · Queued" data-ar="٣٬١٠٠ مستقبل · في قائمة الانتظار">3,100 recipients · Queued</div>
+              </div>
+              <span class="sms-status status-sent" data-en="Queued" data-ar="في الانتظار">Queued</span>
+            </div>
+          </div>
+          <div class="bss-metrics">
+            <div class="metric-box">
+              <div class="metric-val">99.4%</div>
+              <div class="metric-lbl" data-en="Delivery Rate" data-ar="معدل التسليم">Delivery Rate</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val">&lt;2s</div>
+              <div class="metric-lbl" data-en="Avg. Latency" data-ar="متوسط الكمون">Avg. Latency</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val">50M+</div>
+              <div class="metric-lbl" data-en="Monthly SMS" data-ar="رسالة شهرياً">Monthly SMS</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val">24/7</div>
+              <div class="metric-lbl" data-en="Uptime SLA" data-ar="ضمان التشغيل">Uptime SLA</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div class="chat-window reveal">
+      <!-- Content -->
+      <div class="col-content reveal reveal-delay-2">
+        <span class="section-label" data-en="BSS Platform" data-ar="منصة BSS">BSS Platform</span>
+        <h2>
+          <span data-en="Enterprise SMS &" data-ar="رسائل المؤسسات و">Enterprise SMS &</span><br/>
+          <span class="gradient-text" data-en="Business Support Systems" data-ar="أنظمة دعم الأعمال">Business Support Systems</span>
+        </h2>
+        <p data-en="Nexora's BSS platform powers mission-critical messaging for enterprises, banks, telecom operators, and government entities. Built on carrier-grade infrastructure for 99.99% uptime and sub-second delivery."
+           data-ar="منصة BSS من نيكسورا تشغّل الرسائل الحيوية للمؤسسات والبنوك وشركات الاتصالات والجهات الحكومية. مبنية على بنية تحتية من الدرجة الأولى بوقت تشغيل 99.99% وتسليم أقل من ثانية.">
+          Nexora's BSS platform powers mission-critical messaging for enterprises, banks, telecom operators, and government entities. Built on carrier-grade infrastructure for 99.99% uptime and sub-second delivery.
+        </p>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><span data-en="Bulk SMS, OTP, and transactional messaging at scale" data-ar="رسائل جماعية ورموز OTP ورسائل معاملات بحجم كبير">Bulk SMS, OTP, and transactional messaging at scale</span></li>
+          <li><span class="check">✓</span><span data-en="SMPP & REST API integration with full documentation" data-ar="تكامل SMPP وREST API مع توثيق كامل">SMPP & REST API integration with full documentation</span></li>
+          <li><span class="check">✓</span><span data-en="Real-time delivery reports and DLR tracking" data-ar="تقارير تسليم آنية وتتبع DLR">Real-time delivery reports and DLR tracking</span></li>
+          <li><span class="check">✓</span><span data-en="Smart routing for highest delivery rate and lowest cost" data-ar="توجيه ذكي لأعلى معدل تسليم وأدنى تكلفة">Smart routing for highest delivery rate and lowest cost</span></li>
+          <li><span class="check">✓</span><span data-en="Dedicated account manager and 24/7 support" data-ar="مدير حساب مخصص ودعم على مدار الساعة">Dedicated account manager and 24/7 support</span></li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" data-en="Get BSS Demo" data-ar="اطلب عرضاً تجريبياً">Get BSS Demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     AI SOLUTIONS
+══════════════════════════════════════ -->
+<section id="ai">
+  <div class="container">
+    <div class="two-col">
+      <!-- Content -->
+      <div class="col-content reveal">
+        <span class="section-label" data-en="AI Solutions" data-ar="حلول الذكاء الاصطناعي">AI Solutions</span>
+        <h2>
+          <span data-en="The Future of Work is" data-ar="مستقبل العمل هو">The Future of Work is</span><br/>
+          <span class="gradient-text" data-en="Agentic AI" data-ar="الذكاء الاصطناعي الوكيل">Agentic AI</span>
+        </h2>
+        <p data-en="Nexora's AI practice goes beyond simple automation. We design and deploy intelligent agents that perceive, plan, and execute — dramatically reducing manual effort while improving accuracy and speed."
+           data-ar="ممارسة الذكاء الاصطناعي في نيكسورا تتجاوز الأتمتة البسيطة. نصمم ونطرح وكلاء ذكيين يدركون ويخططون وينفذون — مما يقلل الجهد اليدوي بشكل كبير مع تحسين الدقة والسرعة.">
+          Nexora's AI practice goes beyond simple automation. We design and deploy intelligent agents that perceive, plan, and execute — dramatically reducing manual effort while improving accuracy and speed.
+        </p>
+        <div class="ai-cards">
+          <div class="ai-card">
+            <div class="ai-card-icon">🧠</div>
+            <div class="ai-card-title" data-en="LLM Integration" data-ar="تكامل النماذج اللغوية">LLM Integration</div>
+            <div class="ai-card-desc" data-en="Connect GPT-4, Claude, and open-source models to your business data." data-ar="ربط نماذج GPT-4 وClaude والمفتوحة المصدر ببيانات أعمالك.">Connect GPT-4, Claude, and open-source models to your business data.</div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-card-icon">⚙️</div>
+            <div class="ai-card-title" data-en="Agentic Workflows" data-ar="سير عمل وكيلة">Agentic Workflows</div>
+            <div class="ai-card-desc" data-en="Autonomous agents that research, draft, decide, and act across tools." data-ar="وكلاء مستقلون يبحثون ويصيغون ويقررون ويتصرفون عبر الأدوات.">Autonomous agents that research, draft, decide, and act across tools.</div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-card-icon">📄</div>
+            <div class="ai-card-title" data-en="Document AI" data-ar="ذكاء المستندات">Document AI</div>
+            <div class="ai-card-desc" data-en="Extract, classify, and process unstructured documents with human-level accuracy." data-ar="استخراج وتصنيف ومعالجة المستندات غير المنظمة بدقة بشرية.">Extract, classify, and process unstructured documents with human-level accuracy.</div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-card-icon">🔮</div>
+            <div class="ai-card-title" data-en="Predictive Analytics" data-ar="التحليلات التنبؤية">Predictive Analytics</div>
+            <div class="ai-card-desc" data-en="ML models that forecast churn, demand, and revenue from your data." data-ar="نماذج تعلم آلي تتنبأ بالتسرب والطلب والإيرادات من بياناتك.">ML models that forecast churn, demand, and revenue from your data.</div>
+          </div>
+        </div>
+        <a href="#contact" class="btn btn-primary" data-en="Explore AI Services" data-ar="استكشف خدمات الذكاء">Explore AI Services</a>
+      </div>
+
+      <!-- Neural net visual -->
+      <div class="reveal reveal-delay-2">
+        <div class="neural-net">
+          <svg class="neural-svg" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="230" cy="230" r="200" stroke="rgba(26,127,232,0.08)" stroke-width="1"/>
+            <circle cx="230" cy="230" r="150" stroke="rgba(26,127,232,0.06)" stroke-width="1"/>
+            <g stroke="#1a7fe8" stroke-width="1" opacity="0.2">
+              <line class="connection" x1="90" y1="130" x2="190" y2="160"/>
+              <line class="connection" x1="90" y1="130" x2="190" y2="230"/>
+              <line class="connection" x1="90" y1="130" x2="190" y2="300"/>
+              <line class="connection" x1="90" y1="230" x2="190" y2="160"/>
+              <line class="connection" x1="90" y1="230" x2="190" y2="230"/>
+              <line class="connection" x1="90" y1="230" x2="190" y2="300"/>
+              <line class="connection" x1="90" y1="330" x2="190" y2="160"/>
+              <line class="connection" x1="90" y1="330" x2="190" y2="230"/>
+              <line class="connection" x1="90" y1="330" x2="190" y2="300"/>
+              <line class="connection" x1="190" y1="160" x2="270" y2="140"/>
+              <line class="connection" x1="190" y1="160" x2="270" y2="200"/>
+              <line class="connection" x1="190" y1="160" x2="270" y2="260"/>
+              <line class="connection" x1="190" y1="160" x2="270" y2="320"/>
+              <line class="connection" x1="190" y1="230" x2="270" y2="140"/>
+              <line class="connection" x1="190" y1="230" x2="270" y2="200"/>
+              <line class="connection" x1="190" y1="230" x2="270" y2="260"/>
+              <line class="connection" x1="190" y1="230" x2="270" y2="320"/>
+              <line class="connection" x1="190" y1="300" x2="270" y2="140"/>
+              <line class="connection" x1="190" y1="300" x2="270" y2="200"/>
+              <line class="connection" x1="190" y1="300" x2="270" y2="260"/>
+              <line class="connection" x1="190" y1="300" x2="270" y2="320"/>
+              <line class="connection" x1="270" y1="140" x2="370" y2="180"/>
+              <line class="connection" x1="270" y1="140" x2="370" y2="280"/>
+              <line class="connection" x1="270" y1="200" x2="370" y2="180"/>
+              <line class="connection" x1="270" y1="200" x2="370" y2="280"/>
+              <line class="connection" x1="270" y1="260" x2="370" y2="180"/>
+              <line class="connection" x1="270" y1="260" x2="370" y2="280"/>
+              <line class="connection" x1="270" y1="320" x2="370" y2="180"/>
+              <line class="connection" x1="270" y1="320" x2="370" y2="280"/>
+            </g>
+            <circle class="node" cx="90" cy="130" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="90" cy="130" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="90" cy="230" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="90" cy="230" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="90" cy="330" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="90" cy="330" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="190" cy="160" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="190" cy="160" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="190" cy="230" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="190" cy="230" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="190" cy="300" r="13" fill="#070d1a" stroke="#1a7fe8" stroke-width="2"/><circle cx="190" cy="300" r="6" fill="#1a7fe8" opacity="0.7"/>
+            <circle class="node" cx="270" cy="140" r="13" fill="#070d1a" stroke="#00cfff" stroke-width="2"/><circle cx="270" cy="140" r="6" fill="#00cfff" opacity="0.7"/>
+            <circle class="node" cx="270" cy="200" r="13" fill="#070d1a" stroke="#00cfff" stroke-width="2"/><circle cx="270" cy="200" r="6" fill="#00cfff" opacity="0.7"/>
+            <circle class="node" cx="270" cy="260" r="13" fill="#070d1a" stroke="#00cfff" stroke-width="2"/><circle cx="270" cy="260" r="6" fill="#00cfff" opacity="0.7"/>
+            <circle class="node" cx="270" cy="320" r="13" fill="#070d1a" stroke="#00cfff" stroke-width="2"/><circle cx="270" cy="320" r="6" fill="#00cfff" opacity="0.7"/>
+            <circle class="node" cx="370" cy="180" r="16" fill="#070d1a" stroke="url(#ng)" stroke-width="2.5"/><circle cx="370" cy="180" r="8" fill="url(#ng)" opacity="0.9"/>
+            <circle class="node" cx="370" cy="280" r="16" fill="#070d1a" stroke="url(#ng)" stroke-width="2.5"/><circle cx="370" cy="280" r="8" fill="url(#ng)" opacity="0.9"/>
+            <circle cx="230" cy="230" r="5" fill="#00cfff" opacity="0.6">
+              <animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <defs>
+              <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a7fe8"/>
+                <stop offset="100%" stop-color="#00cfff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CRM
+══════════════════════════════════════ -->
+<section id="crm">
+  <div class="container">
+    <div class="two-col">
+      <!-- CRM Visual -->
+      <div class="reveal">
+        <div class="crm-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <span style="font-size:14px;font-weight:700;color:var(--white);" data-en="Sales Pipeline" data-ar="خط المبيعات">Sales Pipeline</span>
+            <span style="font-size:12px;color:var(--accent);font-weight:600;">Q4 2024 · JOD 2.4M</span>
+          </div>
+          <div class="pipeline">
+            <div class="pipeline-stage">
+              <div class="stage-label" data-en="New Leads" data-ar="عملاء جدد">New Leads</div>
+              <div class="lead-card"><div class="lead-name">TechCorp Ltd.</div><div class="lead-value">JOD 45K</div></div>
+              <div class="lead-card"><div class="lead-name">Alpha Solutions</div><div class="lead-value">JOD 28K</div></div>
+            </div>
+            <div class="pipeline-stage">
+              <div class="stage-label" data-en="Qualified" data-ar="مؤهلون">Qualified</div>
+              <div class="lead-card"><div class="lead-name">Zain Jordan</div><div class="lead-value">JOD 120K</div></div>
+              <div class="lead-card"><div class="lead-name">Bank Al-Etihad</div><div class="lead-value">JOD 88K</div></div>
+            </div>
+            <div class="pipeline-stage">
+              <div class="stage-label" data-en="Proposal" data-ar="عرض سعر">Proposal</div>
+              <div class="lead-card"><div class="lead-name">JordanTech</div><div class="lead-value">JOD 200K</div></div>
+            </div>
+            <div class="pipeline-stage">
+              <div class="stage-label" data-en="Closed Won" data-ar="صُفقة مُنجزة">Closed Won</div>
+              <div class="lead-card" style="border-left:2px solid #4ade80;">
+                <div class="lead-name">MegaMall</div>
+                <div class="lead-value" style="color:#4ade80;">JOD 95K ✓</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding-top:14px;border-top:1px solid var(--border);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:11px;color:var(--text-muted);" data-en="Pipeline Health" data-ar="صحة خط المبيعات">Pipeline Health</span>
+              <span style="font-size:11px;color:var(--accent);">87%</span>
+            </div>
+            <div style="background:rgba(26,127,232,0.1);border-radius:100px;height:5px;overflow:hidden;">
+              <div style="background:linear-gradient(90deg,#1a7fe8,#00cfff);width:87%;height:100%;border-radius:100px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-content reveal reveal-delay-2">
+        <span class="section-label" data-en="CRM Solutions" data-ar="حلول CRM">CRM Solutions</span>
+        <h2>
+          <span data-en="Smarter Relationships," data-ar="علاقات أذكى،">Smarter Relationships,</span><br/>
+          <span class="gradient-text" data-en="Stronger Revenue" data-ar="إيرادات أقوى">Stronger Revenue</span>
+        </h2>
+        <p data-en="Nexora CRM unifies every customer touchpoint — from first contact to long-term loyalty. Purpose-built for the MENA market with Arabic-language support, regional compliance, and seamless local integrations."
+           data-ar="نيكسورا CRM يوحّد كل نقاط تواصل العملاء من أول اتصال حتى الولاء بعيد المدى. مصمم خصيصاً لسوق منطقة الشرق الأوسط وشمال أفريقيا بدعم اللغة العربية والامتثال الإقليمي.">
+          Nexora CRM unifies every customer touchpoint — from first contact to long-term loyalty. Purpose-built for the MENA market with Arabic-language support, regional compliance, and seamless local integrations.
+        </p>
+        <div class="crm-features">
+          <div class="crm-feat">
+            <div class="crm-feat-icon">🎯</div>
+            <div class="crm-feat-title" data-en="Lead Management" data-ar="إدارة العملاء المحتملين">Lead Management</div>
+            <div class="crm-feat-desc" data-en="Capture, score, and route leads automatically from any channel." data-ar="التقاط العملاء المحتملين وتقييمهم وتوجيههم تلقائياً من أي قناة.">Capture, score, and route leads automatically from any channel.</div>
+          </div>
+          <div class="crm-feat">
+            <div class="crm-feat-icon">🔄</div>
+            <div class="crm-feat-title" data-en="Workflow Automation" data-ar="أتمتة سير العمل">Workflow Automation</div>
+            <div class="crm-feat-desc" data-en="Automate follow-ups, reminders, and task assignments." data-ar="أتمتة المتابعات والتذكيرات وتعيين المهام.">Automate follow-ups, reminders, and task assignments.</div>
+          </div>
+          <div class="crm-feat">
+            <div class="crm-feat-icon">📈</div>
+            <div class="crm-feat-title" data-en="Sales Analytics" data-ar="تحليلات المبيعات">Sales Analytics</div>
+            <div class="crm-feat-desc" data-en="Real-time dashboards with forecasting and team performance." data-ar="لوحات تحكم آنية مع التنبؤ وأداء الفريق.">Real-time dashboards with forecasting and team performance.</div>
+          </div>
+          <div class="crm-feat">
+            <div class="crm-feat-icon">💳</div>
+            <div class="crm-feat-title" data-en="Collecting CRM" data-ar="CRM التحصيل">Collecting CRM</div>
+            <div class="crm-feat-desc" data-en="Specialized debt-collection workflows with legal escalation." data-ar="سير عمل تحصيل ديون متخصصة مع التصعيد القانوني.">Specialized debt-collection workflows with legal escalation.</div>
+          </div>
+        </div>
+        <a href="#contact" class="btn btn-primary" data-en="Request CRM Demo" data-ar="اطلب عرض CRM">Request CRM Demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PROCESS
+══════════════════════════════════════ -->
+<section id="process">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label" data-en="Our Approach" data-ar="منهجيتنا">Our Approach</span>
+      <h2 class="section-title">
+        <span data-en="From Concept to" data-ar="من الفكرة إلى">From Concept to</span>
+        <span class="gradient-text" data-en=" Launch" data-ar=" الإطلاق"> Launch</span>
+      </h2>
+      <p class="section-subtitle"
+         data-en="A proven four-step delivery framework that ensures every project is on time, on budget, and above expectations."
+         data-ar="إطار تسليم مثبت من أربع خطوات يضمن أن كل مشروع يُنجز في الوقت المحدد وضمن الميزانية وبما يتجاوز التوقعات.">
+        A proven four-step delivery framework that ensures every project is on time, on budget, and above expectations.
+      </p>
+    </div>
+    <div class="process-steps">
+      <div class="process-step reveal reveal-delay-1">
+        <div class="step-number">01</div>
+        <h3 class="step-title" data-en="Discover" data-ar="الاكتشاف">Discover</h3>
+        <p class="step-desc" data-en="We deep-dive into your business goals, audience, and technical landscape to define the right strategy." data-ar="نتعمق في أهدافك التجارية وجمهورك والمشهد التقني لتحديد الاستراتيجية الصحيحة.">We deep-dive into your business goals, audience, and technical landscape to define the right strategy.</p>
+      </div>
+      <div class="process-step reveal reveal-delay-2">
+        <div class="step-number">02</div>
+        <h3 class="step-title" data-en="Design" data-ar="التصميم">Design</h3>
+        <p class="step-desc" data-en="Our architects design scalable solutions with clear milestones, KPIs, and technology blueprints." data-ar="يصمم معماريونا حلولاً قابلة للتوسع مع معالم واضحة ومؤشرات أداء ومخططات تقنية.">Our architects design scalable solutions with clear milestones, KPIs, and technology blueprints.</p>
+      </div>
+      <div class="process-step reveal reveal-delay-3">
+        <div class="step-number">03</div>
+        <h3 class="step-title" data-en="Build" data-ar="البناء">Build</h3>
+        <p class="step-desc" data-en="Agile sprints with continuous feedback loops ensure quality delivery and rapid iteration." data-ar="سبرنتات رشيقة مع حلقات تغذية راجعة مستمرة تضمن تسليماً عالي الجودة وتطوراً سريعاً.">Agile sprints with continuous feedback loops ensure quality delivery and rapid iteration.</p>
+      </div>
+      <div class="process-step reveal reveal-delay-4">
+        <div class="step-number">04</div>
+        <h3 class="step-title" data-en="Grow" data-ar="النمو">Grow</h3>
+        <p class="step-desc" data-en="Post-launch support, optimization, and scaling — we stay with you as your business evolves." data-ar="دعم ما بعد الإطلاق والتحسين والتوسع — نبقى معك بينما يتطور عملك.">Post-launch support, optimization, and scaling — we stay with you as your business evolves.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CHATBOT
+══════════════════════════════════════ -->
+<section id="chatbot">
+  <div class="container">
+    <div class="two-col">
+      <!-- Chat window -->
+      <div class="reveal">
+        <div class="chat-window">
           <div class="chat-header">
             <div class="chat-avatar">🤖</div>
             <div>
-              <div class="chat-name">Nexora AI Assistant</div>
-              <div class="chat-status"><span class="online-dot"></span>Online · Powered by AI</div>
+              <div class="chat-name" data-en="Nexora AI Assistant" data-ar="مساعد نيكسورا الذكي">Nexora AI Assistant</div>
+              <div class="chat-status"><span class="online-dot"></span><span data-en="Online · Powered by AI" data-ar="متصل · مدعوم بالذكاء الاصطناعي">Online · Powered by AI</span></div>
             </div>
           </div>
-
           <div class="chat-body">
             <div class="chat-msg">
               <div class="msg-avatar bot">N</div>
-              <div class="msg-bubble bot">Hi! I'm your Nexora AI assistant. How can I help you today? 👋</div>
+              <div class="msg-bubble bot" data-en="Hi! I'm your Nexora AI assistant. How can I help you today? 👋" data-ar="مرحباً! أنا مساعدك الذكي من نيكسورا. كيف يمكنني مساعدتك اليوم؟ 👋">Hi! I'm your Nexora AI assistant. How can I help you today? 👋</div>
             </div>
             <div class="chat-msg user">
               <div class="msg-avatar user-av">U</div>
-              <div class="msg-bubble user-msg">I'd like to know more about your SMS platform pricing.</div>
+              <div class="msg-bubble user-msg" data-en="I'd like to know more about your SMS platform." data-ar="أريد معرفة المزيد عن منصة الرسائل لديكم.">I'd like to know more about your SMS platform.</div>
             </div>
             <div class="chat-msg">
               <div class="msg-avatar bot">N</div>
-              <div class="msg-bubble bot">Great choice! Our BSS platform starts from 1,000 messages/month. Would you like a custom quote based on your volume?</div>
+              <div class="msg-bubble bot" data-en="Great choice! Our BSS platform supports bulk SMS, OTP, and transactional messaging at enterprise scale. Would you like a custom quote?" data-ar="اختيار رائع! منصتنا تدعم الرسائل الجماعية والـ OTP والرسائل التعاملية. هل تريد عرض سعر مخصص؟">Great choice! Our BSS platform supports bulk SMS, OTP, and transactional messaging at enterprise scale. Would you like a custom quote?</div>
             </div>
             <div class="chat-msg user">
               <div class="msg-avatar user-av">U</div>
-              <div class="msg-bubble user-msg">Yes, we send around 200,000 SMS per month.</div>
+              <div class="msg-bubble user-msg" data-en="Yes! We send ~200K SMS per month." data-ar="نعم! نرسل حوالي ٢٠٠ ألف رسالة شهرياً.">Yes! We send ~200K SMS per month.</div>
             </div>
             <div class="chat-msg">
               <div class="msg-avatar bot">N</div>
-              <div class="msg-bubble bot">Perfect! I've noted your requirements. A specialist will contact you within 2 hours with a tailored enterprise plan. 🚀</div>
+              <div class="msg-bubble bot" data-en="Perfect! A specialist will contact you within 2 hours with a tailored enterprise plan. 🚀" data-ar="ممتاز! سيتواصل معك أحد المختصين خلال ساعتين بخطة مؤسسية مخصصة. 🚀">Perfect! A specialist will contact you within 2 hours with a tailored enterprise plan. 🚀</div>
             </div>
           </div>
-
           <div class="chat-input-bar">
-            <input class="chat-input" type="text" placeholder="Type a message..." readonly />
+            <div class="chat-input-fake" data-en="Type a message..." data-ar="اكتب رسالة...">Type a message...</div>
             <button class="chat-send">→</button>
           </div>
         </div>
-
-        <div class="chatbot-content reveal reveal-delay-2">
-          <span class="section-label">Chatbots</span>
-          <h2>Conversations That<br/><span class="gradient-text">Convert, 24/7</span></h2>
-          <p>
-            Nexora's AI chatbots understand context, handle complex queries, and escalate
-            to humans when needed — delivering seamless experiences across every channel
-            your customers use.
-          </p>
-
-          <div class="bot-channels">
-            <span class="channel-chip">💬 WhatsApp Business</span>
-            <span class="channel-chip">🌐 Website Widget</span>
-            <span class="channel-chip">📘 Facebook Messenger</span>
-            <span class="channel-chip">📱 Instagram DM</span>
-            <span class="channel-chip">✉️ Email Automation</span>
-            <span class="channel-chip">📞 Voice IVR</span>
-          </div>
-
-          <ul class="feature-list" style="margin-bottom:36px;">
-            <li><span class="check">✓</span><span>Arabic & English NLP with dialect understanding</span></li>
-            <li><span class="check">✓</span><span>Seamless handoff to live agents with full context</span></li>
-            <li><span class="check">✓</span><span>CRM and API integrations for personalized responses</span></li>
-            <li><span class="check">✓</span><span>Lead qualification and appointment scheduling</span></li>
-          </ul>
-
-          <a href="#contact" class="btn btn-primary">Build Your Bot</a>
-        </div>
-
       </div>
-    </div>
-  </section>
 
-  <!-- ══════════════════════════════════════
-       DIGITAL MARKETING
-  ══════════════════════════════════════ -->
-  <section id="marketing">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">Digital Marketing</span>
-        <h2 class="section-title">
-          Growth That's <span class="gradient-text">Data-Driven</span>
+      <!-- Content -->
+      <div class="col-content reveal reveal-delay-2">
+        <span class="section-label" data-en="AI Chatbots" data-ar="روبوتات الدردشة">AI Chatbots</span>
+        <h2>
+          <span data-en="Conversations That" data-ar="محادثات تُحوّل">Conversations That</span><br/>
+          <span class="gradient-text" data-en="Convert, 24/7" data-ar="على مدار الساعة">Convert, 24/7</span>
         </h2>
-        <p class="section-subtitle">
-          We blend creativity with analytics to deliver campaigns that reach the right people,
-          at the right moment, on the right channel.
+        <p data-en="Nexora's AI chatbots understand context, handle complex queries, and escalate to humans when needed — delivering seamless experiences across every channel your customers use."
+           data-ar="روبوتات نيكسورا الذكية تفهم السياق وتتعامل مع الاستفسارات المعقدة وتحيل للبشر عند الحاجة — عبر كل قنوات عملائك.">
+          Nexora's AI chatbots understand context, handle complex queries, and escalate to humans when needed — delivering seamless experiences across every channel your customers use.
         </p>
-      </div>
-
-      <div class="marketing-grid">
-
-        <div class="marketing-card reveal reveal-delay-1">
-          <div class="mk-icon">🔍</div>
-          <h3 class="mk-title">SEO & Content</h3>
-          <p class="mk-desc">Dominate search rankings with technical SEO, strategic content, and local search optimization for Arabic and English markets.</p>
-          <div class="mk-metrics">
-            <div class="mk-metric">
-              <div class="mk-metric-val">3x</div>
-              <div class="mk-metric-lbl">Avg. Traffic Growth</div>
-            </div>
-            <div class="mk-metric">
-              <div class="mk-metric-val">Top 3</div>
-              <div class="mk-metric-lbl">Keyword Rankings</div>
-            </div>
-          </div>
+        <div class="bot-channels">
+          <span class="channel-chip">💬 WhatsApp Business</span>
+          <span class="channel-chip">🌐 <span data-en="Website Widget" data-ar="ويدجت الموقع">Website Widget</span></span>
+          <span class="channel-chip">📘 Facebook Messenger</span>
+          <span class="channel-chip">📱 Instagram DM</span>
+          <span class="channel-chip">✉️ <span data-en="Email Automation" data-ar="أتمتة البريد">Email Automation</span></span>
         </div>
-
-        <div class="marketing-card reveal reveal-delay-2">
-          <div class="mk-icon">🎯</div>
-          <h3 class="mk-title">PPC & Paid Media</h3>
-          <p class="mk-desc">Google Ads, Meta Ads, TikTok — precision-targeted paid campaigns with full-funnel optimization and transparent reporting.</p>
-          <div class="mk-metrics">
-            <div class="mk-metric">
-              <div class="mk-metric-val">4.2x</div>
-              <div class="mk-metric-lbl">Average ROAS</div>
-            </div>
-            <div class="mk-metric">
-              <div class="mk-metric-val">-38%</div>
-              <div class="mk-metric-lbl">Cost Per Lead</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="marketing-card reveal reveal-delay-3">
-          <div class="mk-icon">📱</div>
-          <h3 class="mk-title">Social Media</h3>
-          <p class="mk-desc">Brand-building social strategies with creative content, community management, and influencer partnerships.</p>
-          <div class="mk-metrics">
-            <div class="mk-metric">
-              <div class="mk-metric-val">5x</div>
-              <div class="mk-metric-lbl">Engagement Growth</div>
-            </div>
-            <div class="mk-metric">
-              <div class="mk-metric-val">200K+</div>
-              <div class="mk-metric-lbl">Followers Grown</div>
-            </div>
-          </div>
-        </div>
-
+        <ul class="feature-list" style="margin-bottom:32px;">
+          <li><span class="check">✓</span><span data-en="Arabic & English NLP with dialect understanding" data-ar="معالجة اللغة الطبيعية بالعربية والإنجليزية مع فهم اللهجات">Arabic & English NLP with dialect understanding</span></li>
+          <li><span class="check">✓</span><span data-en="Seamless handoff to live agents with full context" data-ar="تسليم سلس للوكلاء البشريين مع كامل السياق">Seamless handoff to live agents with full context</span></li>
+          <li><span class="check">✓</span><span data-en="CRM and API integrations for personalized responses" data-ar="تكاملات CRM وAPI للردود المخصصة">CRM and API integrations for personalized responses</span></li>
+          <li><span class="check">✓</span><span data-en="Lead qualification and appointment scheduling" data-ar="تأهيل العملاء وجدولة المواعيد">Lead qualification and appointment scheduling</span></li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" data-en="Build Your Bot" data-ar="ابنِ روبوتك">Build Your Bot</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ══════════════════════════════════════
-       WHY NEXORA
-  ══════════════════════════════════════ -->
-  <section id="why">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">Why Nexora</span>
-        <h2 class="section-title">
-          Built for <span class="gradient-text">Results</span>
+<!-- ══════════════════════════════════════
+     DIGITAL MARKETING
+══════════════════════════════════════ -->
+<section id="marketing">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label" data-en="Digital Marketing" data-ar="التسويق الرقمي">Digital Marketing</span>
+      <h2 class="section-title">
+        <span data-en="Growth That's" data-ar="نمو">Growth That's</span>
+        <span class="gradient-text" data-en=" Data-Driven" data-ar=" مدعوم بالبيانات"> Data-Driven</span>
+      </h2>
+      <p class="section-subtitle"
+         data-en="We blend creativity with analytics to deliver campaigns that reach the right people, at the right moment, on the right channel."
+         data-ar="ندمج الإبداع بالتحليلات لتقديم حملات تصل إلى الأشخاص المناسبين في الوقت المناسب على القناة المناسبة.">
+        We blend creativity with analytics to deliver campaigns that reach the right people, at the right moment, on the right channel.
+      </p>
+    </div>
+    <div class="marketing-grid">
+      <div class="marketing-card reveal reveal-delay-1">
+        <div class="mk-icon">🔍</div>
+        <h3 class="mk-title" data-en="SEO & Content" data-ar="تحسين محركات البحث والمحتوى">SEO & Content</h3>
+        <p class="mk-desc" data-en="Dominate search rankings with technical SEO, strategic content, and local search optimization for Arabic and English markets." data-ar="هيمن على نتائج البحث بتحسين محركات البحث التقني والمحتوى الاستراتيجي وتحسين البحث المحلي للسوقين العربي والإنجليزي.">Dominate search rankings with technical SEO, strategic content, and local search optimization for Arabic and English markets.</p>
+        <div class="mk-metrics">
+          <div class="mk-metric"><div class="mk-metric-val">3x</div><div class="mk-metric-lbl" data-en="Avg. Traffic Growth" data-ar="متوسط نمو الزيارات">Avg. Traffic Growth</div></div>
+          <div class="mk-metric"><div class="mk-metric-val">Top 3</div><div class="mk-metric-lbl" data-en="Keyword Rankings" data-ar="ترتيب الكلمات المفتاحية">Keyword Rankings</div></div>
+        </div>
+      </div>
+      <div class="marketing-card reveal reveal-delay-2">
+        <div class="mk-icon">🎯</div>
+        <h3 class="mk-title" data-en="PPC & Paid Media" data-ar="الإعلانات المدفوعة">PPC & Paid Media</h3>
+        <p class="mk-desc" data-en="Google Ads, Meta Ads, TikTok — precision-targeted paid campaigns with full-funnel optimization and transparent reporting." data-ar="جوجل ومنصة ميتا وتيك توك — حملات مدفوعة مستهدفة بدقة مع تحسين القمع الكامل وتقارير شفافة.">Google Ads, Meta Ads, TikTok — precision-targeted paid campaigns with full-funnel optimization and transparent reporting.</p>
+        <div class="mk-metrics">
+          <div class="mk-metric"><div class="mk-metric-val">4.2x</div><div class="mk-metric-lbl" data-en="Average ROAS" data-ar="متوسط العائد">Average ROAS</div></div>
+          <div class="mk-metric"><div class="mk-metric-val">-38%</div><div class="mk-metric-lbl" data-en="Cost Per Lead" data-ar="تكلفة العميل">Cost Per Lead</div></div>
+        </div>
+      </div>
+      <div class="marketing-card reveal reveal-delay-3">
+        <div class="mk-icon">📱</div>
+        <h3 class="mk-title" data-en="Social Media" data-ar="وسائل التواصل الاجتماعي">Social Media</h3>
+        <p class="mk-desc" data-en="Brand-building social strategies with creative content, community management, and influencer partnerships." data-ar="استراتيجيات بناء العلامة التجارية بمحتوى إبداعي وإدارة المجتمع وشراكات المؤثرين.">Brand-building social strategies with creative content, community management, and influencer partnerships.</p>
+        <div class="mk-metrics">
+          <div class="mk-metric"><div class="mk-metric-val">5x</div><div class="mk-metric-lbl" data-en="Engagement Growth" data-ar="نمو التفاعل">Engagement Growth</div></div>
+          <div class="mk-metric"><div class="mk-metric-val">200K+</div><div class="mk-metric-lbl" data-en="Followers Grown" data-ar="متابع مكتسب">Followers Grown</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     WHY NEXORA
+══════════════════════════════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label" data-en="Why Nexora" data-ar="لماذا نيكسورا">Why Nexora</span>
+      <h2 class="section-title">
+        <span data-en="Built for" data-ar="مبني من أجل">Built for</span>
+        <span class="gradient-text" data-en=" Results" data-ar=" النتائج"> Results</span>
+      </h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal reveal-delay-1">
+        <div class="why-icon">🏆</div>
+        <h3 class="why-title" data-en="Proven Track Record" data-ar="سجل حافل بالإنجازات">Proven Track Record</h3>
+        <p class="why-desc" data-en="150+ successful projects across telecom, banking, retail, and government sectors in the MENA region." data-ar="أكثر من ١٥٠ مشروعاً ناجحاً في قطاعات الاتصالات والبنوك والتجزئة والحكومة.">150+ successful projects across telecom, banking, retail, and government sectors in the MENA region.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-2">
+        <div class="why-icon">🔒</div>
+        <h3 class="why-title" data-en="Enterprise Security" data-ar="أمان على مستوى المؤسسات">Enterprise Security</h3>
+        <p class="why-desc" data-en="ISO-aligned security practices, data encryption, and compliance with local and international regulations." data-ar="ممارسات أمنية متوافقة مع ISO وتشفير البيانات والامتثال للوائح المحلية والدولية.">ISO-aligned security practices, data encryption, and compliance with local and international regulations.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-3">
+        <div class="why-icon">⚡</div>
+        <h3 class="why-title" data-en="Rapid Delivery" data-ar="تسليم سريع">Rapid Delivery</h3>
+        <p class="why-desc" data-en="Agile teams that ship on time. Our average time-to-launch is 40% faster than industry benchmarks." data-ar="فرق رشيقة تُسلّم في الوقت المحدد. متوسط وقت الإطلاق لدينا أسرع بـ٤٠٪ من معايير الصناعة.">Agile teams that ship on time. Our average time-to-launch is 40% faster than industry benchmarks.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-4">
+        <div class="why-icon">🌍</div>
+        <h3 class="why-title" data-en="Local MENA Expertise" data-ar="خبرة محلية في المنطقة">Local MENA Expertise</h3>
+        <p class="why-desc" data-en="Deep understanding of the MENA market, culture, regulations, and business environment." data-ar="فهم عميق لسوق منطقة الشرق الأوسط وشمال أفريقيا وثقافتها ولوائحها وبيئة أعمالها.">Deep understanding of the MENA market, culture, regulations, and business environment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CTA
+══════════════════════════════════════ -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <h2>
+        <span data-en="Ready to" data-ar="هل أنت مستعد لـ">Ready to</span>
+        <span class="gradient-text" data-en=" Transform" data-ar=" تحويل"> Transform</span>
+        <span data-en=" Your Business?" data-ar=" عملك؟"> Your Business?</span>
+      </h2>
+      <p data-en="Let's build something exceptional together. Schedule a free consultation with our team and discover what Nexora can do for you."
+         data-ar="لنبنِ شيئاً استثنائياً معاً. احجز استشارة مجانية مع فريقنا واكتشف ما يمكن أن تفعله نيكسورا من أجلك.">
+        Let's build something exceptional together. Schedule a free consultation with our team and discover what Nexora can do for you.
+      </p>
+      <div class="cta-buttons">
+        <a href="#contact" class="btn btn-primary btn-lg"
+           data-en="Start Today" data-ar="ابدأ اليوم">
+          Start Today
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="mailto:hello@nexorajo.com" class="btn btn-outline btn-lg"
+           data-en="Email Us Directly" data-ar="راسلنا مباشرة">Email Us Directly</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CONTACT
+══════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-info reveal">
+        <span class="section-label" data-en="Contact Us" data-ar="تواصل معنا">Contact Us</span>
+        <h2>
+          <span data-en="Let's Start a" data-ar="لنبدأ">Let's Start a</span><br/>
+          <span class="gradient-text" data-en="Conversation" data-ar="محادثة">Conversation</span>
         </h2>
-        <p class="section-subtitle">
-          We're not just a vendor — we're a strategic partner invested in your growth.
+        <p data-en="Have a project in mind? Fill out the form and our team will get back to you within one business day."
+           data-ar="هل لديك مشروع في ذهنك؟ املأ النموذج وسيتواصل معك فريقنا خلال يوم عمل واحد.">
+          Have a project in mind? Fill out the form and our team will get back to you within one business day.
         </p>
-      </div>
-
-      <div class="why-grid">
-        <div class="why-card reveal reveal-delay-1">
-          <div class="why-icon">🏆</div>
-          <h3 class="why-title">Proven Track Record</h3>
-          <p class="why-desc">150+ successful projects across telecom, banking, retail, and government sectors in the MENA region.</p>
-        </div>
-        <div class="why-card reveal reveal-delay-2">
-          <div class="why-icon">🔒</div>
-          <h3 class="why-title">Enterprise Security</h3>
-          <p class="why-desc">ISO-aligned security practices, data encryption, and compliance with local and international regulations.</p>
-        </div>
-        <div class="why-card reveal reveal-delay-3">
-          <div class="why-icon">⚡</div>
-          <h3 class="why-title">Rapid Delivery</h3>
-          <p class="why-desc">Agile teams that ship on time. Our average time-to-launch is 40% faster than industry benchmarks.</p>
-        </div>
-        <div class="why-card reveal reveal-delay-4">
-          <div class="why-icon">🌍</div>
-          <h3 class="why-title">Local Expertise</h3>
-          <p class="why-desc">Deep understanding of the MENA market, culture, regulations, and business environment.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       CTA
-  ══════════════════════════════════════ -->
-  <section id="cta">
-    <div class="container">
-      <div class="cta-box reveal">
-        <h2>Ready to <span class="gradient-text">Transform</span> Your Business?</h2>
-        <p>
-          Let's build something exceptional together. Schedule a free consultation
-          with our team and discover what Nexora can do for you.
-        </p>
-        <div class="cta-buttons">
-          <a href="#contact" class="btn btn-primary btn-lg">
-            Start Today
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="mailto:hello@nexorajo.com" class="btn btn-outline btn-lg">
-            Email Us Directly
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       CONTACT
-  ══════════════════════════════════════ -->
-  <section id="contact">
-    <div class="container">
-      <div class="contact-inner">
-
-        <div class="contact-info reveal">
-          <span class="section-label">Contact Us</span>
-          <h2>Let's Start a<br/><span class="gradient-text">Conversation</span></h2>
-          <p>
-            Have a project in mind? Fill out the form and our team will get back to you
-            within one business day.
-          </p>
-
-          <div class="contact-details">
-            <div class="contact-item">
-              <div class="contact-icon">📍</div>
-              <div>
-                <div class="contact-text-label">Location</div>
-                <div class="contact-text-val">Amman, Jordan</div>
-              </div>
+        <div class="contact-details">
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div>
+              <div class="contact-text-label" data-en="Location" data-ar="الموقع">Location</div>
+              <div class="contact-text-val" data-en="Amman, Jordan" data-ar="عمّان، الأردن">Amman, Jordan</div>
             </div>
-            <div class="contact-item">
-              <div class="contact-icon">✉️</div>
-              <div>
-                <div class="contact-text-label">Email</div>
-                <div class="contact-text-val">hello@nexorajo.com</div>
-              </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">✉️</div>
+            <div>
+              <div class="contact-text-label" data-en="Email" data-ar="البريد الإلكتروني">Email</div>
+              <div class="contact-text-val">hello@nexorajo.com</div>
             </div>
-            <div class="contact-item">
-              <div class="contact-icon">📞</div>
-              <div>
-                <div class="contact-text-label">Phone / WhatsApp</div>
-                <div class="contact-text-val">+962 XX XXX XXXX</div>
-              </div>
-            </div>
-            <div class="contact-item">
-              <div class="contact-icon">🌐</div>
-              <div>
-                <div class="contact-text-label">Website</div>
-                <div class="contact-text-val">nexorajo.com</div>
-              </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div>
+              <div class="contact-text-label" data-en="Phone / WhatsApp" data-ar="الهاتف / واتساب">Phone / WhatsApp</div>
+              <div class="contact-text-val">+962 XX XXX XXXX</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="contact-form reveal reveal-delay-2">
-          <form id="contactForm">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="fname">First Name</label>
-                <input type="text" id="fname" name="fname" placeholder="Ahmad" required />
-              </div>
-              <div class="form-group">
-                <label for="lname">Last Name</label>
-                <input type="text" id="lname" name="lname" placeholder="Al-Rashid" required />
-              </div>
-            </div>
-
+      <div class="contact-form reveal reveal-delay-2">
+        <form id="contactForm">
+          <div class="form-row">
             <div class="form-group">
-              <label for="email">Email Address</label>
-              <input type="email" id="email" name="email" placeholder="ahmad@company.com" required />
+              <label data-en="First Name" data-ar="الاسم الأول">First Name</label>
+              <input type="text" placeholder="Ahmad" data-placeholder-en="Ahmad" data-placeholder-ar="أحمد" required />
             </div>
-
             <div class="form-group">
-              <label for="company">Company</label>
-              <input type="text" id="company" name="company" placeholder="Your Company Name" />
+              <label data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
+              <input type="text" placeholder="Al-Rashid" data-placeholder-en="Al-Rashid" data-placeholder-ar="الراشد" required />
             </div>
-
-            <div class="form-group">
-              <label for="service">Service Interested In</label>
-              <select id="service" name="service">
-                <option value="">Select a service...</option>
-                <option value="bss">BSS & SMS Platform</option>
-                <option value="marketing">Digital Marketing</option>
-                <option value="crm">CRM Solution</option>
-                <option value="collecting">Collecting CRM</option>
-                <option value="chatbot">AI Chatbot</option>
-                <option value="ai">Agentic AI Solutions</option>
-                <option value="multiple">Multiple Services</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="message">Your Message</label>
-              <textarea id="message" name="message" placeholder="Tell us about your project, goals, and timeline..." required></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
-              Send Message
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
-            </button>
-          </form>
-        </div>
-
+          </div>
+          <div class="form-group">
+            <label data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
+            <input type="email" placeholder="ahmad@company.com" required />
+          </div>
+          <div class="form-group">
+            <label data-en="Company" data-ar="الشركة">Company</label>
+            <input type="text" data-placeholder-en="Your Company Name" data-placeholder-ar="اسم شركتك" placeholder="Your Company Name" />
+          </div>
+          <div class="form-group">
+            <label data-en="Service Interested In" data-ar="الخدمة المطلوبة">Service Interested In</label>
+            <select>
+              <option value="" data-en="Select a service..." data-ar="اختر خدمة...">Select a service...</option>
+              <option value="bss"       data-en="BSS & SMS Platform"       data-ar="منصة BSS والرسائل">BSS & SMS Platform</option>
+              <option value="marketing" data-en="Digital Marketing"         data-ar="التسويق الرقمي">Digital Marketing</option>
+              <option value="crm"       data-en="CRM Solution"             data-ar="حل CRM">CRM Solution</option>
+              <option value="collecting"data-en="Collecting CRM"           data-ar="CRM التحصيل">Collecting CRM</option>
+              <option value="chatbot"   data-en="AI Chatbot"               data-ar="روبوت دردشة ذكي">AI Chatbot</option>
+              <option value="ai"        data-en="Agentic AI Solutions"     data-ar="حلول الذكاء الوكيل">Agentic AI Solutions</option>
+              <option value="multiple"  data-en="Multiple Services"        data-ar="خدمات متعددة">Multiple Services</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-en="Your Message" data-ar="رسالتك">Your Message</label>
+            <textarea data-placeholder-en="Tell us about your project, goals, and timeline..." data-placeholder-ar="أخبرنا عن مشروعك وأهدافك وجدولك الزمني..." placeholder="Tell us about your project, goals, and timeline..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;"
+                  data-en="Send Message" data-ar="إرسال الرسالة">
+            Send Message
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          </button>
+        </form>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ══════════════════════════════════════
-       FOOTER
-  ══════════════════════════════════════ -->
-  <footer>
-    <div class="container">
-      <div class="footer-inner">
-
-        <div class="footer-brand">
-          <div class="footer-logo">
-            <img src="assets/images/logo.png" alt="Nexora" height="36" onerror="this.style.display='none'" />
-            <span class="footer-logo-text">NEXORA</span>
-          </div>
-          <p>
-            Digital Marketing & IT Solutions partner for forward-thinking businesses
-            in Jordan and across the MENA region. Transforming ideas into digital excellence.
-          </p>
-          <div class="social-links" style="margin-top:20px;">
-            <a href="#" class="social-link" aria-label="LinkedIn">in</a>
-            <a href="#" class="social-link" aria-label="Twitter/X">𝕏</a>
-            <a href="#" class="social-link" aria-label="Instagram">📷</a>
-            <a href="#" class="social-link" aria-label="WhatsApp">💬</a>
-          </div>
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <img src="assets/images/logo.png" alt="Nexora" onerror="this.style.display='none'" />
+          <span class="footer-logo-text">NEXORA</span>
         </div>
-
-        <div class="footer-col">
-          <h4>Services</h4>
-          <ul>
-            <li><a href="#bss">BSS & SMS</a></li>
-            <li><a href="#marketing">Digital Marketing</a></li>
-            <li><a href="#crm">CRM Solutions</a></li>
-            <li><a href="#crm">Collecting CRM</a></li>
-            <li><a href="#chatbot">AI Chatbots</a></li>
-            <li><a href="#ai">Agentic AI</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="#why">About Us</a></li>
-            <li><a href="#process">Our Process</a></li>
-            <li><a href="#contact">Careers</a></li>
-            <li><a href="#contact">Partners</a></li>
-            <li><a href="#contact">News</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Contact</h4>
-          <ul>
-            <li><a href="mailto:hello@nexorajo.com">hello@nexorajo.com</a></li>
-            <li><a href="#contact">Amman, Jordan</a></li>
-            <li><a href="#contact">+962 XX XXX XXXX</a></li>
-            <li><a href="#contact">Support Portal</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2024 Nexora Digital Marketing & IT Solutions. All rights reserved.</p>
-        <p>
-          <a href="#" style="color:var(--text-muted);text-decoration:none;margin-right:20px;">Privacy Policy</a>
-          <a href="#" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+        <p data-en="Digital Marketing & IT Solutions partner for forward-thinking businesses in Jordan and across the MENA region."
+           data-ar="شريك التسويق الرقمي وحلول تقنية المعلومات للشركات التقدمية في الأردن ومنطقة الشرق الأوسط وشمال أفريقيا.">
+          Digital Marketing & IT Solutions partner for forward-thinking businesses in Jordan and across the MENA region.
         </p>
+        <div class="social-links" style="margin-top:18px;">
+          <a href="#" class="social-link" aria-label="LinkedIn">in</a>
+          <a href="#" class="social-link" aria-label="X">𝕏</a>
+          <a href="#" class="social-link" aria-label="Instagram">ig</a>
+          <a href="#" class="social-link" aria-label="WhatsApp">wa</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-en="Services" data-ar="الخدمات">Services</h4>
+        <ul>
+          <li><a href="#bss"       data-en="BSS & SMS"          data-ar="منصة BSS والرسائل">BSS & SMS</a></li>
+          <li><a href="#marketing" data-en="Digital Marketing"  data-ar="التسويق الرقمي">Digital Marketing</a></li>
+          <li><a href="#crm"       data-en="CRM Solutions"      data-ar="حلول CRM">CRM Solutions</a></li>
+          <li><a href="#crm"       data-en="Collecting CRM"     data-ar="CRM التحصيل">Collecting CRM</a></li>
+          <li><a href="#chatbot"   data-en="AI Chatbots"        data-ar="روبوتات الدردشة">AI Chatbots</a></li>
+          <li><a href="#ai"        data-en="Agentic AI"         data-ar="الذكاء الاصطناعي الوكيل">Agentic AI</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-en="Company" data-ar="الشركة">Company</h4>
+        <ul>
+          <li><a href="#why"     data-en="About Us"  data-ar="من نحن">About Us</a></li>
+          <li><a href="#process" data-en="Our Process" data-ar="منهجيتنا">Our Process</a></li>
+          <li><a href="#contact" data-en="Careers"   data-ar="وظائف">Careers</a></li>
+          <li><a href="#contact" data-en="Partners"  data-ar="الشركاء">Partners</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-en="Contact" data-ar="التواصل">Contact</h4>
+        <ul>
+          <li><a href="mailto:hello@nexorajo.com">hello@nexorajo.com</a></li>
+          <li><a href="#contact" data-en="Amman, Jordan" data-ar="عمّان، الأردن">Amman, Jordan</a></li>
+          <li><a href="#contact">+962 XX XXX XXXX</a></li>
+        </ul>
       </div>
     </div>
-  </footer>
 
-  <!-- Scripts -->
-  <script src="assets/js/main.js"></script>
+    <div class="footer-bottom">
+      <p><span data-en="© 2024 Nexora Digital Marketing & IT Solutions. All rights reserved." data-ar="© ٢٠٢٤ نيكسورا للتسويق الرقمي وحلول تقنية المعلومات. جميع الحقوق محفوظة.">© 2024 Nexora Digital Marketing & IT Solutions. All rights reserved.</span></p>
+      <p>
+        <a href="#" style="color:var(--text-muted);text-decoration:none;margin-inline-end:18px;" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>
+        <a href="#" style="color:var(--text-muted);text-decoration:none;" data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
 </body>
 </html>

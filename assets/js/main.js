@@ -5,222 +5,271 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ── NAVBAR SCROLL ── */
+  /* ══════════════════════════════════════
+     LANGUAGE SWITCHER  (EN / AR + RTL)
+  ══════════════════════════════════════ */
+  const HTML  = document.documentElement;
+  const STORE = localStorage;
+
+  function applyLang(lang) {
+    const isAr = lang === 'ar';
+
+    // Direction + lang attribute
+    HTML.setAttribute('lang', lang);
+    HTML.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+
+    // Arabic font injection
+    if (isAr) {
+      document.body.style.fontFamily = "'Cairo', 'Tajawal', 'Inter', sans-serif";
+    } else {
+      document.body.style.fontFamily = "'Inter', -apple-system, sans-serif";
+    }
+
+    // Swap all [data-en] / [data-ar] text nodes
+    document.querySelectorAll('[data-en]').forEach(el => {
+      const val = el.getAttribute(isAr ? 'data-ar' : 'data-en');
+      if (val) {
+        // For inputs/textarea swap placeholder, for others swap text
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.placeholder = val;
+        } else {
+          el.textContent = val;
+        }
+      }
+    });
+
+    // Swap data-placeholder-en / data-placeholder-ar on form elements
+    document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+      const key = isAr ? 'data-placeholder-ar' : 'data-placeholder-en';
+      el.placeholder = el.getAttribute(key) || '';
+    });
+
+    // Swap <option> text inside <select>
+    document.querySelectorAll('option[data-en]').forEach(opt => {
+      const val = opt.getAttribute(isAr ? 'data-ar' : 'data-en');
+      if (val) opt.textContent = val;
+    });
+
+    // Toggle active state on all lang buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+
+    STORE.setItem('nexora-lang', lang);
+  }
+
+  // Attach click handlers to ALL language buttons (desktop + mobile)
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+  });
+
+  // Init from saved preference or browser language
+  const saved   = STORE.getItem('nexora-lang');
+  const browser = navigator.language?.startsWith('ar') ? 'ar' : 'en';
+  applyLang(saved || browser);
+
+
+  /* ══════════════════════════════════════
+     NAVBAR SCROLL
+  ══════════════════════════════════════ */
   const navbar = document.getElementById('navbar');
-  const onScroll = () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 40);
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 30);
+  }, { passive: true });
 
-  /* ── MOBILE MENU ── */
-  const hamburger = document.querySelector('.hamburger');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  const mobileClose = document.querySelector('.mobile-close');
 
-  hamburger?.addEventListener('click', () => mobileMenu?.classList.add('open'));
-  mobileClose?.addEventListener('click', () => mobileMenu?.classList.remove('open'));
+  /* ══════════════════════════════════════
+     MOBILE MENU
+  ══════════════════════════════════════ */
+  const hamburger  = document.getElementById('hamburgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileClose= document.getElementById('mobileClose');
+
+  hamburger?.addEventListener('click', () => mobileMenu.classList.add('open'));
+  mobileClose?.addEventListener('click', () => mobileMenu.classList.remove('open'));
   mobileMenu?.querySelectorAll('a').forEach(a =>
     a.addEventListener('click', () => mobileMenu.classList.remove('open'))
   );
 
-  /* ── SCROLL REVEAL ── */
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          revealObserver.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-  );
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-  /* ── COUNTER ANIMATION ── */
-  const animateCounter = (el, target, suffix = '') => {
-    const duration = 2000;
-    const start = performance.now();
-    const update = (now) => {
-      const t = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
+  /* ══════════════════════════════════════
+     SCROLL REVEAL
+  ══════════════════════════════════════ */
+  const revealObs = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObs.unobserve(e.target);
+      }
+    }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+
+  /* ══════════════════════════════════════
+     COUNTER ANIMATION
+  ══════════════════════════════════════ */
+  function animateCounter(el, target, suffix) {
+    const dur = 2000;
+    const t0  = performance.now();
+    const tick = now => {
+      const p    = Math.min((now - t0) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.floor(ease * target) + suffix;
-      if (t < 1) requestAnimationFrame(update);
+      if (p < 1) requestAnimationFrame(tick);
     };
-    requestAnimationFrame(update);
-  };
+    requestAnimationFrame(tick);
+  }
 
-  const counterObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const el = e.target;
-          const target = parseInt(el.dataset.target);
-          const suffix = el.dataset.suffix || '';
-          animateCounter(el, target, suffix);
-          counterObserver.unobserve(el);
-        }
-      });
-    },
-    { threshold: 0.5 }
-  );
-  document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCounter(e.target, +e.target.dataset.target, e.target.dataset.suffix || '');
+        counterObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-target]').forEach(el => counterObs.observe(el));
 
-  /* ── HERO PARTICLES ── */
+
+  /* ══════════════════════════════════════
+     HERO PARTICLE CANVAS
+  ══════════════════════════════════════ */
   const canvas = document.getElementById('particles');
   if (canvas) {
     const ctx = canvas.getContext('2d');
-    let W, H, particles;
+    let W, H, pts;
 
     const resize = () => {
-      W = canvas.width = canvas.offsetWidth;
+      W = canvas.width  = canvas.offsetWidth;
       H = canvas.height = canvas.offsetHeight;
     };
 
-    const initParticles = () => {
-      particles = Array.from({ length: 60 }, () => ({
+    const init = () => {
+      pts = Array.from({ length: 55 }, () => ({
         x: Math.random() * W,
         y: Math.random() * H,
-        r: Math.random() * 2 + 0.5,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-        alpha: Math.random() * 0.5 + 0.1,
+        r: Math.random() * 1.8 + 0.4,
+        dx: (Math.random() - 0.5) * 0.35,
+        dy: (Math.random() - 0.5) * 0.35,
+        a: Math.random() * 0.45 + 0.1,
       }));
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > W) p.dx *= -1;
-        if (p.y < 0 || p.y > H) p.dy *= -1;
-
+      pts.forEach(p => {
+        p.x = (p.x + p.dx + W) % W;
+        p.y = (p.y + p.dy + H) % H;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 207, 255, ${p.alpha})`;
+        ctx.fillStyle = `rgba(0,207,255,${p.a})`;
         ctx.fill();
       });
-
-      // Draw connecting lines
-      particles.forEach((a, i) => {
-        particles.slice(i + 1).forEach(b => {
-          const dist = Math.hypot(a.x - b.x, a.y - b.y);
-          if (dist < 100) {
+      pts.forEach((a, i) => {
+        for (let j = i + 1; j < pts.length; j++) {
+          const b = pts[j];
+          const d = Math.hypot(a.x - b.x, a.y - b.y);
+          if (d < 90) {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(26, 127, 232, ${(1 - dist / 100) * 0.15})`;
+            ctx.strokeStyle = `rgba(26,127,232,${(1 - d / 90) * 0.12})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
-        });
+        }
       });
-
       requestAnimationFrame(draw);
     };
 
-    resize();
-    initParticles();
-    draw();
-    window.addEventListener('resize', () => { resize(); initParticles(); });
+    resize(); init(); draw();
+    window.addEventListener('resize', () => { resize(); init(); });
   }
 
-  /* ── SMOOTH SCROLL ── */
+
+  /* ══════════════════════════════════════
+     SMOOTH SCROLL
+  ══════════════════════════════════════ */
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      const tgt = document.querySelector(a.getAttribute('href'));
+      if (tgt) { e.preventDefault(); tgt.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     });
   });
 
-  /* ── CONTACT FORM ── */
+
+  /* ══════════════════════════════════════
+     CONTACT FORM
+  ══════════════════════════════════════ */
   const form = document.getElementById('contactForm');
-  form?.addEventListener('submit', async (e) => {
+  form?.addEventListener('submit', async e => {
     e.preventDefault();
     const btn = form.querySelector('[type="submit"]');
-    const original = btn.textContent;
-    btn.textContent = 'Sending...';
+    const orig = btn.textContent;
+    const isAr = HTML.getAttribute('lang') === 'ar';
+    btn.textContent = isAr ? 'جارٍ الإرسال...' : 'Sending...';
     btn.disabled = true;
-
-    // Simulate sending (replace with real API call)
-    await new Promise(r => setTimeout(r, 1500));
-    btn.textContent = 'Message Sent!';
-    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-
+    await new Promise(r => setTimeout(r, 1400));
+    btn.textContent = isAr ? 'تم الإرسال! ✓' : 'Message Sent! ✓';
+    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
     setTimeout(() => {
-      btn.textContent = original;
+      btn.textContent    = orig;
       btn.style.background = '';
       btn.disabled = false;
       form.reset();
     }, 3000);
   });
 
-  /* ── NEURAL NET SVG ANIMATION ── */
-  const svg = document.querySelector('.neural-svg');
-  if (svg) {
-    const nodes = svg.querySelectorAll('.node');
-    const connections = svg.querySelectorAll('.connection');
+
+  /* ══════════════════════════════════════
+     NEURAL NET ANIMATION
+  ══════════════════════════════════════ */
+  const nodes = document.querySelectorAll('.node');
+  const conns = document.querySelectorAll('.connection');
+
+  if (nodes.length) {
+    setInterval(() => {
+      const n = nodes[Math.floor(Math.random() * nodes.length)];
+      n.style.filter = 'drop-shadow(0 0 8px #00cfff)';
+      setTimeout(() => n.style.filter = '', 500);
+    }, 700);
 
     setInterval(() => {
-      const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
-      randomNode.style.filter = 'drop-shadow(0 0 8px #00cfff)';
-      setTimeout(() => randomNode.style.filter = '', 600);
-    }, 800);
-
-    setInterval(() => {
-      const randomConn = connections[Math.floor(Math.random() * connections.length)];
-      randomConn.style.opacity = '0.9';
-      randomConn.style.stroke = '#00cfff';
-      setTimeout(() => {
-        randomConn.style.opacity = '0.2';
-        randomConn.style.stroke = '#1a7fe8';
-      }, 500);
-    }, 400);
+      const c = conns[Math.floor(Math.random() * conns.length)];
+      c.style.opacity = '0.85';
+      c.style.stroke  = '#00cfff';
+      setTimeout(() => { c.style.opacity = '0.2'; c.style.stroke = '#1a7fe8'; }, 450);
+    }, 350);
   }
 
-  /* ── CHAT ANIMATION ── */
-  const chatBody = document.querySelector('.chat-body');
-  if (chatBody) {
-    const messages = chatBody.querySelectorAll('.chat-msg');
-    messages.forEach((msg, i) => {
-      msg.style.opacity = '0';
-      msg.style.animationDelay = `${i * 0.6 + 0.5}s`;
-      msg.style.animationFillMode = 'both';
-      msg.style.animationName = 'fadeUp';
-      msg.style.animationDuration = '0.5s';
-      msg.style.animationTimingFunction = 'ease';
-    });
 
-    // Show typing indicator briefly
-    const typingObserver = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        messages.forEach(m => m.style.opacity = '');
-        typingObserver.disconnect();
-      }
-    }, { threshold: 0.5 });
-    typingObserver.observe(chatBody);
-  }
-
-  /* ── ACTIVE NAV HIGHLIGHT ── */
+  /* ══════════════════════════════════════
+     ACTIVE NAV HIGHLIGHT
+  ══════════════════════════════════════ */
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-links a');
 
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          navLinks.forEach(l => l.classList.remove('active'));
-          const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-          active?.classList.add('active');
-        }
-      });
-    },
-    { threshold: 0.4 }
-  );
-  sections.forEach(s => sectionObserver.observe(s));
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        document.querySelector(`.nav-links a[href="#${e.target.id}"]`)?.classList.add('active');
+      }
+    });
+  }, { threshold: 0.35 }).forEach
+    ? null
+    : void 0;
+
+  const secObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        document.querySelector(`.nav-links a[href="#${e.target.id}"]`)?.classList.add('active');
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => secObs.observe(s));
 
 });
