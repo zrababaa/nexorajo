@@ -134,12 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   /* ══════════════════════════════════════
-     HERO PARTICLE CANVAS
+     HERO PARTICLE CANVAS (enhanced)
   ══════════════════════════════════════ */
   const canvas = document.getElementById('particles');
   if (canvas) {
     const ctx = canvas.getContext('2d');
     let W, H, pts;
+    let mouseX = -9999, mouseY = -9999;
+
+    canvas.addEventListener('mousemove', e => {
+      const r = canvas.getBoundingClientRect();
+      mouseX = e.clientX - r.left;
+      mouseY = e.clientY - r.top;
+    });
+    canvas.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
 
     const resize = () => {
       W = canvas.width  = canvas.offsetWidth;
@@ -147,36 +155,50 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const init = () => {
-      pts = Array.from({ length: 55 }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.8 + 0.4,
-        dx: (Math.random() - 0.5) * 0.35,
-        dy: (Math.random() - 0.5) * 0.35,
-        a: Math.random() * 0.45 + 0.1,
+      pts = Array.from({ length: 90 }, () => ({
+        x:    Math.random() * W,
+        y:    Math.random() * H,
+        r:    Math.random() * 2.2 + 0.4,
+        dx:   (Math.random() - 0.5) * 0.42,
+        dy:   (Math.random() - 0.5) * 0.42,
+        a:    Math.random() * 0.5 + 0.15,
+        cyan: Math.random() > 0.45,
       }));
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
+
       pts.forEach(p => {
+        const mx = mouseX - p.x;
+        const my = mouseY - p.y;
+        const md = Math.hypot(mx, my);
+        if (md < 130 && md > 0) {
+          p.dx -= (mx / md) * 0.055;
+          p.dy -= (my / md) * 0.055;
+        }
+        p.dx *= 0.992; p.dy *= 0.992;
         p.x = (p.x + p.dx + W) % W;
         p.y = (p.y + p.dy + H) % H;
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,207,255,${p.a})`;
+        ctx.fillStyle = p.cyan
+          ? `rgba(0,207,255,${p.a})`
+          : `rgba(26,127,232,${p.a * 0.8})`;
         ctx.fill();
       });
+
       pts.forEach((a, i) => {
         for (let j = i + 1; j < pts.length; j++) {
           const b = pts[j];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < 90) {
+          if (d < 105) {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(26,127,232,${(1 - d / 90) * 0.12})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(26,127,232,${(1 - d / 105) * 0.16})`;
+            ctx.lineWidth = 0.6;
             ctx.stroke();
           }
         }
@@ -224,24 +246,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   /* ══════════════════════════════════════
-     NEURAL NET ANIMATION
+     NEURAL NET ANIMATION (enhanced)
   ══════════════════════════════════════ */
   const nodes = document.querySelectorAll('.node');
   const conns = document.querySelectorAll('.connection');
 
   if (nodes.length) {
+    // Pulse nodes in a wave pattern
+    let nIdx = 0;
     setInterval(() => {
-      const n = nodes[Math.floor(Math.random() * nodes.length)];
-      n.style.filter = 'drop-shadow(0 0 8px #00cfff)';
-      setTimeout(() => n.style.filter = '', 500);
-    }, 700);
+      const n = nodes[nIdx % nodes.length];
+      n.style.filter = 'drop-shadow(0 0 10px #00cfff) drop-shadow(0 0 20px rgba(0,207,255,.5))';
+      n.style.transition = 'filter .15s';
+      setTimeout(() => { n.style.filter = ''; }, 600);
+      nIdx++;
+    }, 180);
 
+    // Cascade connections
+    let cIdx = 0;
     setInterval(() => {
-      const c = conns[Math.floor(Math.random() * conns.length)];
-      c.style.opacity = '0.85';
-      c.style.stroke  = '#00cfff';
-      setTimeout(() => { c.style.opacity = '0.2'; c.style.stroke = '#1a7fe8'; }, 450);
-    }, 350);
+      const c = conns[cIdx % conns.length];
+      c.style.opacity   = '1';
+      c.style.stroke    = '#00cfff';
+      c.style.strokeWidth = '1.5';
+      setTimeout(() => {
+        c.style.opacity     = '0.2';
+        c.style.stroke      = '#1a7fe8';
+        c.style.strokeWidth = '1';
+      }, 500);
+      cIdx++;
+    }, 120);
+  }
+
+
+  /* ══════════════════════════════════════
+     3D CARD TILT
+  ══════════════════════════════════════ */
+  document.querySelectorAll('.service-card, .why-card, .marketing-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r  = card.getBoundingClientRect();
+      const x  = (e.clientX - r.left)  / r.width;
+      const y  = (e.clientY - r.top)   / r.height;
+      const tx = (y - 0.5) * 10;
+      const ty = (x - 0.5) * -10;
+      card.style.transform = `perspective(720px) rotateX(${tx}deg) rotateY(${ty}deg) translateZ(6px)`;
+      card.style.setProperty('--mouse-x', `${x * 100}%`);
+      card.style.setProperty('--mouse-y', `${y * 100}%`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+
+  /* ══════════════════════════════════════
+     HERO MOUSE PARALLAX
+  ══════════════════════════════════════ */
+  const floatItems = document.querySelectorAll(
+    '.float-orb, .float-hex, .float-badge'
+  );
+  if (floatItems.length) {
+    let ticking = false;
+    document.addEventListener('mousemove', e => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const cx = window.innerWidth  / 2;
+        const cy = window.innerHeight / 2;
+        const dx = (e.clientX - cx) / cx;
+        const dy = (e.clientY - cy) / cy;
+        floatItems.forEach((el, i) => {
+          const depth = (i % 3 + 1) * 7;
+          el.style.transform = `translate(${dx * depth}px, ${dy * depth}px)`;
+        });
+        ticking = false;
+      });
+    });
   }
 
 
