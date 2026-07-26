@@ -223,6 +223,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   /* ══════════════════════════════════════
+     CHATBOT DEMO SEND BUTTON
+  ══════════════════════════════════════ */
+  document.querySelector('.chat-send')?.addEventListener('click', () => {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+
+  /* ══════════════════════════════════════
      CONTACT FORM
   ══════════════════════════════════════ */
   const form = document.getElementById('contactForm');
