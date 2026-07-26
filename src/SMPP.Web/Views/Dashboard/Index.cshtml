@@ -1,0 +1,43 @@
+@using SMPP.Application.Dashboard
+@model DashboardSummaryDto
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1 class="h4 mb-4">Dashboard</h1>
+
+<div class="row g-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Balance</div>
+            <div class="kpi-value">@Model.Balance.ToString("N2")</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Sends today</div>
+            <div class="kpi-value">@Model.SendsToday</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Delivery rate</div>
+            <div class="kpi-value">@(Model.DeliveryRatePercent.HasValue ? $"{Model.DeliveryRatePercent:0.0}%" : "—")</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Pending payments</div>
+            <div class="kpi-value">@Model.PendingPayments</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-sm-6 col-lg-4">
+        <a class="btn btn-outline-primary w-100" asp-controller="Campaigns" asp-action="Index">Manage campaigns</a>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <a class="btn btn-outline-primary w-100" asp-controller="Templates" asp-action="Index">Manage templates</a>
+    </div>
+</div>

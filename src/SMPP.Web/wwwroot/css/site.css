@@ -1,0 +1,177 @@
+:root {
+  --smpp-primary: #4f46e5;
+  --smpp-primary-dark: #4338ca;
+  --smpp-sidebar-bg: #111827;
+  --smpp-sidebar-bg-active: #1f2937;
+  --smpp-sidebar-text: #d1d5db;
+  --smpp-sidebar-text-active: #ffffff;
+  --smpp-topbar-bg: #ffffff;
+  --smpp-body-bg: #f4f5f9;
+  --smpp-border: #e5e7eb;
+  --smpp-radius: 0.5rem;
+  --smpp-sidebar-width: 260px;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--smpp-body-bg);
+  font-size: 0.95rem;
+}
+
+a {
+  color: var(--smpp-primary);
+}
+
+.btn-primary {
+  background-color: var(--smpp-primary);
+  border-color: var(--smpp-primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--smpp-primary-dark);
+  border-color: var(--smpp-primary-dark);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--smpp-primary);
+  box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15);
+}
+
+/* App shell -------------------------------------------------------- */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: var(--smpp-sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--smpp-sidebar-bg);
+  color: var(--smpp-sidebar-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1.25rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.app-sidebar .nav-section-title {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  padding: 1rem 1.25rem 0.25rem;
+}
+
+.app-sidebar .nav-link {
+  color: var(--smpp-sidebar-text);
+  padding: 0.55rem 1.25rem;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.app-sidebar .nav-link:hover {
+  background-color: var(--smpp-sidebar-bg-active);
+  color: var(--smpp-sidebar-text-active);
+}
+
+.app-sidebar .nav-link.active {
+  background-color: var(--smpp-primary);
+  color: #fff;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-topbar {
+  background-color: var(--smpp-topbar-bg);
+  border-bottom: 1px solid var(--smpp-border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.card {
+  border: 1px solid var(--smpp-border);
+  border-radius: var(--smpp-radius);
+}
+
+/* KPI cards ---------------------------------------------------------- */
+
+.kpi-card {
+  border-radius: var(--smpp-radius);
+  border: 1px solid var(--smpp-border);
+  background: #fff;
+  padding: 1.25rem;
+}
+
+.kpi-card .kpi-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-card .kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+/* Auth pages ----------------------------------------------------------- */
+
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--smpp-sidebar-bg) 0%, var(--smpp-primary-dark) 100%);
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: var(--smpp-radius);
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .app-sidebar {
+    position: fixed;
+    z-index: 1040;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .app-sidebar.show {
+    transform: translateX(0);
+  }
+}

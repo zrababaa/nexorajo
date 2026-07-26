@@ -1,0 +1,32 @@
+@model SMPP.Web.ViewModels.Templates.TemplateFormViewModel
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" autofocus />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="TemplateCode" class="form-label"></label>
+    <input asp-for="TemplateCode" class="form-control" readonly="@(Model.Id.HasValue ? "readonly" : null)" />
+    <span asp-validation-for="TemplateCode" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="MessageBody" class="form-label"></label>
+    <textarea asp-for="MessageBody" class="form-control" rows="5"></textarea>
+    <span asp-validation-for="MessageBody" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="CsvFile" class="form-label"></label>
+    <input asp-for="CsvFile" type="file" class="form-control" accept=".csv,.txt,.xlsx" />
+    <span asp-validation-for="CsvFile" class="text-danger small"></span>
+    @if (!string.IsNullOrEmpty(Model.ExistingCsvFilePath))
+    {
+        <div class="form-text">Current file: <a href="~/@Model.ExistingCsvFilePath" target="_blank">download</a> (upload only supported when creating a new template)</div>
+    }
+</div>
+
+<button type="submit" class="btn btn-primary">Save</button>
+<a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>

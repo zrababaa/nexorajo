@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+
+## User-uploaded content (campaign CSVs, template CSVs)
+src/SMPP.Web/wwwroot/uploads/

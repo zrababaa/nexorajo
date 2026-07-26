@@ -1,0 +1,20 @@
+@{
+    var displayName = User.Identity?.Name ?? "Account";
+    var role = User.IsInRole(RoleNames.Superadmin) ? "Superadmin"
+        : User.IsInRole(RoleNames.WhiteLabelAdmin) ? "White-label Admin"
+        : "User";
+}
+
+<header class="app-topbar">
+    <button class="btn btn-sm btn-outline-secondary d-md-none" type="button" onclick="document.getElementById('appSidebar').classList.toggle('show')">
+        &#9776;
+    </button>
+
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="text-muted small">@displayName <span class="badge bg-light text-dark border">@role</span></span>
+        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Sign out</button>
+        </form>
+    </div>
+</header>

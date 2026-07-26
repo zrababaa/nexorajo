@@ -1,0 +1,39 @@
+@model SMPP.Web.ViewModels.Campaigns.CampaignFormViewModel
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" autofocus />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ExternalCampaignCode" class="form-label"></label>
+    <input asp-for="ExternalCampaignCode" class="form-control" readonly="@(Model.Id.HasValue ? "readonly" : null)" />
+    <span asp-validation-for="ExternalCampaignCode" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="PastedNumbers" class="form-label"></label>
+    <textarea asp-for="PastedNumbers" class="form-control" rows="5" placeholder="9715xxxxxxxx, 9715xxxxxxxx, ..."></textarea>
+    <span asp-validation-for="PastedNumbers" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="CsvFile" class="form-label"></label>
+    <input asp-for="CsvFile" type="file" class="form-control" accept=".csv,.txt" />
+    <div class="form-text">Provide numbers either pasted above or via CSV upload here, not both.</div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6 mb-3">
+        <label asp-for="SendSpeedMinSeconds" class="form-label"></label>
+        <input asp-for="SendSpeedMinSeconds" class="form-control" />
+    </div>
+    <div class="col-sm-6 mb-3">
+        <label asp-for="SendSpeedMaxSeconds" class="form-label"></label>
+        <input asp-for="SendSpeedMaxSeconds" class="form-control" />
+    </div>
+</div>
+
+<button type="submit" class="btn btn-primary">Save</button>
+<a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>

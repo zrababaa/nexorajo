@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SMPP.Application/SMPP.Application.csproj" />
+    <Project Path="src/SMPP.Domain/SMPP.Domain.csproj" />
+    <Project Path="src/SMPP.Infrastructure/SMPP.Infrastructure.csproj" />
+    <Project Path="src/SMPP.Web/SMPP.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SMPP.Tests/SMPP.Tests.csproj" />
+  </Folder>
+</Solution>

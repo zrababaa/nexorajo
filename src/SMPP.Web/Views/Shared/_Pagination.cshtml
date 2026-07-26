@@ -1,0 +1,40 @@
+@model SMPP.Web.ViewModels.Shared.PaginationInfo
+
+@if (Model.TotalPages > 1)
+{
+    var routeValues = new RouteValueDictionary(ViewContext.RouteData.Values);
+    foreach (var kv in Context.Request.Query)
+    {
+        if (!string.Equals(kv.Key, "page", StringComparison.OrdinalIgnoreCase))
+        {
+            routeValues[kv.Key] = kv.Value.ToString();
+        }
+    }
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm">
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                var pageRoute = new RouteValueDictionary(routeValues) { ["page"] = i };
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" asp-all-route-data="@ToStringDictionary(pageRoute)">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+@functions {
+    private static Dictionary<string, string> ToStringDictionary(RouteValueDictionary values)
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var kv in values)
+        {
+            if (kv.Value is not null)
+            {
+                result[kv.Key] = kv.Value.ToString()!;
+            }
+        }
+        return result;
+    }
+}

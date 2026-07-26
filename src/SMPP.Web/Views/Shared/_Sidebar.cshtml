@@ -1,0 +1,31 @@
+@{
+    string current = (string?)ViewContext.RouteData.Values["controller"] ?? string.Empty;
+
+    bool IsActive(string controllerName) =>
+        string.Equals(current, controllerName, StringComparison.OrdinalIgnoreCase);
+}
+
+<nav class="app-sidebar" id="appSidebar">
+    <a class="brand" href="/">
+        <span>SMPP</span>
+    </a>
+
+    <div class="nav flex-column">
+        <div class="nav-section-title">Overview</div>
+        <a class="nav-link @(IsActive("Dashboard") ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+            Dashboard
+        </a>
+
+        <div class="nav-section-title">Messaging</div>
+        <a class="nav-link @(IsActive("Campaigns") ? "active" : "")" asp-controller="Campaigns" asp-action="Index">
+            Campaigns
+        </a>
+        <a class="nav-link @(IsActive("Templates") ? "active" : "")" asp-controller="Templates" asp-action="Index">
+            Templates
+        </a>
+
+        @* Additional nav sections (Quick Send, Bulk Send, History, Payments, Users, Admins,
+           etc.) are added here as each phase's controllers land - legacy's sidebar pointed at
+           ~80% dead routes; this one only ever lists real pages. *@
+    </div>
+</nav>
