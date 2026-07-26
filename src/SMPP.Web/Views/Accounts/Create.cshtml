@@ -1,0 +1,60 @@
+@model SMPP.Web.ViewModels.Accounts.CreateAccountViewModel
+@{
+    ViewData["Title"] = "New account";
+}
+
+<h1 class="h4 mb-4">New account</h1>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autofocus />
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MobileNo" class="form-label"></label>
+                <input asp-for="MobileNo" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="InitialBalance" class="form-label"></label>
+                    <input asp-for="InitialBalance" class="form-control" />
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="RatePerMessage" class="form-label"></label>
+                    <input asp-for="RatePerMessage" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SenderId" class="form-label"></label>
+                <input asp-for="SenderId" class="form-control" maxlength="20" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

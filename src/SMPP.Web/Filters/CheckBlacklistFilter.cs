@@ -6,10 +6,9 @@ using SMPP.Infrastructure.Identity;
 namespace SMPP.Web.Filters;
 
 /// <summary>
-/// Replaces legacy's CheckBlacklist middleware. Blocks access for EndUser accounts that are
-/// inactive or whose package validity window (DateFrom/DateTo) has elapsed. Superadmin and
-/// WhiteLabelAdmin accounts are never blocked here (mirrors legacy's role-2-only scoping).
-/// No OTP step - that legacy gate was non-functional and has been dropped entirely.
+/// Replaces legacy's CheckBlacklist middleware. Blocks access for Account users that are
+/// inactive or whose validity window (DateFrom/DateTo) has elapsed. Superadmin is never
+/// blocked here. No OTP step - that legacy gate was non-functional and has been dropped.
 /// </summary>
 public class CheckBlacklistFilter : IAsyncActionFilter
 {
@@ -27,7 +26,7 @@ public class CheckBlacklistFilter : IAsyncActionFilter
         if (context.HttpContext.User.Identity?.IsAuthenticated == true)
         {
             var user = await _userManager.GetUserAsync(context.HttpContext.User);
-            if (user is not null && user.Role == Domain.Enums.UserRole.EndUser)
+            if (user is not null && user.Role == Domain.Enums.UserRole.Account)
             {
                 var today = DateOnly.FromDateTime(DateTime.UtcNow);
                 var expired = user.DateTo.HasValue && user.DateTo.Value < today;

@@ -1,0 +1,64 @@
+@using SMPP.Application.Accounts
+@using SMPP.Application.Common
+@using SMPP.Web.ViewModels.Shared
+@model PagedResult<AccountListItemDto>
+@{
+    ViewData["Title"] = "Accounts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Accounts</h1>
+    <a class="btn btn-primary btn-sm" asp-action="Create">+ New account</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Full name</th>
+                    <th>Status</th>
+                    <th>Credits</th>
+                    <th>Rate/msg</th>
+                    <th>Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">No accounts yet.</td></tr>
+                }
+                @foreach (var a in Model.Items)
+                {
+                    <tr>
+                        <td>@a.Username</td>
+                        <td>@a.Email</td>
+                        <td>@a.FullName</td>
+                        <td>
+                            @if (a.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td>@a.Balance.ToString("N2")</td>
+                        <td>@a.RatePerMessage.ToString("N4")</td>
+                        <td>@a.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@a.Id">Manage</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white">
+        <partial name="_Pagination" model="@(new PaginationInfo(Model.PageNumber, Model.TotalPages))" />
+    </div>
+</div>

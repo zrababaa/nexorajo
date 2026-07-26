@@ -263,49 +263,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.ToTable("Histories");
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.Instance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CallbackUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExternalInstanceId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("WhatsAppNumber")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.ToTable("Instances");
-                });
-
             modelBuilder.Entity("SMPP.Domain.Entities.OutboundMessage", b =>
                 {
                     b.Property<int>("Id")
@@ -423,48 +380,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.Proxy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("Port")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.ToTable("Proxies");
-                });
-
             modelBuilder.Entity("SMPP.Domain.Entities.SpamKeyword", b =>
                 {
                     b.Property<int>("Id")
@@ -495,54 +410,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.ToTable("SpamKeywords");
-                });
-
-            modelBuilder.Entity("SMPP.Domain.Entities.Template", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CsvFilePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("MessageBody")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MessageSegmentCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<string>("TemplateCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("TemplateCode")
-                        .IsUnique();
-
-                    b.ToTable("Templates");
                 });
 
             modelBuilder.Entity("SMPP.Domain.Entities.Transaction", b =>
@@ -588,42 +455,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.UserPackage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<decimal>("RateEachMessage")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("UserPackages");
-                });
-
             modelBuilder.Entity("SMPP.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
@@ -634,9 +465,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("ApiIpAllowlist")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("ApiSecret")
                         .HasMaxLength(128)
@@ -673,9 +501,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("FreeSenderNumber")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -701,9 +526,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.Property<int?>("PackageId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
 
@@ -713,14 +535,19 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<decimal>("RatePerMessage")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("SmsSenderId")
-                        .HasColumnType("longtext");
+                    b.Property<string>("SenderId")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
@@ -728,13 +555,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
-
-                    b.Property<string>("WhiteLabelDomain")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("WhiteLabelLogoPath")
-                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -749,8 +569,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("PackageId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -824,15 +642,6 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.Instance", b =>
-                {
-                    b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SMPP.Domain.Entities.OutboundMessage", b =>
                 {
                     b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
@@ -856,25 +665,7 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.Proxy", b =>
-                {
-                    b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SMPP.Domain.Entities.SpamKeyword", b =>
-                {
-                    b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SMPP.Domain.Entities.Template", b =>
                 {
                     b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
@@ -898,26 +689,12 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SMPP.Domain.Entities.UserPackage", b =>
-                {
-                    b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SMPP.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.HasOne("SMPP.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SMPP.Domain.Entities.UserPackage", null)
-                        .WithMany()
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618
         }

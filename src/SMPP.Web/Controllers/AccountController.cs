@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using SMPP.Domain.Enums;
 using SMPP.Infrastructure.Identity;
 using SMPP.Web.ViewModels.Account;
 
 namespace SMPP.Web.Controllers;
 
+/// <summary>
+/// Accounts are provisioned by a Superadmin (see AccountsController), not self-registered -
+/// this controller only handles sign-in/out and password recovery for existing accounts.
+/// </summary>
 [AllowAnonymous]
 public class AccountController : Controller
 {
@@ -31,7 +34,7 @@ public class AccountController : Controller
     {
         if (blocked)
         {
-            ModelState.AddModelError(string.Empty, "Your account is inactive or your package has expired. Contact your administrator.");
+            ModelState.AddModelError(string.Empty, "Your account is inactive or has expired. Contact your administrator.");
         }
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
@@ -45,23 +48,29 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
-        if (result.Succeeded)
+        var user = await ResolveUserAsync(model.Identifier);
+        if (user is not null)
         {
-            return LocalRedirectOrDashboard(model.ReturnUrl);
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
+            if (result.Succeeded)
+            {
+                return LocalRedirectOrDashboard(model.ReturnUrl);
+            }
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "This account is temporarily locked out due to repeated failed attempts.");
+                return View(model);
+            }
         }
 
-        if (result.IsLockedOut)
-        {
-            ModelState.AddModelError(string.Empty, "This account is temporarily locked out due to repeated failed attempts.");
-        }
-        else
-        {
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
-        }
-
+        ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
         return View(model);
     }
+
+    /// <summary>Accepts either a username or an email address as the sign-in identifier.</summary>
+    private async Task<ApplicationUser?> ResolveUserAsync(string identifier) =>
+        await _userManager.FindByNameAsync(identifier) ?? await _userManager.FindByEmailAsync(identifier);
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -69,43 +78,6 @@ public class AccountController : Controller
     {
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(Login));
-    }
-
-    [HttpGet]
-    public IActionResult Register() => View(new RegisterViewModel());
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
-        var user = new ApplicationUser
-        {
-            UserName = model.Email,
-            Email = model.Email,
-            FullName = model.FullName,
-            MobileNo = model.MobileNo,
-            Role = UserRole.EndUser,
-            IsActive = true,
-        };
-
-        var result = await _userManager.CreateAsync(user, model.Password);
-        if (result.Succeeded)
-        {
-            await _userManager.AddToRoleAsync(user, RoleNames.EndUser);
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError(string.Empty, error.Description);
-        }
-        return View(model);
     }
 
     [HttpGet]
@@ -121,7 +93,7 @@ public class AccountController : Controller
         }
 
         var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user is null || !await _userManager.IsEmailConfirmedAsync(user))
+        if (user is null)
         {
             // Don't reveal whether the account exists.
             return RedirectToAction(nameof(ForgotPasswordConfirmation));

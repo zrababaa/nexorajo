@@ -35,11 +35,7 @@ public class CurrentUserService : ICurrentUserService
             {
                 return UserRole.Superadmin;
             }
-            if (User?.IsInRole(Infrastructure.Identity.RoleNames.WhiteLabelAdmin) == true)
-            {
-                return UserRole.WhiteLabelAdmin;
-            }
-            return UserRole.EndUser;
+            return UserRole.Account;
         }
     }
 }

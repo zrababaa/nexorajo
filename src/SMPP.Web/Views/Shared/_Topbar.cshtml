@@ -1,8 +1,6 @@
 @{
     var displayName = User.Identity?.Name ?? "Account";
-    var role = User.IsInRole(RoleNames.Superadmin) ? "Superadmin"
-        : User.IsInRole(RoleNames.WhiteLabelAdmin) ? "White-label Admin"
-        : "User";
+    var role = User.IsInRole(RoleNames.Superadmin) ? "Superadmin" : "Account";
 }
 
 <header class="app-topbar">

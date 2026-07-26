@@ -1,0 +1,75 @@
+@using SMPP.Application.Common
+@using SMPP.Application.History
+@using SMPP.Web.ViewModels.Shared
+@model SMPP.Web.ViewModels.Sending.QuickSendViewModel
+@{
+    ViewData["Title"] = "Quick Send";
+    var history = (PagedResult<HistoryListItemDto>)ViewBag.History;
+}
+
+<h1 class="h4 mb-4">Quick Send</h1>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Submit" method="post">
+                    <div class="mb-3">
+                        <label asp-for="RawNumbers" class="form-label"></label>
+                        <textarea asp-for="RawNumbers" class="form-control" rows="5" placeholder="9715xxxxxxxx, 9715xxxxxxxx, ..."></textarea>
+                        <span asp-validation-for="RawNumbers" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Message" class="form-label"></label>
+                        <textarea asp-for="Message" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Message" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="SenderId" class="form-label"></label>
+                        <input asp-for="SenderId" class="form-control" />
+                        <span asp-validation-for="SenderId" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white">Recent Quick Send history</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Batch</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Status</th>
+                            <th>Sent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!history.Items.Any())
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4">No sends yet.</td></tr>
+                        }
+                        @foreach (var h in history.Items)
+                        {
+                            <tr>
+                                <td><code>@h.CampaignBatchId[..8]</code></td>
+                                <td>@h.SenderNumber</td>
+                                <td>@h.ReceiverNumber</td>
+                                <td>@h.Status</td>
+                                <td>@h.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <partial name="_Pagination" model="@(new PaginationInfo(history.PageNumber, history.TotalPages))" />
+            </div>
+        </div>
+    </div>
+</div>

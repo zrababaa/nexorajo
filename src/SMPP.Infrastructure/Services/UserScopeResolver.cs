@@ -16,22 +16,11 @@ public class UserScopeResolver : IUserScopeResolver
 
     public async Task<IReadOnlyCollection<int>> GetVisibleUserIdsAsync(int currentUserId, UserRole role, CancellationToken ct = default)
     {
-        switch (role)
+        if (role == UserRole.Superadmin)
         {
-            case UserRole.Superadmin:
-                return await _db.Users.Select(u => u.Id).ToListAsync(ct);
-
-            case UserRole.WhiteLabelAdmin:
-                var ownedIds = await _db.Users
-                    .Where(u => u.CreatedByUserId == currentUserId)
-                    .Select(u => u.Id)
-                    .ToListAsync(ct);
-                ownedIds.Add(currentUserId);
-                return ownedIds;
-
-            case UserRole.EndUser:
-            default:
-                return new[] { currentUserId };
+            return await _db.Users.Select(u => u.Id).ToListAsync(ct);
         }
+
+        return new[] { currentUserId };
     }
 }

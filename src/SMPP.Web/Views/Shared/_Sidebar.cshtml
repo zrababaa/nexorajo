@@ -1,5 +1,6 @@
 @{
     string current = (string?)ViewContext.RouteData.Values["controller"] ?? string.Empty;
+    bool isSuperadmin = User.IsInRole(RoleNames.Superadmin);
 
     bool IsActive(string controllerName) =>
         string.Equals(current, controllerName, StringComparison.OrdinalIgnoreCase);
@@ -7,7 +8,7 @@
 
 <nav class="app-sidebar" id="appSidebar">
     <a class="brand" href="/">
-        <span>SMPP</span>
+        <span>Nexora</span>
     </a>
 
     <div class="nav flex-column">
@@ -17,15 +18,25 @@
         </a>
 
         <div class="nav-section-title">Messaging</div>
+        <a class="nav-link @(IsActive("QuickSend") ? "active" : "")" asp-controller="QuickSend" asp-action="Index">
+            Quick Send
+        </a>
+        <a class="nav-link @(IsActive("BulkSend") ? "active" : "")" asp-controller="BulkSend" asp-action="Index">
+            Bulk Send
+        </a>
         <a class="nav-link @(IsActive("Campaigns") ? "active" : "")" asp-controller="Campaigns" asp-action="Index">
             Campaigns
         </a>
-        <a class="nav-link @(IsActive("Templates") ? "active" : "")" asp-controller="Templates" asp-action="Index">
-            Templates
-        </a>
 
-        @* Additional nav sections (Quick Send, Bulk Send, History, Payments, Users, Admins,
-           etc.) are added here as each phase's controllers land - legacy's sidebar pointed at
-           ~80% dead routes; this one only ever lists real pages. *@
+        @if (isSuperadmin)
+        {
+            <div class="nav-section-title">Administration</div>
+            <a class="nav-link @(IsActive("Accounts") ? "active" : "")" asp-controller="Accounts" asp-action="Index">
+                Accounts
+            </a>
+            <a class="nav-link @(IsActive("SpamKeywords") ? "active" : "")" asp-controller="SpamKeywords" asp-action="Index">
+                Content Filter
+            </a>
+        }
     </div>
 </nav>

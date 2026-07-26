@@ -1,0 +1,51 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SMPP.Application.Abstractions;
+using SMPP.Application.SpamKeywords;
+using SMPP.Web.ViewModels.SpamKeywords;
+
+namespace SMPP.Web.Controllers;
+
+[Authorize(Roles = "Superadmin")]
+public class SpamKeywordsController : Controller
+{
+    private readonly ISpamKeywordService _spamKeywordService;
+    private readonly ICurrentUserService _currentUser;
+
+    public SpamKeywordsController(ISpamKeywordService spamKeywordService, ICurrentUserService currentUser)
+    {
+        _spamKeywordService = spamKeywordService;
+        _currentUser = currentUser;
+    }
+
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        var keywords = await _spamKeywordService.GetAllAsync(ct);
+        return View(keywords);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateSpamKeywordViewModel model, CancellationToken ct)
+    {
+        if (ModelState.IsValid)
+        {
+            await _spamKeywordService.CreateAsync(_currentUser.UserId, new CreateSpamKeywordRequest(model.Keyword, model.KeywordType), ct);
+            TempData["Success"] = "Keyword added.";
+        }
+        else
+        {
+            TempData["Error"] = "Please provide a valid keyword.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        await _spamKeywordService.DeleteAsync(id, ct);
+        TempData["Success"] = "Keyword deleted.";
+        return RedirectToAction(nameof(Index));
+    }
+}

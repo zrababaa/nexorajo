@@ -9,7 +9,7 @@
 <div class="row g-3">
     <div class="col-sm-6 col-lg-3">
         <div class="kpi-card">
-            <div class="kpi-label">Balance</div>
+            <div class="kpi-label">Credits</div>
             <div class="kpi-value">@Model.Balance.ToString("N2")</div>
         </div>
     </div>
@@ -35,9 +35,12 @@
 
 <div class="row g-3 mt-1">
     <div class="col-sm-6 col-lg-4">
-        <a class="btn btn-outline-primary w-100" asp-controller="Campaigns" asp-action="Index">Manage campaigns</a>
+        <a class="btn btn-outline-primary w-100" asp-controller="QuickSend" asp-action="Index">Quick Send</a>
     </div>
     <div class="col-sm-6 col-lg-4">
-        <a class="btn btn-outline-primary w-100" asp-controller="Templates" asp-action="Index">Manage templates</a>
+        <a class="btn btn-outline-primary w-100" asp-controller="BulkSend" asp-action="Index">Bulk Send</a>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <a class="btn btn-outline-primary w-100" asp-controller="Campaigns" asp-action="Index">Manage campaigns</a>
     </div>
 </div>

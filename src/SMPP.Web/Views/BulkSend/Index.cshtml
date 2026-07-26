@@ -1,0 +1,87 @@
+@using SMPP.Application.Campaigns
+@using SMPP.Application.Common
+@using SMPP.Application.History
+@using SMPP.Web.ViewModels.Shared
+@model SMPP.Web.ViewModels.Sending.BulkSendViewModel
+@{
+    ViewData["Title"] = "Bulk Send";
+    var history = (PagedResult<HistoryListItemDto>)ViewBag.History;
+    var campaigns = (IEnumerable<CampaignListItemDto>)ViewBag.Campaigns;
+}
+
+<h1 class="h4 mb-4">Bulk Send</h1>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                @if (!campaigns.Any())
+                {
+                    <p class="text-muted small">You have no campaigns yet. <a asp-controller="Campaigns" asp-action="Create">Create one</a> first.</p>
+                }
+                <form asp-action="Submit" method="post">
+                    <div class="mb-3">
+                        <label asp-for="CampaignId" class="form-label"></label>
+                        <select asp-for="CampaignId" class="form-select">
+                            <option value="">Select a campaign...</option>
+                            @foreach (var c in campaigns)
+                            {
+                                <option value="@c.Id">@c.Name (@c.RecipientCount recipients)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CampaignId" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Message" class="form-label"></label>
+                        <textarea asp-for="Message" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Message" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="SenderId" class="form-label"></label>
+                        <input asp-for="SenderId" class="form-control" />
+                        <span asp-validation-for="SenderId" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white">Recent Bulk Send history</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Batch</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Status</th>
+                            <th>Sent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!history.Items.Any())
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4">No sends yet.</td></tr>
+                        }
+                        @foreach (var h in history.Items)
+                        {
+                            <tr>
+                                <td><code>@h.CampaignBatchId[..8]</code></td>
+                                <td>@h.SenderNumber</td>
+                                <td>@h.ReceiverNumber</td>
+                                <td>@h.Status</td>
+                                <td>@h.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <partial name="_Pagination" model="@(new PaginationInfo(history.PageNumber, history.TotalPages))" />
+            </div>
+        </div>
+    </div>
+</div>

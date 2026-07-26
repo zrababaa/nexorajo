@@ -12,11 +12,7 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     {
     }
 
-    public DbSet<UserPackage> UserPackages => Set<UserPackage>();
     public DbSet<Campaign> Campaigns => Set<Campaign>();
-    public DbSet<Template> Templates => Set<Template>();
-    public DbSet<Instance> Instances => Set<Instance>();
-    public DbSet<Proxy> Proxies => Set<Proxy>();
     public DbSet<SpamKeyword> SpamKeywords => Set<SpamKeyword>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<History> Histories => Set<History>();

@@ -15,7 +15,7 @@ namespace SMPP.Infrastructure.Outbound;
 /// mostly-dead mechanisms (an under_process table nobody read, synchronous curl-with-sleep()
 /// in the request thread, a never-dispatched queued job, and a scheduled closure/Artisan
 /// command pair reading a table nothing ever inserted into). Polls OutboundMessage for Pending
-/// rows, claims a batch, sends each through IWhatsAppGatewayClient, and writes one History row
+/// rows, claims a batch, sends each through ISmsGatewayClient, and writes one History row
 /// per attempt.
 /// </summary>
 public class OutboundMessageWorker : BackgroundService
@@ -55,7 +55,7 @@ public class OutboundMessageWorker : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SmppDbContext>();
-        var gateway = scope.ServiceProvider.GetRequiredService<IWhatsAppGatewayClient>();
+        var gateway = scope.ServiceProvider.GetRequiredService<ISmsGatewayClient>();
 
         var batch = await db.OutboundMessages
             .Where(m => m.Status == OutboundMessageStatus.Pending)
@@ -86,14 +86,40 @@ public class OutboundMessageWorker : BackgroundService
         }
     }
 
-    private async Task SendOneAsync(SmppDbContext db, IWhatsAppGatewayClient gateway, OutboundMessage message, CancellationToken ct)
+    /// <summary>
+    /// Writes exactly one History row per OutboundMessage, only once a terminal outcome is
+    /// reached (sent, or failed after exhausting retries) - an earlier version wrote a History
+    /// row on every attempt, which recorded a spurious "Failed" row for every retry that later
+    /// succeeded.
+    /// </summary>
+    private async Task SendOneAsync(SmppDbContext db, ISmsGatewayClient gateway, OutboundMessage message, CancellationToken ct)
     {
         message.Attempts++;
+        string? externalMessageId = null;
+        string? gatewayResponse = null;
+        bool succeeded;
 
         try
         {
             var result = await gateway.SendAsync(message.MessageText, message.ReceiverNumber, message.SenderNumber, ct);
+            succeeded = result.Success;
+            externalMessageId = result.ExternalMessageId;
+            gatewayResponse = result.RawResponse;
+            if (!succeeded)
+            {
+                message.LastError = "Gateway reported failure.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Send failed for OutboundMessage {Id} (attempt {Attempt})", message.Id, message.Attempts);
+            succeeded = false;
+            message.LastError = ex.Message;
+        }
 
+        var exhausted = message.Attempts >= _options.MaxAttempts;
+        if (succeeded || exhausted)
+        {
             var history = new History
             {
                 CampaignBatchId = message.CampaignBatchId,
@@ -101,35 +127,20 @@ public class OutboundMessageWorker : BackgroundService
                 SenderNumber = message.SenderNumber,
                 ReceiverNumber = message.ReceiverNumber,
                 MessageText = message.MessageText,
-                Status = result.Success ? MessageStatus.Sent : MessageStatus.Failed,
-                ExternalMessageId = result.ExternalMessageId,
-                GatewayResponse = result.RawResponse,
+                Status = succeeded ? MessageStatus.Sent : MessageStatus.Failed,
+                ExternalMessageId = externalMessageId,
+                GatewayResponse = gatewayResponse,
                 CreatedByUserId = message.CreatedByUserId,
             };
             db.Histories.Add(history);
             await db.SaveChangesAsync(ct);
 
             message.HistoryId = history.Id;
-
-            if (result.Success)
-            {
-                message.Status = OutboundMessageStatus.Sent;
-            }
-            else
-            {
-                message.LastError = "Gateway reported failure.";
-                message.Status = message.Attempts >= _options.MaxAttempts
-                    ? OutboundMessageStatus.Failed
-                    : OutboundMessageStatus.Pending;
-            }
+            message.Status = succeeded ? OutboundMessageStatus.Sent : OutboundMessageStatus.Failed;
         }
-        catch (Exception ex)
+        else
         {
-            _logger.LogWarning(ex, "Send failed for OutboundMessage {Id} (attempt {Attempt})", message.Id, message.Attempts);
-            message.LastError = ex.Message;
-            message.Status = message.Attempts >= _options.MaxAttempts
-                ? OutboundMessageStatus.Failed
-                : OutboundMessageStatus.Pending;
+            message.Status = OutboundMessageStatus.Pending;
         }
 
         await db.SaveChangesAsync(ct);
