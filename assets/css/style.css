@@ -199,7 +199,7 @@ section { padding: 100px 0; position: relative; }
 }
 
 .nav-logo img {
-  height: 52px;
+  height: 64px;
   width: auto;
   display: block;
 }
@@ -1324,7 +1324,7 @@ footer {
   margin-bottom: 2px;
 }
 
-.footer-logo img { height: 60px; width: auto; }
+.footer-logo img { height: 74px; width: auto; }
 
 .footer-brand p {
   font-size: 13px;
