@@ -13,6 +13,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.TransactionRef).HasMaxLength(150);
         builder.Property(p => p.ProofFilePath).HasMaxLength(500);
         builder.Property(p => p.Note).HasColumnType("text");
+        builder.Property(p => p.ReviewNote).HasColumnType("text");
 
         builder.HasIndex(p => p.SubmittedByUserId);
         builder.HasIndex(p => p.Status);

@@ -1,6 +1,6 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Sign in";
+    ViewData["Title"] = L["Sign in"];
 }
 
 <form asp-controller="Account" asp-action="Login" method="post">
@@ -23,9 +23,9 @@
         <label asp-for="RememberMe" class="form-check-label"></label>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+    <button type="submit" class="btn btn-primary w-100">@L["Sign in"]</button>
 
     <div class="text-center mt-3 small">
-        <a asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
+        <a asp-controller="Account" asp-action="ForgotPassword">@L["Forgot password?"]</a>
     </div>
 </form>

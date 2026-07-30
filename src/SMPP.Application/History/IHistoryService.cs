@@ -12,5 +12,14 @@ public interface IHistoryService
     Task<PagedResult<HistoryListItemDto>> GetPagedAsync(
         int currentUserId, UserRole role, MessageSource? source, string? campaignBatchId, int page, int pageSize, CancellationToken ct = default);
 
-    Task<HistorySummaryDto> GetSummaryAsync(int currentUserId, UserRole role, string campaignBatchId, CancellationToken ct = default);
+    /// <summary>Full-filter version backing the dedicated History tab.</summary>
+    Task<PagedResult<HistoryListItemDto>> GetPagedAsync(
+        int currentUserId, UserRole role, HistoryFilterDto filter, int page, int pageSize, CancellationToken ct = default);
+
+    Task<HistorySummaryDto> GetSummaryAsync(
+        int currentUserId, UserRole role, HistoryFilterDto filter, CancellationToken ct = default);
+
+    /// <summary>Unbounded (capped) row set for CSV/Excel export, honoring the same filters as the list view.</summary>
+    Task<IReadOnlyList<HistoryExportRowDto>> GetForExportAsync(
+        int currentUserId, UserRole role, HistoryFilterDto filter, CancellationToken ct = default);
 }

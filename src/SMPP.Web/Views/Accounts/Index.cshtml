@@ -3,12 +3,12 @@
 @using SMPP.Web.ViewModels.Shared
 @model PagedResult<AccountListItemDto>
 @{
-    ViewData["Title"] = "Accounts";
+    ViewData["Title"] = L["Accounts"];
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Accounts</h1>
-    <a class="btn btn-primary btn-sm" asp-action="Create">+ New account</a>
+    <h1 class="h4 mb-0">@L["Accounts"]</h1>
+    <a class="btn btn-primary btn-sm" asp-action="Create">+ @L["New account"]</a>
 </div>
 
 <div class="card">
@@ -16,20 +16,20 @@
         <table class="table table-hover mb-0 align-middle">
             <thead>
                 <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Full name</th>
-                    <th>Status</th>
-                    <th>Credits</th>
-                    <th>Rate/msg</th>
-                    <th>Created</th>
-                    <th class="text-end">Actions</th>
+                    <th>@L["Username"]</th>
+                    <th>@L["Email"]</th>
+                    <th>@L["Full name"]</th>
+                    <th>@L["Status"]</th>
+                    <th>@L["Credits"]</th>
+                    <th>@L["Rate/msg"]</th>
+                    <th>@L["Created"]</th>
+                    <th class="text-end">@L["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.Items.Any())
                 {
-                    <tr><td colspan="8" class="text-center text-muted py-4">No accounts yet.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-4">@L["No accounts yet."]</td></tr>
                 }
                 @foreach (var a in Model.Items)
                 {
@@ -40,18 +40,18 @@
                         <td>
                             @if (a.IsActive)
                             {
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-success">@L["Active"]</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Inactive</span>
+                                <span class="badge bg-secondary">@L["Inactive"]</span>
                             }
                         </td>
                         <td>@a.Balance.ToString("N2")</td>
                         <td>@a.RatePerMessage.ToString("N4")</td>
                         <td>@a.CreatedAt.ToString("yyyy-MM-dd")</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@a.Id">Manage</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@a.Id">@L["Manage"]</a>
                         </td>
                     </tr>
                 }

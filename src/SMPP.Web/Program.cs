@@ -1,8 +1,12 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using SMPP.Application.Abstractions;
 using SMPP.Infrastructure;
 using SMPP.Infrastructure.Files;
+using SMPP.Web;
 using SMPP.Web.Filters;
 using SMPP.Web.Seed;
 using SMPP.Web.Services;
@@ -16,6 +20,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<CheckBlacklistFilter>();
 
+builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
+
 builder.Services.AddControllersWithViews(options =>
 {
     // Every page requires authentication by default; Account actions opt out with [AllowAnonymous].
@@ -23,7 +29,23 @@ builder.Services.AddControllersWithViews(options =>
         .RequireAuthenticatedUser()
         .Build()));
     options.Filters.AddService<CheckBlacklistFilter>();
-});
+})
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization(o =>
+        o.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)));
+
+var supportedUICultures = new[] { new CultureInfo("en"), new CultureInfo("ar") };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en"),
+    SupportedCultures = new[] { new CultureInfo("en") },
+    SupportedUICultures = supportedUICultures,
+};
+localizationOptions.RequestCultureProviders = new IRequestCultureProvider[]
+{
+    new CookieRequestCultureProvider(),
+    new AcceptLanguageHeaderRequestCultureProvider(),
+};
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -40,6 +62,11 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -48,6 +75,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
 

@@ -1,25 +1,26 @@
 @using SMPP.Web.ViewModels.Accounts
 @model EditAccountViewModel
 @{
-    ViewData["Title"] = "Manage account";
+    ViewData["Title"] = L["Manage account"];
+    var confirmRegenerate = L["Regenerating will invalidate the current credentials. Continue?"].Value;
 }
 
-<h1 class="h4 mb-4">Manage account: @Model.Username</h1>
+<h1 class="h4 mb-4">@L["Manage account:"] @Model.Username</h1>
 
 <div class="row g-3">
     <div class="col-lg-7">
         <div class="card">
             <div class="card-body">
-                <h2 class="h6">Account details</h2>
+                <h2 class="h6">@L["Account details"]</h2>
                 <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
                     <input type="hidden" asp-for="Id" />
 
                     <div class="mb-3">
-                        <label class="form-label">Username</label>
+                        <label class="form-label">@L["Username"]</label>
                         <input class="form-control" value="@Model.Username" readonly />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
+                        <label class="form-label">@L["Email"]</label>
                         <input class="form-control" value="@Model.Email" readonly />
                     </div>
 
@@ -61,8 +62,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">@L["Back"]</a>
                 </form>
             </div>
         </div>
@@ -71,42 +72,42 @@
     <div class="col-lg-5">
         <div class="card mb-3">
             <div class="card-body">
-                <h2 class="h6">Credits</h2>
+                <h2 class="h6">@L["Credits"]</h2>
                 <div class="kpi-card mb-3">
-                    <div class="kpi-label">Current credits</div>
+                    <div class="kpi-label">@L["Current credits"]</div>
                     <div class="kpi-value">@Model.Balance.ToString("N2")</div>
                 </div>
 
                 <form asp-action="Credit" method="post" class="d-flex gap-2 mb-2">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="AccountId" value="@Model.Id" />
-                    <input type="number" step="0.01" name="Amount" class="form-control" placeholder="Amount" required />
-                    <button type="submit" class="btn btn-success">Credit</button>
+                    <input type="number" step="0.01" name="Amount" class="form-control" placeholder="@L["Amount"]" required />
+                    <button type="submit" class="btn btn-success">@L["Credit"]</button>
                 </form>
                 <form asp-action="Debit" method="post" class="d-flex gap-2">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="AccountId" value="@Model.Id" />
-                    <input type="number" step="0.01" name="Amount" class="form-control" placeholder="Amount" required />
-                    <button type="submit" class="btn btn-outline-danger">Debit</button>
+                    <input type="number" step="0.01" name="Amount" class="form-control" placeholder="@L["Amount"]" required />
+                    <button type="submit" class="btn btn-outline-danger">@L["Debit"]</button>
                 </form>
             </div>
         </div>
 
         <div class="card">
             <div class="card-body">
-                <h2 class="h6">API credentials</h2>
+                <h2 class="h6">@L["API credentials"]</h2>
                 @if (!string.IsNullOrEmpty(Model.ApiToken))
                 {
-                    <p class="small mb-1"><strong>Token:</strong> <code>@Model.ApiToken</code></p>
-                    <p class="small mb-3"><strong>Secret:</strong> <code>@Model.ApiSecret</code></p>
+                    <p class="small mb-1"><strong>@L["Token:"]</strong> <code>@Model.ApiToken</code></p>
+                    <p class="small mb-3"><strong>@L["Secret:"]</strong> <code>@Model.ApiSecret</code></p>
                 }
                 else
                 {
-                    <p class="small text-muted mb-3">No API credentials generated yet.</p>
+                    <p class="small text-muted mb-3">@L["No API credentials generated yet."]</p>
                 }
-                <form asp-action="RegenerateApiCredentials" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Regenerating will invalidate the current credentials. Continue?');">
+                <form asp-action="RegenerateApiCredentials" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('@confirmRegenerate');">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Regenerate credentials</button>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">@L["Regenerate credentials"]</button>
                 </form>
             </div>
         </div>

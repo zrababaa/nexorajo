@@ -1,6 +1,8 @@
 @{
-    var displayName = User.Identity?.Name ?? "Account";
-    var role = User.IsInRole(RoleNames.Superadmin) ? "Superadmin" : "Account";
+    var displayName = User.Identity?.Name ?? L["Account"];
+    var role = User.IsInRole(RoleNames.Superadmin) ? L["Superadmin"] : L["Account"];
+    bool isRtl = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
+    string returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <header class="app-topbar">
@@ -9,10 +11,15 @@
     </button>
 
     <div class="ms-auto d-flex align-items-center gap-3">
-        <span class="text-muted small">@displayName <span class="badge bg-light text-dark border">@role</span></span>
+        <div class="d-flex small lang-switch">
+            <a class="@(!isRtl ? "fw-bold text-body" : "text-muted")" asp-controller="Language" asp-action="SetLanguage" asp-route-culture="en" asp-route-returnUrl="@returnUrl">EN</a>
+            <span class="mx-1 text-muted">|</span>
+            <a class="@(isRtl ? "fw-bold text-body" : "text-muted")" asp-controller="Language" asp-action="SetLanguage" asp-route-culture="ar" asp-route-returnUrl="@returnUrl">AR</a>
+        </div>
+        <span class="text-muted small"><span class="d-none d-sm-inline">@displayName</span> <span class="badge bg-light text-dark border">@role</span></span>
         <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-sm btn-outline-secondary">Sign out</button>
+            <button type="submit" class="btn btn-sm btn-outline-secondary">@L["Sign out"]</button>
         </form>
     </div>
 </header>

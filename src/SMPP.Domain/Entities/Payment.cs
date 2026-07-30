@@ -19,4 +19,5 @@ public class Payment : AuditableEntity
     public int SubmittedByUserId { get; set; }
     public int? ReviewedByUserId { get; set; }
     public DateTime? ReviewedAt { get; set; }
+    public string? ReviewNote { get; set; }
 }

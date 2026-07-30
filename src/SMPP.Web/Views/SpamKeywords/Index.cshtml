@@ -1,30 +1,34 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
 @using SMPP.Application.SpamKeywords
+@using SMPP.Domain.Enums
 @using SMPP.Web.ViewModels.SpamKeywords
 @model IReadOnlyList<SpamKeywordListItemDto>
 @{
-    ViewData["Title"] = "Spam Keywords";
+    ViewData["Title"] = L["Spam Keywords"];
+    var confirmDelete = L["Delete this keyword?"].Value;
+    var keywordTypes = new SelectList(Enum.GetValues<SpamKeywordType>().Select(v => new SelectListItem(L[v.ToString()].Value, v.ToString())), "Value", "Text");
 }
 
-<h1 class="h4 mb-4">Content Filter Keywords</h1>
+<h1 class="h4 mb-4">@L["Content Filter Keywords"]</h1>
 
 <div class="row g-3">
     <div class="col-lg-4">
         <div class="card">
             <div class="card-body">
-                <h2 class="h6">Add keyword</h2>
+                <h2 class="h6">@L["Add keyword"]</h2>
                 <form asp-action="Create" method="post">
                     @{
                         var newModel = new CreateSpamKeywordViewModel();
                     }
                     <div class="mb-3">
-                        <label class="form-label">Keyword</label>
+                        <label class="form-label">@L["Keyword"]</label>
                         <input name="Keyword" class="form-control" required />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Type</label>
-                        <select name="KeywordType" class="form-select" asp-items="Html.GetEnumSelectList<SMPP.Domain.Enums.SpamKeywordType>()"></select>
+                        <label class="form-label">@L["Type"]</label>
+                        <select name="KeywordType" class="form-select" asp-items="keywordTypes"></select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="submit" class="btn btn-primary">@L["Add"]</button>
                 </form>
             </div>
         </div>
@@ -35,27 +39,27 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th>Keyword</th>
-                            <th>Type</th>
-                            <th>Added</th>
-                            <th class="text-end">Actions</th>
+                            <th>@L["Keyword"]</th>
+                            <th>@L["Type"]</th>
+                            <th>@L["Added"]</th>
+                            <th class="text-end">@L["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
-                            <tr><td colspan="4" class="text-center text-muted py-4">No keywords configured.</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted py-4">@L["No keywords configured."]</td></tr>
                         }
                         @foreach (var k in Model)
                         {
                             <tr>
                                 <td>@k.Keyword</td>
-                                <td>@k.KeywordType</td>
+                                <td>@L[k.KeywordType.ToString()]</td>
                                 <td>@k.CreatedAt.ToString("yyyy-MM-dd")</td>
                                 <td class="text-end">
-                                    <form asp-action="Delete" asp-route-id="@k.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this keyword?');">
+                                    <form asp-action="Delete" asp-route-id="@k.Id" method="post" class="d-inline" onsubmit="return confirm('@confirmDelete');">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
                                     </form>
                                 </td>
                             </tr>

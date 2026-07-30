@@ -67,6 +67,16 @@ a {
   text-decoration: none;
 }
 
+.app-sidebar .brand-logo {
+  height: 40px;
+  width: auto;
+}
+
+.auth-logo {
+  height: 64px;
+  width: auto;
+}
+
 .app-sidebar .nav-section-title {
   text-transform: uppercase;
   font-size: 0.7rem;
@@ -174,4 +184,18 @@ a {
   .app-sidebar.show {
     transform: translateX(0);
   }
+
+  [dir="rtl"] .app-sidebar {
+    transform: translateX(100%);
+  }
+
+  [dir="rtl"] .app-sidebar.show {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile / RTL polish -------------------------------------------------- */
+
+.btn-group-wrap {
+  flex-wrap: wrap;
 }

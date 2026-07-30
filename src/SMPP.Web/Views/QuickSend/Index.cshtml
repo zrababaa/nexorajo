@@ -1,19 +1,34 @@
+@using SMPP.Application.Campaigns
 @using SMPP.Application.Common
 @using SMPP.Application.History
 @using SMPP.Web.ViewModels.Shared
 @model SMPP.Web.ViewModels.Sending.QuickSendViewModel
 @{
-    ViewData["Title"] = "Quick Send";
+    ViewData["Title"] = L["Quick Send"];
     var history = (PagedResult<HistoryListItemDto>)ViewBag.History;
+    var savedLists = (IEnumerable<CampaignListItemDto>)ViewBag.SavedLists;
 }
 
-<h1 class="h4 mb-4">Quick Send</h1>
+<h1 class="h4 mb-4">@L["Quick Send"]</h1>
 
 <div class="row g-3">
     <div class="col-lg-5">
         <div class="card">
             <div class="card-body">
-                <form asp-action="Submit" method="post">
+                <form asp-action="Submit" method="post" id="quickSendForm">
+                    @if (savedLists.Any())
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">@L["Use a saved list"]</label>
+                            <select id="savedListPicker" class="form-select">
+                                <option value="">@L["Select a saved list..."]</option>
+                                @foreach (var l in savedLists)
+                                {
+                                    <option value="@l.Id">@l.Name (@l.RecipientCount @L["Recipients"])</option>
+                                }
+                            </select>
+                        </div>
+                    }
                     <div class="mb-3">
                         <label asp-for="RawNumbers" class="form-label"></label>
                         <textarea asp-for="RawNumbers" class="form-control" rows="5" placeholder="9715xxxxxxxx, 9715xxxxxxxx, ..."></textarea>
@@ -29,7 +44,15 @@
                         <input asp-for="SenderId" class="form-control" />
                         <span asp-validation-for="SenderId" class="text-danger small"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Send</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">@L["Send"]</button>
+                    <div class="border-top pt-3">
+                        <label asp-for="SaveListName" class="form-label small"></label>
+                        <div class="input-group">
+                            <input asp-for="SaveListName" class="form-control" placeholder="@L["e.g. VIP customers"]" />
+                            <button type="submit" formaction="@Url.Action("SaveList")" formnovalidate class="btn btn-outline-secondary">@L["Save as list"]</button>
+                        </div>
+                        <span asp-validation-for="SaveListName" class="text-danger small"></span>
+                    </div>
                 </form>
             </div>
         </div>
@@ -37,22 +60,22 @@
 
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header bg-white">Recent Quick Send history</div>
+            <div class="card-header bg-white">@L["Recent Quick Send history"]</div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th>Batch</th>
-                            <th>Sender</th>
-                            <th>Receiver</th>
-                            <th>Status</th>
-                            <th>Sent</th>
+                            <th>@L["Batch"]</th>
+                            <th>@L["Sender"]</th>
+                            <th>@L["Receiver"]</th>
+                            <th>@L["Status"]</th>
+                            <th>@L["Sent"]</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!history.Items.Any())
                         {
-                            <tr><td colspan="5" class="text-center text-muted py-4">No sends yet.</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">@L["No sends yet."]</td></tr>
                         }
                         @foreach (var h in history.Items)
                         {
@@ -60,7 +83,7 @@
                                 <td><code>@h.CampaignBatchId[..8]</code></td>
                                 <td>@h.SenderNumber</td>
                                 <td>@h.ReceiverNumber</td>
-                                <td>@h.Status</td>
+                                <td>@L[h.Status.ToString()]</td>
                                 <td>@h.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                             </tr>
                         }
@@ -73,3 +96,17 @@
         </div>
     </div>
 </div>
+
+@if (savedLists.Any())
+{
+    <script>
+        document.getElementById('savedListPicker').addEventListener('change', function () {
+            if (!this.value) return;
+            fetch('@Url.Action("CampaignNumbers")/' + this.value)
+                .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+                .then(function (data) {
+                    document.querySelector('#quickSendForm textarea[name="RawNumbers"]').value = data.numbers;
+                });
+        });
+    </script>
+}

@@ -1,9 +1,9 @@
 @model SMPP.Web.ViewModels.Accounts.CreateAccountViewModel
 @{
-    ViewData["Title"] = "New account";
+    ViewData["Title"] = L["New account"];
 }
 
-<h1 class="h4 mb-4">New account</h1>
+<h1 class="h4 mb-4">@L["New account"]</h1>
 
 <div class="card" style="max-width: 640px;">
     <div class="card-body">
@@ -53,8 +53,8 @@
                 <input asp-for="SenderId" class="form-control" maxlength="20" />
             </div>
 
-            <button type="submit" class="btn btn-primary">Create</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">@L["Create"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@L["Cancel"]</a>
         </form>
     </div>
 </div>

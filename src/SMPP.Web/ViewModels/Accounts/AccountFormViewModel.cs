@@ -4,27 +4,32 @@ namespace SMPP.Web.ViewModels.Accounts;
 
 public class CreateAccountViewModel
 {
-    [Required, StringLength(50, MinimumLength = 3)]
+    [Required(ErrorMessage = "The {0} field is required.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "The field {0} must be a string with a minimum length of {2} and a maximum length of {1}.")]
+    [Display(Name = "Username")]
     public string Username { get; set; } = string.Empty;
 
-    [Required, EmailAddress]
+    [Required(ErrorMessage = "The {0} field is required.")]
+    [EmailAddress(ErrorMessage = "The {0} field is not a valid e-mail address.")]
+    [Display(Name = "Email")]
     public string Email { get; set; } = string.Empty;
 
-    [Required, StringLength(150)]
+    [Required(ErrorMessage = "The {0} field is required.")]
+    [StringLength(150, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     [Display(Name = "Full name")]
     public string FullName { get; set; } = string.Empty;
 
     [Display(Name = "Mobile number")]
     public string? MobileNo { get; set; }
 
-    [Required, DataType(DataType.Password)]
+    [Required(ErrorMessage = "The {0} field is required."), DataType(DataType.Password), Display(Name = "Password")]
     public string Password { get; set; } = string.Empty;
 
-    [Range(0, double.MaxValue)]
+    [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     [Display(Name = "Initial credits")]
     public decimal InitialBalance { get; set; }
 
-    [Range(0, double.MaxValue)]
+    [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     [Display(Name = "Rate per message")]
     public decimal RatePerMessage { get; set; }
 
@@ -38,7 +43,8 @@ public class EditAccountViewModel
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 
-    [Required, StringLength(150)]
+    [Required(ErrorMessage = "The {0} field is required.")]
+    [StringLength(150, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     [Display(Name = "Full name")]
     public string FullName { get; set; } = string.Empty;
 
@@ -48,7 +54,7 @@ public class EditAccountViewModel
     [Display(Name = "Active")]
     public bool IsActive { get; set; }
 
-    [Range(0, double.MaxValue)]
+    [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     [Display(Name = "Rate per message")]
     public decimal RatePerMessage { get; set; }
 

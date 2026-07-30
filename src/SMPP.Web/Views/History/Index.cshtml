@@ -1,0 +1,161 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SMPP.Application.Abstractions
+@using SMPP.Domain.Enums
+@using SMPP.Web.Services
+@using SMPP.Web.ViewModels.History
+@using SMPP.Web.ViewModels.Shared
+@inject ICurrentUserService CurrentUser
+@model HistoryIndexViewModel
+@{
+    ViewData["Title"] = L["History"];
+    var sourceOptions = new SelectList(Enum.GetValues<MessageSource>().Select(v => new SelectListItem(L[ChartColors.SourceLabel(v)].Value, v.ToString())), "Value", "Text");
+    var statusOptions = new SelectList(Enum.GetValues<MessageStatus>().Select(v => new SelectListItem(L[v.ToString()].Value, v.ToString())), "Value", "Text");
+    var resendableStatuses = new[] { MessageStatus.Failed, MessageStatus.Undelivered, MessageStatus.Expired };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@L["Message History"]</h1>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" asp-action="ExportCsv" asp-all-route-data="@BuildFilterRoute()">@L["Export CSV"]</a>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="ExportExcel" asp-all-route-data="@BuildFilterRoute()">@L["Export Excel"]</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-1">
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Total"]</div>
+            <div class="kpi-value">@Model.Summary.Total</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Delivered"]</div>
+            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Delivered)">@Model.Summary.Delivered</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Sent"]</div>
+            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Sent)">@Model.Summary.Sent</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Processing"]</div>
+            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Processing)">@Model.Summary.Processing</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Undelivered"]</div>
+            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Undelivered)">@Model.Summary.Undelivered</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="kpi-card">
+            <div class="kpi-label">@L["Failed / Expired"]</div>
+            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Failed)">@(Model.Summary.Failed + Model.Summary.Expired)</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["Channel"]</label>
+                <select asp-for="Source" class="form-select form-select-sm" asp-items="sourceOptions">
+                    <option value="">@L["All"]</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["Status"]</label>
+                <select asp-for="Status" class="form-select form-select-sm" asp-items="statusOptions">
+                    <option value="">@L["All"]</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["Receiver"]</label>
+                <input asp-for="Receiver" class="form-control form-control-sm" placeholder="@L["Phone number"]" />
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["Batch Id"]</label>
+                <input asp-for="CampaignBatchId" class="form-control form-control-sm" />
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["From"]</label>
+                <input asp-for="DateFrom" class="form-control form-control-sm" />
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label class="form-label small mb-1">@L["To"]</label>
+                <input asp-for="DateTo" class="form-control form-control-sm" />
+            </div>
+            <div class="col-12 d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-sm">@L["Filter"]</button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">@L["Clear"]</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>@L["Batch"]</th>
+                    <th>@L["Channel"]</th>
+                    <th>@L["Sender"]</th>
+                    <th>@L["Receiver"]</th>
+                    <th>@L["Status"]</th>
+                    <th>@L["Date (UTC)"]</th>
+                    <th class="text-end">@L["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Page.Items.Any())
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">@L["No messages match these filters."]</td></tr>
+                }
+                @foreach (var h in Model.Page.Items)
+                {
+                    <tr>
+                        <td><code title="@h.CampaignBatchId">@h.CampaignBatchId[..Math.Min(8, h.CampaignBatchId.Length)]</code></td>
+                        <td>@L[ChartColors.SourceLabel(h.Source)]</td>
+                        <td>@h.SenderNumber</td>
+                        <td>@h.ReceiverNumber</td>
+                        <td><span style="color:@ChartColors.StatusColor(h.Status)">&#9679;</span> @L[h.Status.ToString()]</td>
+                        <td>@h.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end">
+                            @if (h.CreatedByUserId == CurrentUser.UserId && resendableStatuses.Contains(h.Status))
+                            {
+                                <form asp-action="Resend" asp-route-id="@h.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">@L["Resend"]</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white">
+        <partial name="_Pagination" model="@(new PaginationInfo(Model.Page.PageNumber, Model.Page.TotalPages))" />
+    </div>
+</div>
+
+@functions {
+    private Dictionary<string, string> BuildFilterRoute()
+    {
+        var route = new Dictionary<string, string>();
+        if (Model.Source.HasValue) route["source"] = Model.Source.Value.ToString();
+        if (Model.Status.HasValue) route["status"] = Model.Status.Value.ToString();
+        if (!string.IsNullOrEmpty(Model.CampaignBatchId)) route["campaignBatchId"] = Model.CampaignBatchId;
+        if (!string.IsNullOrEmpty(Model.Receiver)) route["receiver"] = Model.Receiver;
+        if (Model.DateFrom.HasValue) route["dateFrom"] = Model.DateFrom.Value.ToString("yyyy-MM-dd");
+        if (Model.DateTo.HasValue) route["dateTo"] = Model.DateTo.Value.ToString("yyyy-MM-dd");
+        return route;
+    }
+}

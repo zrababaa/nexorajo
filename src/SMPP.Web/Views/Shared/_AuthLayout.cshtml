@@ -1,18 +1,27 @@
+@{
+    bool isRtl = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
+    string returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" dir="@(isRtl ? "rtl" : "ltr")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Nexora SMS Portal</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(isRtl ? "bootstrap.rtl.min.css" : "bootstrap.min.css")" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <div class="auth-shell">
         <div class="auth-card">
+            <div class="d-flex justify-content-end small mb-2 lang-switch">
+                <a class="@(!isRtl ? "fw-bold text-body" : "text-muted")" asp-controller="Language" asp-action="SetLanguage" asp-route-culture="en" asp-route-returnUrl="@returnUrl">EN</a>
+                <span class="mx-1 text-muted">|</span>
+                <a class="@(isRtl ? "fw-bold text-body" : "text-muted")" asp-controller="Language" asp-action="SetLanguage" asp-route-culture="ar" asp-route-returnUrl="@returnUrl">AR</a>
+            </div>
             <div class="text-center mb-4">
-                <h1 class="h4 fw-bold mb-0">Nexora</h1>
-                <p class="text-muted small mb-0">SMS Portal</p>
+                <img src="~/images/nexora-logo.png" alt="Nexora SMS Portal" class="auth-logo" />
             </div>
             <partial name="_FlashMessages" />
             @RenderBody()

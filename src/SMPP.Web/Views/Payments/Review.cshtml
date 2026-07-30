@@ -1,0 +1,116 @@
+@using SMPP.Application.Common
+@using SMPP.Application.Payments
+@using SMPP.Domain.Enums
+@using SMPP.Web.ViewModels.Shared
+@model PagedResult<PaymentListItemDto>
+@{
+    ViewData["Title"] = L["Credit Requests"];
+    var statusFilter = (PaymentStatus?)ViewBag.StatusFilter;
+
+    string StatusBadge(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Approved => "bg-success",
+        PaymentStatus.Rejected => "bg-danger",
+        _ => "bg-warning text-dark",
+    };
+
+    var confirmApprove = L["Approve this request and credit the account?"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@L["Credit Requests"]</h1>
+    <div class="d-flex flex-wrap gap-1 btn-group-sm">
+        <a class="btn btn-outline-secondary @(statusFilter is null ? "active" : "")" asp-action="Review">@L["All"]</a>
+        <a class="btn btn-outline-secondary @(statusFilter == PaymentStatus.Pending ? "active" : "")" asp-action="Review" asp-route-status="Pending">@L["Pending"]</a>
+        <a class="btn btn-outline-secondary @(statusFilter == PaymentStatus.Approved ? "active" : "")" asp-action="Review" asp-route-status="Approved">@L["Approved"]</a>
+        <a class="btn btn-outline-secondary @(statusFilter == PaymentStatus.Rejected ? "active" : "")" asp-action="Review" asp-route-status="Rejected">@L["Rejected"]</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>@L["Account"]</th>
+                    <th>@L["Amount"]</th>
+                    <th>@L["Method"]</th>
+                    <th>@L["Reference"]</th>
+                    <th>@L["Note"]</th>
+                    <th>@L["Status"]</th>
+                    <th>@L["Submitted"]</th>
+                    <th class="text-end">@L["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">@L["No credit requests."]</td></tr>
+                }
+                @foreach (var r in Model.Items)
+                {
+                    <tr>
+                        <td>@r.SubmittedByUsername</td>
+                        <td>@r.Amount.ToString("N2")</td>
+                        <td>@r.Method</td>
+                        <td>
+                            @r.TransactionRef
+                            @if (!string.IsNullOrEmpty(r.ProofFilePath))
+                            {
+                                <a href="~/@r.ProofFilePath" target="_blank" class="d-block small">@L["View proof"]</a>
+                            }
+                        </td>
+                        <td class="small text-muted">@(r.Status == PaymentStatus.Rejected ? r.ReviewNote : r.Note)</td>
+                        <td><span class="badge @StatusBadge(r.Status)">@L[r.Status.ToString()]</span></td>
+                        <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end">
+                            @if (r.Status == PaymentStatus.Pending)
+                            {
+                                <form asp-action="Approve" asp-route-id="@r.Id" method="post" class="d-inline" onsubmit="return confirm('@confirmApprove');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-success">@L["Approve"]</button>
+                                </form>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal" data-payment-id="@r.Id">@L["Reject"]</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white">
+        <partial name="_Pagination" model="@(new PaginationInfo(Model.PageNumber, Model.TotalPages))" />
+    </div>
+</div>
+
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="Reject" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="PaymentId" id="rejectPaymentId" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h6">@L["Reject credit request"]</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Close"]"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">@L["Reason (optional, shown to the account)"]</label>
+                    <textarea name="ReviewNote" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="btn btn-danger">@L["Reject request"]</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('rejectModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            document.getElementById('rejectPaymentId').value = button.getAttribute('data-payment-id');
+        });
+    </script>
+}

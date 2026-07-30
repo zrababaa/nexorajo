@@ -350,6 +350,9 @@ namespace SMPP.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
+                    b.Property<string>("ReviewNote")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("ReviewedAt")
                         .HasColumnType("datetime(6)");
 

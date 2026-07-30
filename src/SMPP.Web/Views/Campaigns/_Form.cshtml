@@ -21,7 +21,7 @@
 <div class="mb-3">
     <label asp-for="CsvFile" class="form-label"></label>
     <input asp-for="CsvFile" type="file" class="form-control" accept=".csv,.txt" />
-    <div class="form-text">Provide numbers either pasted above or via CSV upload here, not both.</div>
+    <div class="form-text">@L["Provide numbers either pasted above or via CSV upload here, not both."]</div>
 </div>
 
 <div class="row">
@@ -35,5 +35,5 @@
     </div>
 </div>
 
-<button type="submit" class="btn btn-primary">Save</button>
-<a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+<button type="submit" class="btn btn-primary">@L["Save"]</button>
+<a asp-action="Index" class="btn btn-outline-secondary">@L["Cancel"]</a>
