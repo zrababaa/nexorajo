@@ -43,4 +43,14 @@ public class SegmentCounterTests
         var message = new string('a', 100) + "ا";
         Assert.Equal(2, _counter.CountSegments(message));
     }
+
+    [Fact]
+    public void Line_breaks_do_not_push_a_latin_message_onto_unicode_thresholds()
+    {
+        // GSM-7 carries CR/LF/tab, so a plain Latin message with a line break is still one part
+        // at 160 characters - it must not be charged as three.
+        var message = new string('a', 79) + "\r\n" + new string('a', 79);
+
+        Assert.Equal(1, _counter.CountSegments(message));
+    }
 }

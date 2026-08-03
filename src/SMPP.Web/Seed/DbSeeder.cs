@@ -62,8 +62,8 @@ public static class DbSeeder
                 Role = UserRole.Account,
                 IsActive = true,
                 Balance = 1000,
-                RatePerMessage = 0.05m,
-                SenderId = "NEXORA",
+                RatePerMessage = 1m,
+                SenderIds = "NEXORA",
                 CreatedByUserId = superadmin.Id,
             };
 

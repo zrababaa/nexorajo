@@ -17,7 +17,6 @@ using SMPP.Infrastructure.Identity;
 using SMPP.Infrastructure.Persistence;
 using SMPP.Infrastructure.Segmenting;
 using SMPP.Infrastructure.Services;
-using SMPP.Infrastructure.SmsGateway;
 
 namespace SMPP.Infrastructure;
 
@@ -42,11 +41,8 @@ public static class DependencyInjection
 
         services.AddScoped<DatabaseBootstrapper>();
 
-        services.Configure<GatewayOptions>(configuration.GetSection(GatewayOptions.SectionName));
-
-        services.AddHttpClient<ISmsGatewayClient, SmsGatewayClient>();
-
         services.AddScoped<ISegmentCounter, SegmentCounter>();
+        services.AddScoped<ISendPolicyService, SendPolicyService>();
         services.AddScoped<IBalanceLedgerService, BalanceLedgerService>();
         services.AddScoped<IUserScopeResolver, UserScopeResolver>();
         services.AddScoped<ICampaignNumberParser, CampaignNumberParser>();
@@ -54,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<ISpamKeywordFilterService, SpamKeywordFilterService>();
 
         services.AddScoped<SendCore>();
+        services.AddScoped<QuickSendHistoryReader>();
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAccountService, AccountService>();

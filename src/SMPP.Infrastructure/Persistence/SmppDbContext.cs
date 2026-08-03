@@ -16,6 +16,7 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<SpamKeyword> SpamKeywords => Set<SpamKeyword>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<History> Histories => Set<History>();
+    public DbSet<QuickSendHistory> QuickSendHistories => Set<QuickSendHistory>();
     public DbSet<UnderProcess> UnderProcessBatches => Set<UnderProcess>();
     public DbSet<Payment> Payments => Set<Payment>();
 

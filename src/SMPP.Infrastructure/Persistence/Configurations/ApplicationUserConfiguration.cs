@@ -11,7 +11,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
         builder.Property(u => u.FullName).HasMaxLength(200).IsRequired();
         builder.Property(u => u.Balance).HasPrecision(18, 4);
         builder.Property(u => u.RatePerMessage).HasPrecision(18, 4);
-        builder.Property(u => u.SenderId).HasMaxLength(20);
+        builder.Property(u => u.SenderIds).HasMaxLength(500);
         builder.Property(u => u.ApiToken).HasMaxLength(128);
         builder.Property(u => u.ApiSecret).HasMaxLength(128);
 

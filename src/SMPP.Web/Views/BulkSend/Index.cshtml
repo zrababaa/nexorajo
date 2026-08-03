@@ -7,6 +7,12 @@
     ViewData["Title"] = L["Bulk Send"];
     var history = (PagedResult<HistoryListItemDto>)ViewBag.History;
     var campaigns = (IEnumerable<CampaignListItemDto>)ViewBag.Campaigns;
+    var spamBlockedTerms = ViewBag.SpamBlockedTerms as IReadOnlyCollection<string>;
+}
+
+@if (spamBlockedTerms is not null)
+{
+    <partial name="_SpamBlockedModal" model="spamBlockedTerms" />
 }
 
 <h1 class="h4 mb-4">@L["Bulk Send"]</h1>
@@ -31,16 +37,8 @@
                         </select>
                         <span asp-validation-for="CampaignId" class="text-danger small"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Message" class="form-label"></label>
-                        <textarea asp-for="Message" class="form-control" rows="4"></textarea>
-                        <span asp-validation-for="Message" class="text-danger small"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="SenderId" class="form-label"></label>
-                        <input asp-for="SenderId" class="form-control" />
-                        <span asp-validation-for="SenderId" class="text-danger small"></span>
-                    </div>
+                    <partial name="_MessageField" model="Model" />
+                    <partial name="_SenderIdField" model="Model" />
                     <button type="submit" class="btn btn-primary w-100">@L["Send"]</button>
                 </form>
             </div>

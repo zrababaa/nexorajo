@@ -46,7 +46,7 @@ public class AccountsController : Controller
         {
             await _accountService.CreateAsync(_currentUser.UserId, new CreateAccountRequest(
                 model.Username, model.Email, model.FullName, model.MobileNo, model.Password,
-                model.InitialBalance, model.RatePerMessage, model.SenderId), ct);
+                model.InitialBalance, model.RatePerMessage, model.SenderIds, model.AllowFreeSenderId), ct);
         }
         catch (AppException ex)
         {
@@ -75,7 +75,8 @@ public class AccountsController : Controller
             MobileNo = account.MobileNo,
             IsActive = account.IsActive,
             RatePerMessage = account.RatePerMessage,
-            SenderId = account.SenderId,
+            SenderIds = account.SenderIds,
+            AllowFreeSenderId = account.AllowFreeSenderId,
             DateFrom = account.DateFrom,
             DateTo = account.DateTo,
             Balance = account.Balance,
@@ -96,8 +97,8 @@ public class AccountsController : Controller
         try
         {
             await _accountService.UpdateAsync(id, new UpdateAccountRequest(
-                model.FullName, model.MobileNo, model.IsActive, model.RatePerMessage, model.SenderId,
-                model.DateFrom, model.DateTo), ct);
+                model.FullName, model.MobileNo, model.IsActive, model.RatePerMessage, model.SenderIds,
+                model.AllowFreeSenderId, model.DateFrom, model.DateTo), ct);
         }
         catch (AppException ex)
         {

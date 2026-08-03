@@ -22,12 +22,4 @@ public class CampaignFormViewModel
 
     [Display(Name = "Or upload a CSV file")]
     public IFormFile? CsvFile { get; set; }
-
-    [Range(0, 3600, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Min delay (seconds)")]
-    public int? SendSpeedMinSeconds { get; set; }
-
-    [Range(0, 3600, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Max delay (seconds)")]
-    public int? SendSpeedMaxSeconds { get; set; }
 }

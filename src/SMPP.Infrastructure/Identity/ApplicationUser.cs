@@ -17,7 +17,18 @@ public class ApplicationUser : IdentityUser<int>
 
     public decimal Balance { get; set; }
     public decimal RatePerMessage { get; set; }
-    public string? SenderId { get; set; }
+
+    /// <summary>
+    /// Comma-separated list of the Sender IDs this account may send under, chosen from a
+    /// dropdown on the send screens. Ignored for Superadmin, which is unrestricted.
+    /// </summary>
+    public string? SenderIds { get; set; }
+
+    /// <summary>
+    /// When set, the account may also type a Sender ID of its own instead of picking from
+    /// <see cref="SenderIds"/> (legacy's <c>free_sender</c> flag).
+    /// </summary>
+    public bool AllowFreeSenderId { get; set; }
 
     public DateOnly? DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }

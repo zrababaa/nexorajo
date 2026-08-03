@@ -25,13 +25,20 @@ public class SendCore
     private readonly SmppDbContext _db;
     private readonly ISegmentCounter _segmentCounter;
     private readonly ISpamKeywordFilterService _spamFilter;
+    private readonly ISendPolicyService _sendPolicy;
     private readonly IBalanceLedgerService _ledger;
 
-    public SendCore(SmppDbContext db, ISegmentCounter segmentCounter, ISpamKeywordFilterService spamFilter, IBalanceLedgerService ledger)
+    public SendCore(
+        SmppDbContext db,
+        ISegmentCounter segmentCounter,
+        ISpamKeywordFilterService spamFilter,
+        ISendPolicyService sendPolicy,
+        IBalanceLedgerService ledger)
     {
         _db = db;
         _segmentCounter = segmentCounter;
         _spamFilter = spamFilter;
+        _sendPolicy = sendPolicy;
         _ledger = ledger;
     }
 
@@ -55,13 +62,23 @@ public class SendCore
         var filterResult = await _spamFilter.CheckAsync(message, ct);
         if (filterResult.IsBlocked)
         {
-            var matches = filterResult.MatchedKeywords.Concat(filterResult.MatchedUrls);
-            throw new AppException($"Message blocked by content filter: {string.Join(", ", matches)}");
+            throw new SpamBlockedException(filterResult.MatchedKeywords.Concat(filterResult.MatchedUrls).ToList());
         }
 
+        senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);
+
+        // One credit per message part per recipient at the account's rate, so a message long
+        // enough to split into two parts costs twice as much as a single-part one.
         var segments = _segmentCounter.CountSegments(message);
         var isFree = user.Role == UserRole.Superadmin;
         var totalCost = isFree ? 0m : numbers.Count * segments * user.RatePerMessage;
+
+        if (totalCost > user.Balance)
+        {
+            throw new AppException(
+                $"Insufficient balance: this send costs {totalCost:0.####} " +
+                $"({numbers.Count} recipient(s) x {segments} message part(s)) and the balance is {user.Balance:0.####}.");
+        }
 
         var batchId = NewCampaignId(source);
 

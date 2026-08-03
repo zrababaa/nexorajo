@@ -1,0 +1,48 @@
+@using SMPP.Application.Abstractions
+@model SMPP.Web.ViewModels.Sending.SendFormViewModel
+@{
+    // Set by the send controllers from ISendPolicyService. The same policy is applied again on
+    // the server when the form posts, so this only decides what the user is offered.
+    var policy = (SendPolicy)ViewData["SendPolicy"]!;
+}
+
+@if (policy.HasSenderIdList)
+{
+    <div class="mb-3">
+        <label asp-for="SenderId" class="form-label"></label>
+        <select asp-for="SenderId" class="form-select" data-sender-select>
+            @foreach (var senderId in policy.AllowedSenderIds)
+            {
+                <option value="@senderId">@senderId</option>
+            }
+        </select>
+        <span asp-validation-for="SenderId" class="text-danger small"></span>
+    </div>
+
+    @if (policy.AllowFreeSenderId)
+    {
+        <div class="mb-3">
+            <div class="form-check mb-2">
+                <input asp-for="UseFreeSenderId" class="form-check-input" data-sender-toggle />
+                <label asp-for="UseFreeSenderId" class="form-check-label"></label>
+            </div>
+            <input asp-for="FreeSenderId" class="form-control" maxlength="20" placeholder="@L["e.g. MYSHOP"]" data-sender-free />
+            <span asp-validation-for="FreeSenderId" class="text-danger small"></span>
+        </div>
+    }
+}
+else if (policy.AllowFreeSenderId)
+{
+    <input type="hidden" name="UseFreeSenderId" value="true" />
+    <div class="mb-3">
+        <label asp-for="FreeSenderId" class="form-label">@L["Sender ID"]</label>
+        <input asp-for="FreeSenderId" class="form-control" maxlength="20" />
+        <span asp-validation-for="FreeSenderId" class="text-danger small"></span>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning py-2 small">
+        @L["No Sender ID has been assigned to this account. Ask an administrator to assign one before sending."]
+    </div>
+}

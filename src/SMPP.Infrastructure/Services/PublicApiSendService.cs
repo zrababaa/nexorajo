@@ -1,22 +1,18 @@
-using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
 using SMPP.Application.PublicApi;
 using SMPP.Application.Sending;
 using SMPP.Domain.Enums;
-using SMPP.Infrastructure.Persistence;
 
 namespace SMPP.Infrastructure.Services;
 
 public class PublicApiSendService : IPublicApiSendService
 {
-    private readonly SmppDbContext _db;
     private readonly ICampaignNumberParser _numberParser;
     private readonly SendCore _sendCore;
 
-    public PublicApiSendService(SmppDbContext db, ICampaignNumberParser numberParser, SendCore sendCore)
+    public PublicApiSendService(ICampaignNumberParser numberParser, SendCore sendCore)
     {
-        _db = db;
         _numberParser = numberParser;
         _sendCore = sendCore;
     }
@@ -29,14 +25,10 @@ public class PublicApiSendService : IPublicApiSendService
             throw new AppException("No valid phone numbers were found in the input provided.");
         }
 
-        var senderId = request.SenderId;
-        if (string.IsNullOrWhiteSpace(senderId))
-        {
-            senderId = await _db.Users.Where(u => u.Id == userId).Select(u => u.SenderId).FirstAsync(ct)
-                ?? throw new AppException("No sender_id provided and the account has no default Sender ID configured.");
-        }
-
+        // An absent sender_id, and whether the caller may use the one it asked for, are both
+        // settled by SendCore against the account's Sender ID policy.
         var numbers = parsed.NormalizedNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        return await _sendCore.ExecuteAsync(userId, numbers, request.Message, senderId, MessageSource.PublicApi, TransactionSource.PublicApi, ct);
+        return await _sendCore.ExecuteAsync(
+            userId, numbers, request.Message, request.SenderId ?? string.Empty, MessageSource.PublicApi, TransactionSource.PublicApi, ct);
     }
 }

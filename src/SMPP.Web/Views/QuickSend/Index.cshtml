@@ -7,6 +7,12 @@
     ViewData["Title"] = L["Quick Send"];
     var history = (PagedResult<HistoryListItemDto>)ViewBag.History;
     var savedLists = (IEnumerable<CampaignListItemDto>)ViewBag.SavedLists;
+    var spamBlockedTerms = ViewBag.SpamBlockedTerms as IReadOnlyCollection<string>;
+}
+
+@if (spamBlockedTerms is not null)
+{
+    <partial name="_SpamBlockedModal" model="spamBlockedTerms" />
 }
 
 <h1 class="h4 mb-4">@L["Quick Send"]</h1>
@@ -34,16 +40,8 @@
                         <textarea asp-for="RawNumbers" class="form-control" rows="5" placeholder="9715xxxxxxxx, 9715xxxxxxxx, ..."></textarea>
                         <span asp-validation-for="RawNumbers" class="text-danger small"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Message" class="form-label"></label>
-                        <textarea asp-for="Message" class="form-control" rows="4"></textarea>
-                        <span asp-validation-for="Message" class="text-danger small"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="SenderId" class="form-label"></label>
-                        <input asp-for="SenderId" class="form-control" />
-                        <span asp-validation-for="SenderId" class="text-danger small"></span>
-                    </div>
+                    <partial name="_MessageField" model="Model" />
+                    <partial name="_SenderIdField" model="Model" />
                     <button type="submit" class="btn btn-primary w-100 mb-3">@L["Send"]</button>
                     <div class="border-top pt-3">
                         <label asp-for="SaveListName" class="form-label small"></label>

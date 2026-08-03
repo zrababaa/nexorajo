@@ -243,7 +243,6 @@
   <data name="Sender ID" xml:space="preserve"><value>معرّف المرسل</value></data>
   <data name="Mobile number" xml:space="preserve"><value>رقم الجوال</value></data>
   <data name="Initial credits" xml:space="preserve"><value>الرصيد الابتدائي</value></data>
-  <data name="Rate per message" xml:space="preserve"><value>السعر لكل رسالة</value></data>
   <data name="Valid from" xml:space="preserve"><value>صالح من</value></data>
   <data name="Valid to" xml:space="preserve"><value>صالح حتى</value></data>
   <data name="Username or email" xml:space="preserve"><value>اسم المستخدم أو البريد الإلكتروني</value></data>
@@ -254,9 +253,27 @@
   <data name="Reason (optional)" xml:space="preserve"><value>السبب (اختياري)</value></data>
   <data name="Campaign code" xml:space="preserve"><value>رمز الحملة</value></data>
   <data name="Or upload a CSV file" xml:space="preserve"><value>أو ارفع ملف CSV</value></data>
-  <data name="Min delay (seconds)" xml:space="preserve"><value>الحد الأدنى للتأخير (ثوانٍ)</value></data>
-  <data name="Max delay (seconds)" xml:space="preserve"><value>الحد الأقصى للتأخير (ثوانٍ)</value></data>
   <data name="Amount must be greater than zero." xml:space="preserve"><value>يجب أن يكون المبلغ أكبر من صفر.</value></data>
+
+  <data name="Credits per message part" xml:space="preserve"><value>الرصيد المخصوم لكل جزء من الرسالة</value></data>
+  <data name="Sender IDs (comma separated)" xml:space="preserve"><value>معرّفات المرسل (مفصولة بفواصل)</value></data>
+  <data name="Allow the account to type its own Sender ID" xml:space="preserve"><value>السماح للحساب بإدخال معرّف مرسل خاص به</value></data>
+  <data name="The account picks one of these when sending." xml:space="preserve"><value>يختار الحساب أحد هذه المعرّفات عند الإرسال.</value></data>
+  <data name="When off, the account can only send under the Sender IDs above." xml:space="preserve"><value>عند إيقافه، لا يمكن للحساب الإرسال إلا بالمعرّفات أعلاه.</value></data>
+  <data name="Use my own Sender ID" xml:space="preserve"><value>استخدام معرّف مرسل خاص بي</value></data>
+  <data name="Own Sender ID" xml:space="preserve"><value>معرّف المرسل الخاص</value></data>
+  <data name="e.g. MYSHOP" xml:space="preserve"><value>مثال: MYSHOP</value></data>
+  <data name="No Sender ID has been assigned to this account. Ask an administrator to assign one before sending." xml:space="preserve"><value>لم يتم تعيين أي معرّف مرسل لهذا الحساب. اطلب من المسؤول تعيين معرّف قبل الإرسال.</value></data>
+
+  <data name="{chars} characters · {parts} part(s) · {encoding}" xml:space="preserve"><value>{chars} حرفًا · {parts} جزء · {encoding}</value></data>
+  <data name="{credits} credits per recipient" xml:space="preserve"><value>{credits} رصيد لكل مستلم</value></data>
+  <data name="Unicode" xml:space="preserve"><value>يونيكود</value></data>
+  <data name="GSM" xml:space="preserve"><value>GSM</value></data>
+
+  <data name="Message not sent" xml:space="preserve"><value>لم يتم إرسال الرسالة</value></data>
+  <data name="The content filter found the following blocked term(s) in your message:" xml:space="preserve"><value>عثر فلتر المحتوى على الكلمات المحظورة التالية في رسالتك:</value></data>
+  <data name="Nothing was sent and no credits were charged. Edit the message and try again." xml:space="preserve"><value>لم يتم إرسال أي شيء ولم يُخصم أي رصيد. عدّل الرسالة ثم حاول مرة أخرى.</value></data>
+  <data name="Edit message" xml:space="preserve"><value>تعديل الرسالة</value></data>
   <data name="Password" xml:space="preserve"><value>كلمة المرور</value></data>
   <data name="Remember me" xml:space="preserve"><value>تذكرني</value></data>
   <data name="New password" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>

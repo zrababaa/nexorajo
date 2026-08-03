@@ -15,7 +15,5 @@ public class Campaign : AuditableEntity, IHasCreator
     public string ExternalCampaignCode { get; set; } = string.Empty;
     public string Numbers { get; set; } = string.Empty;
     public CampaignSourceType SourceType { get; set; }
-    public int? SendSpeedMinSeconds { get; set; }
-    public int? SendSpeedMaxSeconds { get; set; }
     public int CreatedByUserId { get; set; }
 }

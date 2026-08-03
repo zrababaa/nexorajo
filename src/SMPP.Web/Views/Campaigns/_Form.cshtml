@@ -24,16 +24,5 @@
     <div class="form-text">@L["Provide numbers either pasted above or via CSV upload here, not both."]</div>
 </div>
 
-<div class="row">
-    <div class="col-sm-6 mb-3">
-        <label asp-for="SendSpeedMinSeconds" class="form-label"></label>
-        <input asp-for="SendSpeedMinSeconds" class="form-control" />
-    </div>
-    <div class="col-sm-6 mb-3">
-        <label asp-for="SendSpeedMaxSeconds" class="form-label"></label>
-        <input asp-for="SendSpeedMaxSeconds" class="form-control" />
-    </div>
-</div>
-
 <button type="submit" class="btn btn-primary">@L["Save"]</button>
 <a asp-action="Index" class="btn btn-outline-secondary">@L["Cancel"]</a>

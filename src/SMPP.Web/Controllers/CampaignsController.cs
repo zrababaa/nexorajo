@@ -46,9 +46,7 @@ public class CampaignsController : Controller
                 model.Name,
                 model.ExternalCampaignCode,
                 parsed.NormalizedNumbers,
-                model.CsvFile is not null ? CampaignSourceType.CsvUpload : CampaignSourceType.Pasted,
-                model.SendSpeedMinSeconds,
-                model.SendSpeedMaxSeconds), ct);
+                model.CsvFile is not null ? CampaignSourceType.CsvUpload : CampaignSourceType.Pasted), ct);
         }
         catch (AppException ex)
         {
@@ -74,8 +72,6 @@ public class CampaignsController : Controller
             Name = campaign.Name,
             ExternalCampaignCode = campaign.ExternalCampaignCode,
             PastedNumbers = campaign.Numbers,
-            SendSpeedMinSeconds = campaign.SendSpeedMinSeconds,
-            SendSpeedMaxSeconds = campaign.SendSpeedMaxSeconds,
         });
     }
 
@@ -93,9 +89,7 @@ public class CampaignsController : Controller
         {
             await _campaignService.UpdateAsync(id, _currentUser.UserId, new UpdateCampaignRequest(
                 model.Name,
-                parsed.NormalizedNumbers,
-                model.SendSpeedMinSeconds,
-                model.SendSpeedMaxSeconds), ct);
+                parsed.NormalizedNumbers), ct);
         }
         catch (AppException ex)
         {

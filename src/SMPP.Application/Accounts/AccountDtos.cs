@@ -19,7 +19,8 @@ public record AccountDetailDto(
     bool IsActive,
     decimal Balance,
     decimal RatePerMessage,
-    string? SenderId,
+    string? SenderIds,
+    bool AllowFreeSenderId,
     DateOnly? DateFrom,
     DateOnly? DateTo,
     string? ApiToken,
@@ -33,13 +34,15 @@ public record CreateAccountRequest(
     string Password,
     decimal InitialBalance,
     decimal RatePerMessage,
-    string? SenderId);
+    string? SenderIds,
+    bool AllowFreeSenderId);
 
 public record UpdateAccountRequest(
     string FullName,
     string? MobileNo,
     bool IsActive,
     decimal RatePerMessage,
-    string? SenderId,
+    string? SenderIds,
+    bool AllowFreeSenderId,
     DateOnly? DateFrom,
     DateOnly? DateTo);

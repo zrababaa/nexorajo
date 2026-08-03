@@ -17,6 +17,7 @@ public class QuickSendController : Controller
     private readonly IHistoryService _historyService;
     private readonly ICampaignService _campaignService;
     private readonly ICampaignNumberParser _numberParser;
+    private readonly ISendPolicyService _sendPolicy;
     private readonly ICurrentUserService _currentUser;
 
     public QuickSendController(
@@ -24,20 +25,20 @@ public class QuickSendController : Controller
         IHistoryService historyService,
         ICampaignService campaignService,
         ICampaignNumberParser numberParser,
+        ISendPolicyService sendPolicy,
         ICurrentUserService currentUser)
     {
         _quickSendService = quickSendService;
         _historyService = historyService;
         _campaignService = campaignService;
         _numberParser = numberParser;
+        _sendPolicy = sendPolicy;
         _currentUser = currentUser;
     }
 
     public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
     {
-        var history = await _historyService.GetPagedAsync(_currentUser.UserId, _currentUser.Role, MessageSource.QuickSend, null, page, PageSize, ct);
-        ViewBag.History = history;
-        await LoadSavedListsAsync(ct);
+        await LoadViewDataAsync(page, ct);
         return View(new QuickSendViewModel());
     }
 
@@ -47,16 +48,23 @@ public class QuickSendController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var history = await _historyService.GetPagedAsync(_currentUser.UserId, _currentUser.Role, MessageSource.QuickSend, null, 1, PageSize, ct);
-            ViewBag.History = history;
-            await LoadSavedListsAsync(ct);
+            await LoadViewDataAsync(1, ct);
             return View(nameof(Index), model);
         }
 
         try
         {
-            var summary = await _quickSendService.SubmitAsync(_currentUser.UserId, new QuickSendRequest(model.RawNumbers, model.Message, model.SenderId), ct);
+            var summary = await _quickSendService.SubmitAsync(
+                _currentUser.UserId, new QuickSendRequest(model.RawNumbers, model.Message, model.EffectiveSenderId), ct);
             TempData["Success"] = $"Queued {summary.RecipientCount} message(s), cost {summary.TotalCost:0.####}. Remaining balance: {summary.RemainingBalance:0.####}.";
+        }
+        catch (SpamBlockedException ex)
+        {
+            // Redisplayed rather than redirected so the user gets the offending words in a dialog
+            // with the message they wrote still in the box.
+            ViewBag.SpamBlockedTerms = ex.MatchedTerms;
+            await LoadViewDataAsync(1, ct);
+            return View(nameof(Index), model);
         }
         catch (AppException ex)
         {
@@ -95,9 +103,7 @@ public class QuickSendController : Controller
                 model.SaveListName.Trim(),
                 code,
                 parsed.NormalizedNumbers,
-                CampaignSourceType.Pasted,
-                null,
-                null), ct);
+                CampaignSourceType.Pasted), ct);
             TempData["Success"] = $"Saved \"{model.SaveListName.Trim()}\" as a list with {parsed.Count} number(s).";
         }
         catch (AppException ex)
@@ -120,8 +126,13 @@ public class QuickSendController : Controller
         return Json(new { numbers = campaign.Numbers });
     }
 
-    private async Task LoadSavedListsAsync(CancellationToken ct)
+    private async Task LoadViewDataAsync(int page, CancellationToken ct)
     {
+        ViewData["SendPolicy"] = await _sendPolicy.GetAsync(_currentUser.UserId, ct);
+
+        var history = await _historyService.GetPagedAsync(_currentUser.UserId, _currentUser.Role, MessageSource.QuickSend, null, page, PageSize, ct);
+        ViewBag.History = history;
+
         var campaigns = await _campaignService.GetPagedAsync(_currentUser.UserId, 1, 500, ct);
         ViewBag.SavedLists = campaigns.Items;
     }

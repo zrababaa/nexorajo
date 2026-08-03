@@ -16,20 +16,14 @@ public record CampaignDetailDto(
     string ExternalCampaignCode,
     string Numbers,
     int RecipientCount,
-    CampaignSourceType SourceType,
-    int? SendSpeedMinSeconds,
-    int? SendSpeedMaxSeconds);
+    CampaignSourceType SourceType);
 
 public record CreateCampaignRequest(
     string Name,
     string ExternalCampaignCode,
     string NormalizedNumbers,
-    CampaignSourceType SourceType,
-    int? SendSpeedMinSeconds,
-    int? SendSpeedMaxSeconds);
+    CampaignSourceType SourceType);
 
 public record UpdateCampaignRequest(
     string Name,
-    string NormalizedNumbers,
-    int? SendSpeedMinSeconds,
-    int? SendSpeedMaxSeconds);
+    string NormalizedNumbers);

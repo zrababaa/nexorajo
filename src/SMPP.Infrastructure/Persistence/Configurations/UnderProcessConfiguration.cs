@@ -10,12 +10,16 @@ namespace SMPP.Infrastructure.Persistence.Configurations;
 /// this table with hard-coded column names, so every mapping here is load-bearing - renaming
 /// anything silently breaks sending. No foreign key on userId either: the daemon deletes or
 /// archives rows on its own schedule and a cascade/restrict rule would fight it.
+///
+/// Excluded from migrations for the same reason: describing the daemon's table for EF to read
+/// and write rows must never turn into DDL that alters it. (The baseline migration still
+/// creates it, for the case of an empty database with no daemon alongside.)
 /// </summary>
 public class UnderProcessConfiguration : IEntityTypeConfiguration<UnderProcess>
 {
     public void Configure(EntityTypeBuilder<UnderProcess> builder)
     {
-        builder.ToTable("under_process");
+        builder.ToTable("under_process", t => t.ExcludeFromMigrations());
 
         builder.Property(u => u.Id).HasColumnName("id");
         builder.Property(u => u.CampaignId).HasColumnName("camp_id").HasMaxLength(25).IsRequired();

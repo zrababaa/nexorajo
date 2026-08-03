@@ -17,7 +17,7 @@ public class CampaignService : ICampaignService
 
     public async Task<PagedResult<CampaignListItemDto>> GetPagedAsync(int ownerUserId, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = _db.Campaigns.Where(c => c.CreatedByUserId == ownerUserId).OrderByDescending(c => c.CreatedAt);
+        var query = _db.Campaigns.AsNoTracking().Where(c => c.CreatedByUserId == ownerUserId).OrderByDescending(c => c.CreatedAt);
 
         var totalCount = await query.CountAsync(ct);
         var items = await query
@@ -27,7 +27,11 @@ public class CampaignService : ICampaignService
                 c.Id,
                 c.Name,
                 c.ExternalCampaignCode,
-                c.Numbers.Length == 0 ? 0 : c.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries).Length,
+                // Counted as "commas + 1" in SQL rather than by splitting the string. String.Split
+                // has no MySQL translation, so EF would evaluate it on the client - which means
+                // pulling every list's full longtext of numbers back just to size it, and the send
+                // screens ask for up to 500 lists at a time.
+                c.Numbers.Length == 0 ? 0 : c.Numbers.Length - c.Numbers.Replace(",", string.Empty).Length + 1,
                 c.SourceType,
                 c.CreatedAt))
             .ToListAsync(ct);
@@ -61,8 +65,6 @@ public class CampaignService : ICampaignService
             ExternalCampaignCode = request.ExternalCampaignCode,
             Numbers = request.NormalizedNumbers,
             SourceType = request.SourceType,
-            SendSpeedMinSeconds = request.SendSpeedMinSeconds,
-            SendSpeedMaxSeconds = request.SendSpeedMaxSeconds,
             CreatedByUserId = ownerUserId,
         };
 
@@ -78,8 +80,6 @@ public class CampaignService : ICampaignService
 
         campaign.Name = request.Name;
         campaign.Numbers = request.NormalizedNumbers;
-        campaign.SendSpeedMinSeconds = request.SendSpeedMinSeconds;
-        campaign.SendSpeedMaxSeconds = request.SendSpeedMaxSeconds;
         campaign.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
@@ -103,7 +103,5 @@ public class CampaignService : ICampaignService
         c.ExternalCampaignCode,
         c.Numbers,
         c.Numbers.Length == 0 ? 0 : c.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries).Length,
-        c.SourceType,
-        c.SendSpeedMinSeconds,
-        c.SendSpeedMaxSeconds);
+        c.SourceType);
 }

@@ -52,11 +52,11 @@ public class HistoryController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Resend(int id, CancellationToken ct)
+    public async Task<IActionResult> Resend(int id, MessageSource source, CancellationToken ct)
     {
         try
         {
-            var summary = await _resendService.ResendAsync(id, _currentUser.UserId, ct);
+            var summary = await _resendService.ResendAsync(id, source, _currentUser.UserId, ct);
             TempData["Success"] = $"Message resent, cost {summary.TotalCost:0.####}. Remaining balance: {summary.RemainingBalance:0.####}.";
         }
         catch (AppException ex)

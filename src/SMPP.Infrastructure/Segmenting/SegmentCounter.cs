@@ -23,6 +23,11 @@ public class SegmentCounter : ISegmentCounter
     private const char PrintableAsciiMin = ' ';
     private const char PrintableAsciiMax = '~';
 
+    // Line breaks and tabs are printable ASCII's neighbours below the range but are carried by
+    // GSM-7 all the same. Without this a plain Latin message costs triple the moment the user
+    // presses Enter in the message box.
+    private static bool IsGsmWhitespace(char c) => c is '\n' or '\r' or '\t';
+
     public int CountSegments(string message)
     {
         if (string.IsNullOrEmpty(message))
@@ -31,7 +36,7 @@ public class SegmentCounter : ISegmentCounter
         }
 
         var length = message.Length;
-        var isUnicode = message.Any(c => c < PrintableAsciiMin || c > PrintableAsciiMax);
+        var isUnicode = message.Any(c => (c < PrintableAsciiMin || c > PrintableAsciiMax) && !IsGsmWhitespace(c));
 
         var singleLimit = isUnicode ? ArabicSingle : LatinSingle;
         var multiPartSize = isUnicode ? ArabicFirstOfMulti : LatinFirstOfMulti;

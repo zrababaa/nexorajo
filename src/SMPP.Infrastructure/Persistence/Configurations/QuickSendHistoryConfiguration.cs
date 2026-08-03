@@ -1,30 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SMPP.Domain.Entities;
-using SMPP.Infrastructure.Identity;
 
 namespace SMPP.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// Maps onto the legacy <c>historys</c> table verbatim, because the external SMPP daemon
-/// inserts these rows and its DLR callback updates them by <c>get_message_id</c>. Status and
-/// message_type stay as legacy text codes rather than enum ordinals for the same reason - see
-/// <see cref="LegacyMessageCodes"/>.
-///
-/// Excluded from migrations: the daemon owns this table, so no schema change made here may ever
-/// be turned into DDL against it. (The baseline migration still creates it, for the case of an
-/// empty database with no daemon alongside.)
+/// Maps onto the legacy <c>quick_send_history</c> table, where the external SMPP daemon logs
+/// Quick Send recipients. Excluded from migrations and carrying no foreign key on
+/// <c>creater_id</c>: the table belongs to the daemon and predates this app, so EF must never
+/// try to create, alter, or constrain it - it is read-only from here.
 /// </summary>
-public class HistoryConfiguration : IEntityTypeConfiguration<History>
+public class QuickSendHistoryConfiguration : IEntityTypeConfiguration<QuickSendHistory>
 {
-    public void Configure(EntityTypeBuilder<History> builder)
+    public void Configure(EntityTypeBuilder<QuickSendHistory> builder)
     {
-        builder.ToTable("historys", t => t.ExcludeFromMigrations());
+        builder.ToTable("quick_send_history", t => t.ExcludeFromMigrations());
 
         builder.Property(h => h.Id).HasColumnName("id");
         builder.Property(h => h.CampaignBatchId).HasColumnName("camp_id").HasMaxLength(25).IsRequired();
         builder.Property(h => h.CampaignName).HasColumnName("camp_name").HasMaxLength(255);
-        builder.Property(h => h.Source).HasColumnName("message_type").HasMaxLength(10).HasConversion(LegacyMessageCodes.Source);
         builder.Property(h => h.SenderNumber).HasColumnName("sender_no").HasMaxLength(30).IsRequired();
         builder.Property(h => h.ReceiverNumber).HasColumnName("receiver_no").HasMaxLength(30).IsRequired();
         builder.Property(h => h.MessageText).HasColumnName("message").HasColumnType("text");
@@ -34,14 +28,5 @@ public class HistoryConfiguration : IEntityTypeConfiguration<History>
         builder.Property(h => h.CreatedByUserId).HasColumnName("creater_id");
         builder.Property(h => h.CreatedAt).HasColumnName("created_at");
         builder.Property(h => h.UpdatedAt).HasColumnName("updated_at");
-
-        builder.HasIndex(h => h.CampaignBatchId);
-        builder.HasIndex(h => new { h.CreatedByUserId, h.CreatedAt });
-        builder.HasIndex(h => h.ExternalMessageId);
-
-        builder.HasOne<ApplicationUser>()
-            .WithMany()
-            .HasForeignKey(h => h.CreatedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

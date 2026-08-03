@@ -59,7 +59,8 @@ public class AccountService : IAccountService
             IsActive = true,
             Balance = request.InitialBalance,
             RatePerMessage = request.RatePerMessage,
-            SenderId = request.SenderId,
+            SenderIds = request.SenderIds,
+            AllowFreeSenderId = request.AllowFreeSenderId,
             CreatedByUserId = createdByUserId,
         };
 
@@ -82,7 +83,8 @@ public class AccountService : IAccountService
         user.MobileNo = request.MobileNo;
         user.IsActive = request.IsActive;
         user.RatePerMessage = request.RatePerMessage;
-        user.SenderId = request.SenderId;
+        user.SenderIds = request.SenderIds;
+        user.AllowFreeSenderId = request.AllowFreeSenderId;
         user.DateFrom = request.DateFrom;
         user.DateTo = request.DateTo;
 
@@ -102,5 +104,5 @@ public class AccountService : IAccountService
 
     private static AccountDetailDto ToDetailDto(ApplicationUser u) => new(
         u.Id, u.UserName!, u.Email!, u.FullName, u.MobileNo, u.IsActive, u.Balance, u.RatePerMessage,
-        u.SenderId, u.DateFrom, u.DateTo, u.ApiToken, u.ApiSecret);
+        u.SenderIds, u.AllowFreeSenderId, u.DateFrom, u.DateTo, u.ApiToken, u.ApiSecret);
 }

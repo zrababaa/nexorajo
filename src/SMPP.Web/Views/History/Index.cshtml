@@ -130,7 +130,7 @@
                         <td class="text-end">
                             @if (h.CreatedByUserId == CurrentUser.UserId && resendableStatuses.Contains(h.Status))
                             {
-                                <form asp-action="Resend" asp-route-id="@h.Id" method="post" class="d-inline">
+                                <form asp-action="Resend" asp-route-id="@h.Id" asp-route-source="@h.Source" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-sm btn-outline-secondary">@L["Resend"]</button>
                                 </form>

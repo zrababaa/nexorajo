@@ -40,15 +40,23 @@
                         <label asp-for="IsActive" class="form-check-label"></label>
                     </div>
 
-                    <div class="row">
-                        <div class="col-sm-6 mb-3">
-                            <label asp-for="RatePerMessage" class="form-label"></label>
-                            <input asp-for="RatePerMessage" class="form-control" />
-                        </div>
-                        <div class="col-sm-6 mb-3">
-                            <label asp-for="SenderId" class="form-label"></label>
-                            <input asp-for="SenderId" class="form-control" maxlength="20" />
-                        </div>
+                    <div class="mb-3">
+                        <label asp-for="RatePerMessage" class="form-label"></label>
+                        <input asp-for="RatePerMessage" class="form-control" />
+                        <span asp-validation-for="RatePerMessage" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SenderIds" class="form-label"></label>
+                        <input asp-for="SenderIds" class="form-control" maxlength="500" placeholder="NEXORA, MYSHOP" />
+                        <div class="form-text">@L["The account picks one of these when sending."]</div>
+                        <span asp-validation-for="SenderIds" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="AllowFreeSenderId" class="form-check-input" />
+                        <label asp-for="AllowFreeSenderId" class="form-check-label"></label>
+                        <div class="form-text">@L["When off, the account can only send under the Sender IDs above."]</div>
                     </div>
 
                     <div class="row">

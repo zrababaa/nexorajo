@@ -30,11 +30,15 @@ public class CreateAccountViewModel
     public decimal InitialBalance { get; set; }
 
     [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Rate per message")]
-    public decimal RatePerMessage { get; set; }
+    [Display(Name = "Credits per message part")]
+    public decimal RatePerMessage { get; set; } = 1m;
 
-    [Display(Name = "Sender ID")]
-    public string? SenderId { get; set; }
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
+    [Display(Name = "Sender IDs (comma separated)")]
+    public string? SenderIds { get; set; }
+
+    [Display(Name = "Allow the account to type its own Sender ID")]
+    public bool AllowFreeSenderId { get; set; }
 }
 
 public class EditAccountViewModel
@@ -55,11 +59,15 @@ public class EditAccountViewModel
     public bool IsActive { get; set; }
 
     [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Rate per message")]
+    [Display(Name = "Credits per message part")]
     public decimal RatePerMessage { get; set; }
 
-    [Display(Name = "Sender ID")]
-    public string? SenderId { get; set; }
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
+    [Display(Name = "Sender IDs (comma separated)")]
+    public string? SenderIds { get; set; }
+
+    [Display(Name = "Allow the account to type its own Sender ID")]
+    public bool AllowFreeSenderId { get; set; }
 
     [Display(Name = "Valid from")]
     public DateOnly? DateFrom { get; set; }
