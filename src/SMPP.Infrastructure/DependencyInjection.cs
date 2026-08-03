@@ -40,6 +40,8 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<SmppDbContext>()
             .AddDefaultTokenProviders();
 
+        services.AddScoped<DatabaseBootstrapper>();
+
         services.Configure<GatewayOptions>(configuration.GetSection(GatewayOptions.SectionName));
 
         services.AddHttpClient<ISmsGatewayClient, SmsGatewayClient>();

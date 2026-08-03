@@ -1,58 +1,27 @@
 -- Creates the tables the .NET app owns inside the shared legacy database (smpp_bulk_db_new).
 --
--- Why this exists instead of `dotnet ef database update`: the EF migrations describe a database
--- EF created from scratch. Replayed against smpp_bulk_db_new they would RENAME a fresh `Histories`
--- table onto the live `historys`, CREATE TABLE `under_process` over the one the SMPP daemon polls,
--- and add a foreign key on `historys.creater_id` that legacy rows cannot satisfy. MySQL does not
--- roll back DDL, so a failure halfway through leaves the daemon's tables in pieces.
+-- Embedded into SMPP.Infrastructure and run by DatabaseBootstrapper on startup when the app finds
+-- the daemon's tables but no EF migration history. Also runnable by hand:
+--
+--   mysql -u <user> -p smpp_bulk_db_new < CreateAppTables.sql
+--
+-- Why this exists instead of the EF migrations: those describe a database EF created from scratch.
+-- Replayed against smpp_bulk_db_new they would RENAME a fresh `Histories` table onto the live
+-- `historys`, CREATE TABLE `under_process` over the one the SMPP daemon polls, and add a foreign
+-- key on `historys.creater_id` that legacy rows cannot satisfy. MySQL does not roll back DDL, so a
+-- failure halfway leaves the daemon's tables in pieces.
 --
 -- This script therefore creates ONLY the app-owned tables and never touches `historys` or
 -- `under_process` - the app maps onto those two exactly as the daemon already defines them.
--- The final INSERTs mark the three migrations as applied so EF agrees the schema is current.
+-- The final INSERTs mark the baseline migrations as applied so EF agrees the schema is current.
 --
 -- Safe to re-run: every statement is IF NOT EXISTS / INSERT IGNORE.
 --
--- Usage:
---   mysql -u <user> -p smpp_bulk_db_new < 001-create-app-tables.sql
-
--- ---------------------------------------------------------------------------
--- Preflight: table-name case sensitivity
---
--- The legacy schema already has lowercase `campaigns` and `spam_keywords`. The app wants
--- `Campaigns` and `SpamKeywords`. Those coexist only where lower_case_table_names=0 (the Linux
--- default). Where it is 1, `CREATE TABLE IF NOT EXISTS Campaigns` silently resolves to the legacy
--- `campaigns` table, creates nothing, and the app then reads legacy rows through a completely
--- different column set. Stop here rather than let that happen.
--- ---------------------------------------------------------------------------
--- Matches only a name-colliding table that is NOT one of ours, so re-running this script after it
--- has already created `Campaigns`/`SpamKeywords` does not trip its own guard. `ExternalCampaignCode`
--- and `KeywordType` exist in the app's tables and in neither legacy table.
-SET @lctn = @@global.lower_case_table_names;
-SET @legacy_clash = (
-    SELECT COUNT(*) FROM information_schema.TABLES t
-    WHERE t.TABLE_SCHEMA = DATABASE()
-      AND t.TABLE_NAME IN ('campaigns', 'spam_keywords')
-      AND NOT EXISTS (
-          SELECT 1 FROM information_schema.COLUMNS c
-          WHERE c.TABLE_SCHEMA = t.TABLE_SCHEMA
-            AND c.TABLE_NAME = t.TABLE_NAME
-            AND c.COLUMN_NAME IN ('ExternalCampaignCode', 'KeywordType')
-      )
-);
-
-DROP PROCEDURE IF EXISTS smpp_preflight;
-DELIMITER //
-CREATE PROCEDURE smpp_preflight()
-BEGIN
-    -- MESSAGE_TEXT is capped at 128 bytes; anything longer is a hard error, not a truncation.
-    IF @lctn <> 0 AND @legacy_clash > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT =
-            'App tables collide with legacy campaigns/spam_keywords (lower_case_table_names<>0). Resolve before running.';
-    END IF;
-END //
-DELIMITER ;
-CALL smpp_preflight();
-DROP PROCEDURE smpp_preflight;
+-- Statements are split on trailing semicolons by DatabaseBootstrapper, so keep every statement
+-- terminated by a `;` at end of line, and do not introduce DELIMITER blocks or stored procedures -
+-- DELIMITER is a mysql client directive and does not execute over ADO.NET. The table-name case
+-- collision check that used to live here is now in DatabaseBootstrapper, where it runs on every
+-- boot rather than only when someone remembers to run this file.
 
 -- ---------------------------------------------------------------------------
 -- Identity
@@ -225,9 +194,8 @@ CREATE TABLE IF NOT EXISTS `Transactions` (
 -- ---------------------------------------------------------------------------
 -- Migration bookkeeping
 --
--- Marks all three migrations applied without running them, so a later `dotnet ef database update`
--- (or Database:AutoMigrate) does not try to build historys/under_process a second time. New
--- migrations added after this point still apply normally.
+-- Marks the baseline migrations applied without running them, so MigrateAsync does not try to
+-- build historys/under_process a second time. Migrations added after this point apply normally.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
   `MigrationId` varchar(150) CHARACTER SET utf8mb4 NOT NULL,
@@ -235,7 +203,4 @@ CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
   PRIMARY KEY (`MigrationId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT IGNORE INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`) VALUES
-  ('20260726081323_InitialCreate', '8.0.10'),
-  ('20260727050336_AddPaymentReviewNote', '8.0.10'),
-  ('20260803121726_ReplaceOutboundQueueWithUnderProcess', '8.0.10');
+INSERT IGNORE INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`) VALUES ('20260726081323_InitialCreate', '8.0.10'), ('20260727050336_AddPaymentReviewNote', '8.0.10'), ('20260803121726_ReplaceOutboundQueueWithUnderProcess', '8.0.10');

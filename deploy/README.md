@@ -21,23 +21,34 @@ on the server) before starting it — `appsettings.json` ships with both blank.
 the legacy Laravel app and the SMPP daemon use. The daemon polls `under_process` there;
 pointed anywhere else the app will accept sends that never leave the building.
 
-## 3. Create the app's tables in smpp_bulk_db_new
+## 3. Schema (handled automatically at startup)
 
-```
-mysql -u <user> -p smpp_bulk_db_new < deploy/sql/001-create-app-tables.sql
-```
+Nothing to run by hand. `Database:AutoMigrate` ships `true`, and on startup the app picks a
+path based on what it finds:
 
-Run this once, before first start. It creates only the tables the app owns (Identity,
-`Campaigns`, `Payments`, `SpamKeywords`, `Transactions`) and marks the existing migrations
-as applied. It never touches `historys` or `under_process` — the app maps onto those exactly
-as the daemon already defines them. Re-running it is safe.
+- **Shared `smpp_bulk_db_new`** (the daemon's `historys`/`under_process` are present but there
+  is no EF migration history) — creates only the tables the app owns (Identity, `Campaigns`,
+  `Payments`, `SpamKeywords`, `Transactions`) from a script embedded in `SMPP.Infrastructure`,
+  then stamps the baseline migrations as applied. `historys` and `under_process` are never
+  touched; the app maps onto them exactly as the daemon defines them.
+- **A database EF owns outright** (empty, no legacy tables) — applies the migrations normally.
+- **Already current** — does nothing.
 
-Do **not** use `dotnet ef database update` against this database. The migrations were written
-for a database EF created from scratch; replayed here they would rename a new `Histories`
-table onto the live `historys`, recreate `under_process`, and add a foreign key that legacy
-rows cannot satisfy. For the same reason `Database:AutoMigrate` ships as `false` — leave it
-off unless you are pointing at a database EF owns outright. Back up before any schema change:
-MySQL does not roll back DDL.
+Migrations added after the baseline apply normally on both kinds of database.
+
+Do **not** run `dotnet ef database update` against `smpp_bulk_db_new`. The baseline migrations
+were written for a database EF created from scratch; replayed there they would rename a new
+`Histories` table onto the live `historys`, recreate `under_process`, and add a foreign key that
+legacy rows cannot satisfy. That is exactly what the startup path exists to avoid.
+
+The app refuses to start if MySQL has `lower_case_table_names` set to a non-zero value while
+legacy `campaigns`/`spam_keywords` tables exist — its `Campaigns`/`SpamKeywords` tables would
+silently resolve to the legacy ones. Check with `SELECT @@global.lower_case_table_names`.
+
+Back up before the first start regardless: MySQL does not roll back DDL.
+
+To take the schema into your own hands, set `Database__AutoMigrate=false` and apply
+`src/SMPP.Infrastructure/Persistence/Scripts/CreateAppTables.sql` yourself.
 
 ## 4. Install the systemd service
 
