@@ -48,11 +48,13 @@ public class DeliveryStatusController : ControllerBase
             return BadRequest(new { status = "error", message = $"Unrecognised status code '{status}'." });
         }
 
+        // updated_at is left to MySQL's ON UPDATE CURRENT_TIMESTAMP rather than stamped here.
+        // Legacy runs on Asia/Amman and its Eloquent update() writes local time, so a
+        // DateTime.UtcNow from this app would land three hours behind every row the daemon
+        // writes alongside it.
         var updated = await _db.Histories
             .Where(h => h.ExternalMessageId == messageId)
-            .ExecuteUpdateAsync(set => set
-                .SetProperty(h => h.Status, mapped)
-                .SetProperty(h => h.UpdatedAt, DateTime.UtcNow), ct);
+            .ExecuteUpdateAsync(set => set.SetProperty(h => h.Status, mapped), ct);
 
         return Ok(new { status = "success", updated });
     }

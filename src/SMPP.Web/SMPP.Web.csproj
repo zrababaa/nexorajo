@@ -20,4 +20,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!--
+    Keep local-dev credentials and the settings template out of the server bundle. Deleting after
+    publish rather than excluding as Content, so `dotnet run` still picks both up locally.
+  -->
+  <Target Name="StripNonProductionSettings" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)appsettings.Development.json;$(PublishDir)appsettings.Production.example.json" />
+  </Target>
+
 </Project>

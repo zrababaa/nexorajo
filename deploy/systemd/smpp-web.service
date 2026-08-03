@@ -14,10 +14,10 @@ User=www-data
 Group=www-data
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=ASPNETCORE_URLS=http://127.0.0.1:5083
-# Point at the same database the legacy Laravel app and the SMPP daemon use - the daemon polls
-# under_process there, so a separate database means nothing ever sends. Uncomment and fill in:
-# Environment=ConnectionStrings__Default=Server=127.0.0.1;Port=3306;Database=smpp_bulk_db_new;User=...;Password=...;TreatTinyAsBoolean=true;
-# Environment=SmsGateway__BaseUrl=http://192.168.102.219:8000/
+# Connection string, gateway URL and seed passwords live in appsettings.Production.json, which
+# ASPNETCORE_ENVIRONMENT=Production above makes ASP.NET load on top of appsettings.json. That file
+# is gitignored and ships inside the publish bundle - see appsettings.Production.example.json.
+# Anything set here would override it, so leave it empty unless you mean to.
 
 [Install]
 WantedBy=multi-user.target

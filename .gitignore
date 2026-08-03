@@ -18,3 +18,7 @@ Thumbs.db
 
 ## User-uploaded content (campaign CSVs, template CSVs)
 src/SMPP.Web/wwwroot/uploads/
+
+## Real secrets. Holds the live DB password and the superadmin seed password, so it must never
+## be committed - copy appsettings.Production.example.json and fill it in locally instead.
+src/SMPP.Web/appsettings.Production.json

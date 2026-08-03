@@ -13,13 +13,27 @@ rsync -avz publish/linux-x64/ user@server:/var/www/smpp-web/
 ssh user@server "chmod +x /var/www/smpp-web/SMPP.Web && chown -R www-data:www-data /var/www/smpp-web"
 ```
 
-Set real values for `ConnectionStrings__Default` and `SmsGateway__BaseUrl` in
-`deploy/systemd/smpp-web.service` (or in `/etc/systemd/system/smpp-web.service`
-on the server) before starting it — `appsettings.json` ships with both blank.
+Configuration lives in **`src/SMPP.Web/appsettings.Production.json`**, not in environment
+variables. `ASPNETCORE_ENVIRONMENT=Production` (set by the systemd unit) makes ASP.NET load
+it on top of `appsettings.json`, and `dotnet publish` copies it into the bundle.
 
-`ConnectionStrings__Default` must point at **`smpp_bulk_db_new`** — the same database
-the legacy Laravel app and the SMPP daemon use. The daemon polls `under_process` there;
-pointed anywhere else the app will accept sends that never leave the building.
+It is gitignored, because it holds the live database password and the superadmin seed
+password. On a fresh clone, create it from the template:
+
+```
+cp src/SMPP.Web/appsettings.Production.example.json src/SMPP.Web/appsettings.Production.json
+# then fill in the REPLACE_ME values
+```
+
+Fill it in **before** publishing — the file is baked into the bundle, so treat the bundle
+and the zip as carrying live credentials.
+
+`ConnectionStrings:Default` must point at **`smpp_bulk_db_new`** — the same database the
+legacy Laravel app and the SMPP daemon use. The daemon polls `under_process` there; pointed
+anywhere else the app will accept sends that never leave the building.
+
+`appsettings.Development.json` and the `.example.json` template are deleted from the publish
+output by a post-publish target, so local credentials never reach the server.
 
 ## 3. Schema (handled automatically at startup)
 
