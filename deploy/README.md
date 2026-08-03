@@ -17,7 +17,29 @@ Set real values for `ConnectionStrings__Default` and `SmsGateway__BaseUrl` in
 `deploy/systemd/smpp-web.service` (or in `/etc/systemd/system/smpp-web.service`
 on the server) before starting it — `appsettings.json` ships with both blank.
 
-## 3. Install the systemd service
+`ConnectionStrings__Default` must point at **`smpp_bulk_db_new`** — the same database
+the legacy Laravel app and the SMPP daemon use. The daemon polls `under_process` there;
+pointed anywhere else the app will accept sends that never leave the building.
+
+## 3. Create the app's tables in smpp_bulk_db_new
+
+```
+mysql -u <user> -p smpp_bulk_db_new < deploy/sql/001-create-app-tables.sql
+```
+
+Run this once, before first start. It creates only the tables the app owns (Identity,
+`Campaigns`, `Payments`, `SpamKeywords`, `Transactions`) and marks the existing migrations
+as applied. It never touches `historys` or `under_process` — the app maps onto those exactly
+as the daemon already defines them. Re-running it is safe.
+
+Do **not** use `dotnet ef database update` against this database. The migrations were written
+for a database EF created from scratch; replayed here they would rename a new `Histories`
+table onto the live `historys`, recreate `under_process`, and add a foreign key that legacy
+rows cannot satisfy. For the same reason `Database:AutoMigrate` ships as `false` — leave it
+off unless you are pointing at a database EF owns outright. Back up before any schema change:
+MySQL does not roll back DDL.
+
+## 4. Install the systemd service
 
 ```
 sudo cp deploy/systemd/smpp-web.service /etc/systemd/system/
@@ -28,7 +50,7 @@ sudo systemctl status smpp-web
 
 Kestrel listens on `127.0.0.1:5083` only — not exposed publicly, Apache is the front door.
 
-## 4. Install the Apache vhost
+## 5. Install the Apache vhost
 
 ```
 sudo a2enmod proxy proxy_http headers rewrite
@@ -51,3 +73,12 @@ already in `deploy/apache/smpp-web.conf`.
 - The MySQL DB and any file-upload storage (`uploads/payments/`) are not part
   of the publish output — provision the DB separately and make sure the
   service user (`www-data`) can write to the app's `wwwroot/uploads` path.
+- The app shares `smpp_bulk_db_new` with the legacy Laravel app. It owns its own
+  tables outright, and reads/writes `historys` and `under_process` alongside the
+  daemon. It does not read the legacy `users`, `campaigns`, or `spam_keywords`
+  tables — accounts live in `AspNetUsers` and are separate from legacy logins.
+- Because accounts are separate, `historys` rows written before the cutover carry
+  `creater_id` values from the legacy `users` table, which do not correspond to
+  `AspNetUsers.Id`. Pre-cutover history will therefore be attributed to the wrong
+  account (or to none) in the History page. Decide up front whether to map the old
+  ids across, or to show only rows created after the cutover.

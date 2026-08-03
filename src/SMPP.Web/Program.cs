@@ -61,8 +61,16 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<SmppDbContext>();
-    await db.Database.MigrateAsync();
+    // Off by default: the app now shares smpp_bulk_db_new with the legacy Laravel app and the
+    // SMPP daemon, and EF's migration history does not describe the legacy tables it would find
+    // there. Applying migrations blind would rewrite historys/under_process out from under the
+    // daemon, and MySQL does not roll back DDL. Apply schema changes with a reviewed script
+    // instead (see deploy/README.md), or set Database:AutoMigrate=true on a database EF owns.
+    if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
+    {
+        var db = scope.ServiceProvider.GetRequiredService<SmppDbContext>();
+        await db.Database.MigrateAsync();
+    }
 
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }

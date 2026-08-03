@@ -14,8 +14,10 @@ User=www-data
 Group=www-data
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=ASPNETCORE_URLS=http://127.0.0.1:5083
-# Environment=ConnectionStrings__Default=Server=...;Database=smpp_dotnet;User=...;Password=...;
-# Environment=SmsGateway__BaseUrl=https://your-gateway.example.com
+# Point at the same database the legacy Laravel app and the SMPP daemon use - the daemon polls
+# under_process there, so a separate database means nothing ever sends. Uncomment and fill in:
+# Environment=ConnectionStrings__Default=Server=127.0.0.1;Port=3306;Database=smpp_bulk_db_new;User=...;Password=...;TreatTinyAsBoolean=true;
+# Environment=SmsGateway__BaseUrl=http://192.168.102.219:8000/
 
 [Install]
 WantedBy=multi-user.target
