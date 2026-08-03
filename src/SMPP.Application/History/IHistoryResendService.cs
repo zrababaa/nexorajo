@@ -4,8 +4,8 @@ namespace SMPP.Application.History;
 
 /// <summary>
 /// Re-queues a single History row (Failed/Undelivered/Expired only) through the same
-/// SendCore pipeline as Quick/Bulk Send - spam-filters, debits, and enqueues it as a brand
-/// new OutboundMessage/History entry rather than mutating the original row.
+/// SendCore pipeline as Quick/Bulk Send - spam-filters, debits, and hands it to the SMPP
+/// daemon as a brand new single-recipient batch rather than mutating the original row.
 /// </summary>
 public interface IHistoryResendService
 {

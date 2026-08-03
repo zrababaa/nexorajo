@@ -23,6 +23,6 @@ public class BulkSendService : IBulkSendService
             ?? throw new AppException("Campaign not found.");
 
         var numbers = campaign.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        return await _sendCore.ExecuteAsync(userId, numbers, request.Message, request.SenderId, MessageSource.BulkSend, TransactionSource.BulkSend, ct);
+        return await _sendCore.ExecuteAsync(userId, numbers, request.Message, request.SenderId, MessageSource.BulkSend, TransactionSource.BulkSend, ct, campaign.Name);
     }
 }

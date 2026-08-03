@@ -14,7 +14,6 @@ using SMPP.Application.Sending;
 using SMPP.Application.SpamKeywords;
 using SMPP.Infrastructure.Files;
 using SMPP.Infrastructure.Identity;
-using SMPP.Infrastructure.Outbound;
 using SMPP.Infrastructure.Persistence;
 using SMPP.Infrastructure.Segmenting;
 using SMPP.Infrastructure.Services;
@@ -42,7 +41,6 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.Configure<GatewayOptions>(configuration.GetSection(GatewayOptions.SectionName));
-        services.Configure<OutboundDispatchOptions>(configuration.GetSection(OutboundDispatchOptions.SectionName));
 
         services.AddHttpClient<ISmsGatewayClient, SmsGatewayClient>();
 
@@ -65,8 +63,6 @@ public static class DependencyInjection
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IPublicApiAuthenticator, PublicApiAuthenticator>();
         services.AddScoped<IPublicApiSendService, PublicApiSendService>();
-
-        services.AddHostedService<OutboundMessageWorker>();
 
         return services;
     }

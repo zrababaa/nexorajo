@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SMPP.Application.Abstractions;
@@ -6,10 +7,14 @@ using SMPP.Application.Abstractions;
 namespace SMPP.Infrastructure.SmsGateway;
 
 /// <summary>
-/// Thin HTTP client over the external, out-of-repo SMS gateway. This app never delivers
-/// messages itself - it only calls this gateway's preflight filter and send endpoints, and the
-/// OutboundMessageWorker is the only caller. Kept behind ISmsGatewayClient so the gateway
-/// can be swapped/mocked without touching any send flow.
+/// Thin HTTP client over the external, out-of-repo gateway at legacy's SMPP_API_URL. Despite
+/// the name that host is not how messages are sent - sending happens by inserting an
+/// UnderProcess row for the SMPP daemon to drain. The only live endpoint here is the
+/// spam/URL preflight filter, which is exactly how legacy used it too.
+///
+/// Wire contract (verb, param names, JSON casing) is reverse-engineered from the legacy Laravel
+/// app's curl calls (app/Http/Controllers/Whatsapp.php) against this same gateway - it is an
+/// external system we don't own, so it must match exactly, not what would be more idiomatic here.
 /// </summary>
 public class SmsGatewayClient : ISmsGatewayClient
 {
@@ -33,17 +38,18 @@ public class SmsGatewayClient : ISmsGatewayClient
         {
             var query = new Dictionary<string, string?>
             {
-                ["message"] = request.Message,
-                ["include"] = string.Join(",", request.IncludeKeywords),
-                ["exclude"] = string.Join(",", request.ExcludeKeywords),
-                ["urls"] = string.Join(",", request.BlockedUrls),
+                ["inc_keyword"] = string.Join(",", request.IncludeKeywords),
+                ["exc_keyword"] = string.Join(",", request.ExcludeKeywords),
+                ["exc_urls"] = string.Join(",", request.BlockedUrls),
+                ["msg"] = request.Message,
             };
-            var uri = QueryHelpers("ulr-filter", query);
+            var uri = BuildQuery("ulr-filter", query);
 
-            var response = await _httpClient.GetFromJsonAsync<GatewayFilterResponse>(uri, ct);
+            using var response = await _httpClient.PostAsync(uri, content: null, ct);
+            var body = await response.Content.ReadFromJsonAsync<GatewayFilterResponse>(cancellationToken: ct);
 
-            var matchedKeywords = response?.UniqueElements ?? Array.Empty<string>();
-            var matchedUrls = response?.UrlUniqueElements ?? Array.Empty<string>();
+            var matchedKeywords = body?.UniqueElements ?? Array.Empty<string>();
+            var matchedUrls = body?.UrlUniqueElements ?? Array.Empty<string>();
 
             return new SpamFilterResult(
                 IsBlocked: matchedKeywords.Length > 0 || matchedUrls.Length > 0,
@@ -57,39 +63,7 @@ public class SmsGatewayClient : ISmsGatewayClient
         }
     }
 
-    public async Task<GatewaySendResult> SendAsync(string message, string mobileNumber, string senderId, CancellationToken ct = default)
-    {
-        var query = new Dictionary<string, string?>
-        {
-            ["message"] = message,
-            ["mobiles_numbers"] = mobileNumber,
-            ["sender_id"] = senderId,
-        };
-        var uri = QueryHelpers(string.Empty, query);
-
-        var response = await _httpClient.GetAsync(uri, ct);
-        var raw = await response.Content.ReadAsStringAsync(ct);
-
-        return new GatewaySendResult(
-            Success: response.IsSuccessStatusCode,
-            ExternalMessageId: ExtractMessageId(raw),
-            RawResponse: raw);
-    }
-
-    private static string? ExtractMessageId(string raw)
-    {
-        try
-        {
-            var parsed = System.Text.Json.JsonSerializer.Deserialize<GatewaySendResponse>(raw);
-            return parsed?.MessageId;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static string QueryHelpers(string path, Dictionary<string, string?> query)
+    private static string BuildQuery(string path, Dictionary<string, string?> query)
     {
         var pairs = query
             .Where(kv => !string.IsNullOrEmpty(kv.Value))
@@ -100,12 +74,10 @@ public class SmsGatewayClient : ISmsGatewayClient
 
     private class GatewayFilterResponse
     {
+        [JsonPropertyName("unique_elements")]
         public string[]? UniqueElements { get; set; }
-        public string[]? UrlUniqueElements { get; set; }
-    }
 
-    private class GatewaySendResponse
-    {
-        public string? MessageId { get; set; }
+        [JsonPropertyName("url_unique_elements")]
+        public string[]? UrlUniqueElements { get; set; }
     }
 }

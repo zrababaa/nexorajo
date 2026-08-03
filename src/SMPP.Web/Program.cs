@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
 using SMPP.Infrastructure;
 using SMPP.Infrastructure.Files;
+using SMPP.Infrastructure.Persistence;
 using SMPP.Web;
 using SMPP.Web.Filters;
 using SMPP.Web.Seed;
@@ -59,6 +61,9 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<SmppDbContext>();
+    await db.Database.MigrateAsync();
+
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
