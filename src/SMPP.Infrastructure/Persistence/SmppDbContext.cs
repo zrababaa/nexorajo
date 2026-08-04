@@ -21,6 +21,7 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<AdminBudget> AdminBudgets => Set<AdminBudget>();
     public DbSet<AdminBudgetLog> AdminBudgetLogs => Set<AdminBudgetLog>();
+    public DbSet<SpamBlockedAttempt> SpamBlockedAttempts => Set<SpamBlockedAttempt>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

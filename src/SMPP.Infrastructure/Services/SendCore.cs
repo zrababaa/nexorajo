@@ -63,7 +63,9 @@ public class SendCore
         var filterResult = await _spamFilter.CheckAsync(message, ct);
         if (filterResult.IsBlocked)
         {
-            throw new SpamBlockedException(filterResult.MatchedKeywords.Concat(filterResult.MatchedUrls).ToList());
+            var matchedTerms = filterResult.MatchedKeywords.Concat(filterResult.MatchedUrls).ToList();
+            await _spamFilter.LogBlockedAttemptAsync(userId, source, senderId, numbers.Count, matchedTerms, message, ct);
+            throw new SpamBlockedException(matchedTerms);
         }
 
         senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);

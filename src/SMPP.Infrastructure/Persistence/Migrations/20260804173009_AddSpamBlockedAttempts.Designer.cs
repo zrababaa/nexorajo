@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SMPP.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using SMPP.Infrastructure.Persistence;
 namespace SMPP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SmppDbContext))]
-    partial class SmppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260804173009_AddSpamBlockedAttempts")]
+    partial class AddSpamBlockedAttempts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

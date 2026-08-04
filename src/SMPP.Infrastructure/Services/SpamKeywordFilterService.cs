@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
+using SMPP.Domain.Entities;
 using SMPP.Domain.Enums;
 using SMPP.Infrastructure.Persistence;
 
@@ -56,5 +57,26 @@ public class SpamKeywordFilterService : ISpamKeywordFilterService
             IsBlocked: matchedKeywords.Count > 0 || matchedUrls.Count > 0,
             MatchedKeywords: matchedKeywords,
             MatchedUrls: matchedUrls);
+    }
+
+    public async Task LogBlockedAttemptAsync(
+        int userId,
+        MessageSource source,
+        string senderId,
+        int recipientCount,
+        IReadOnlyCollection<string> matchedTerms,
+        string message,
+        CancellationToken ct = default)
+    {
+        _db.SpamBlockedAttempts.Add(new SpamBlockedAttempt
+        {
+            UserId = userId,
+            Source = source,
+            SenderId = senderId,
+            RecipientCount = recipientCount,
+            MatchedTerms = string.Join(", ", matchedTerms),
+            Message = message,
+        });
+        await _db.SaveChangesAsync(ct);
     }
 }

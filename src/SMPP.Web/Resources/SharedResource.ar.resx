@@ -122,6 +122,9 @@
   <data name="Add" xml:space="preserve"><value>إضافة</value></data>
   <data name="Added" xml:space="preserve"><value>تمت الإضافة</value></data>
   <data name="Actions" xml:space="preserve"><value>الإجراءات</value></data>
+  <data name="Blocked Attempts" xml:space="preserve"><value>المحاولات المحظورة</value></data>
+  <data name="Matched Terms" xml:space="preserve"><value>الكلمات المطابقة</value></data>
+  <data name="No blocked attempts yet." xml:space="preserve"><value>لا توجد محاولات محظورة بعد.</value></data>
   <data name="No keywords configured." xml:space="preserve"><value>لا توجد كلمات مُعدّة.</value></data>
   <data name="Delete" xml:space="preserve"><value>حذف</value></data>
   <data name="Enabled" xml:space="preserve"><value>مفعّلة</value></data>

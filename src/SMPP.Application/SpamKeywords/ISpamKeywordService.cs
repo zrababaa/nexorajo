@@ -1,3 +1,5 @@
+using SMPP.Application.Common;
+
 namespace SMPP.Application.SpamKeywords;
 
 public interface ISpamKeywordService
@@ -10,4 +12,7 @@ public interface ISpamKeywordService
 
     /// <summary>Flips a keyword between enabled and disabled without deleting it.</summary>
     Task SetEnabledAsync(int id, bool isEnabled, CancellationToken ct = default);
+
+    /// <summary>Sends rejected by the content filter - see ISpamKeywordFilterService.LogBlockedAttemptAsync.</summary>
+    Task<PagedResult<SpamBlockedAttemptRowDto>> GetBlockedAttemptsAsync(int page, int pageSize, CancellationToken ct = default);
 }

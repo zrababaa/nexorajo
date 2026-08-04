@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SMPP.Application.Common;
 using SMPP.Application.SpamKeywords;
 using SMPP.Domain.Entities;
 using SMPP.Infrastructure.Persistence;
@@ -51,5 +52,42 @@ public class SpamKeywordService : ISpamKeywordService
             keyword.IsEnabled = isEnabled;
             await _db.SaveChangesAsync(ct);
         }
+    }
+
+    public async Task<PagedResult<SpamBlockedAttemptRowDto>> GetBlockedAttemptsAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _db.SpamBlockedAttempts.AsNoTracking().OrderByDescending(a => a.CreatedAt);
+
+        var totalCount = await query.CountAsync(ct);
+        var rows = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        var userIds = rows.Select(r => r.UserId).Distinct().ToList();
+        var usernames = await _db.Users
+            .AsNoTracking()
+            .Where(u => userIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.UserName!, ct);
+
+        var items = rows
+            .Select(r => new SpamBlockedAttemptRowDto(
+                r.Id,
+                r.CreatedAt,
+                usernames.GetValueOrDefault(r.UserId, r.UserId.ToString()),
+                r.Source,
+                r.SenderId,
+                r.RecipientCount,
+                r.MatchedTerms,
+                r.Message))
+            .ToList();
+
+        return new PagedResult<SpamBlockedAttemptRowDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
     }
 }
