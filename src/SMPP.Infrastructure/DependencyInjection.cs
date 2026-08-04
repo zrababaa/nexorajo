@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Accounts;
+using SMPP.Application.AdminBudget;
 using SMPP.Application.Campaigns;
 using SMPP.Application.Dashboard;
 using SMPP.Application.History;
@@ -45,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<ISegmentCounter, SegmentCounter>();
         services.AddScoped<ISendPolicyService, SendPolicyService>();
         services.AddScoped<IBalanceLedgerService, BalanceLedgerService>();
+        services.AddScoped<IAdminBudgetService, AdminBudgetService>();
         services.AddScoped<IUserScopeResolver, UserScopeResolver>();
         services.AddScoped<ICampaignNumberParser, CampaignNumberParser>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();

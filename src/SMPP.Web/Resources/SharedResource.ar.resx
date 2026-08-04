@@ -124,6 +124,23 @@
   <data name="Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="No keywords configured." xml:space="preserve"><value>لا توجد كلمات مُعدّة.</value></data>
   <data name="Delete" xml:space="preserve"><value>حذف</value></data>
+  <data name="Enabled" xml:space="preserve"><value>مفعّلة</value></data>
+  <data name="Disabled" xml:space="preserve"><value>معطّلة</value></data>
+  <data name="Enable" xml:space="preserve"><value>تفعيل</value></data>
+  <data name="Disable" xml:space="preserve"><value>تعطيل</value></data>
+  <data name="Admin Budget" xml:space="preserve"><value>رصيد المدير</value></data>
+  <data name="Remaining budget" xml:space="preserve"><value>الرصيد المتبقي</value></data>
+  <data name="Edit budget" xml:space="preserve"><value>تعديل الرصيد</value></data>
+  <data name="New budget total" xml:space="preserve"><value>إجمالي الرصيد الجديد</value></data>
+  <data name="Update budget" xml:space="preserve"><value>تحديث الرصيد</value></data>
+  <data name="Budget log" xml:space="preserve"><value>سجل تعديلات الرصيد</value></data>
+  <data name="Performed by" xml:space="preserve"><value>تم بواسطة</value></data>
+  <data name="Change" xml:space="preserve"><value>التغيير</value></data>
+  <data name="Balance after" xml:space="preserve"><value>الرصيد بعد التعديل</value></data>
+  <data name="No budget changes yet." xml:space="preserve"><value>لا توجد تعديلات على الرصيد بعد.</value></data>
+  <data name="Increased" xml:space="preserve"><value>زيادة</value></data>
+  <data name="Decreased" xml:space="preserve"><value>نقصان</value></data>
+  <data name="Accounts Logs" xml:space="preserve"><value>سجلات الحسابات</value></data>
   <data name="Recent Quick Send history" xml:space="preserve"><value>سجل الإرسال السريع الأخير</value></data>
   <data name="Resend" xml:space="preserve"><value>إعادة الإرسال</value></data>
   <data name="Use a saved list" xml:space="preserve"><value>استخدام قائمة محفوظة</value></data>

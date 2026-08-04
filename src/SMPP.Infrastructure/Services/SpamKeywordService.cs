@@ -17,7 +17,7 @@ public class SpamKeywordService : ISpamKeywordService
     public async Task<IReadOnlyList<SpamKeywordListItemDto>> GetAllAsync(CancellationToken ct = default) =>
         await _db.SpamKeywords
             .OrderByDescending(k => k.CreatedAt)
-            .Select(k => new SpamKeywordListItemDto(k.Id, k.Keyword, k.KeywordType, k.CreatedAt))
+            .Select(k => new SpamKeywordListItemDto(k.Id, k.Keyword, k.KeywordType, k.IsEnabled, k.CreatedAt))
             .ToListAsync(ct);
 
     public async Task<int> CreateAsync(int createdByUserId, CreateSpamKeywordRequest request, CancellationToken ct = default)
@@ -39,6 +39,16 @@ public class SpamKeywordService : ISpamKeywordService
         if (keyword is not null)
         {
             _db.SpamKeywords.Remove(keyword);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+
+    public async Task SetEnabledAsync(int id, bool isEnabled, CancellationToken ct = default)
+    {
+        var keyword = await _db.SpamKeywords.FindAsync(new object[] { id }, ct);
+        if (keyword is not null)
+        {
+            keyword.IsEnabled = isEnabled;
             await _db.SaveChangesAsync(ct);
         }
     }

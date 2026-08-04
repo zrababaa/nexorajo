@@ -48,4 +48,13 @@ public class SpamKeywordsController : Controller
         TempData["Success"] = "Keyword deleted.";
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleEnabled(int id, bool isEnabled, CancellationToken ct)
+    {
+        await _spamKeywordService.SetEnabledAsync(id, isEnabled, ct);
+        TempData["Success"] = isEnabled ? "Keyword enabled." : "Keyword disabled.";
+        return RedirectToAction(nameof(Index));
+    }
 }

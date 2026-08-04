@@ -33,10 +33,6 @@
                         <select asp-for="Method" class="form-select" asp-items="Html.GetEnumSelectList<PaymentMethod>()"></select>
                     </div>
                     <div class="mb-3">
-                        <label asp-for="TransactionRef" class="form-label"></label>
-                        <input asp-for="TransactionRef" class="form-control" placeholder="@L["UTR / transaction id"]" />
-                    </div>
-                    <div class="mb-3">
                         <label asp-for="ProofFile" class="form-label"></label>
                         <input asp-for="ProofFile" class="form-control" type="file" accept="image/*,.pdf" />
                     </div>

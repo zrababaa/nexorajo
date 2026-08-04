@@ -36,6 +36,7 @@ public class SpamKeywordFilterService : ISpamKeywordFilterService
 
         var keywords = await _db.SpamKeywords
             .AsNoTracking()
+            .Where(k => k.IsEnabled)
             .Select(k => new { k.Keyword, k.KeywordType })
             .ToListAsync(ct);
 

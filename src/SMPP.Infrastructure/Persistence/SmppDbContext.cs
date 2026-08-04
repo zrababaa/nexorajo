@@ -19,6 +19,8 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<QuickSendHistory> QuickSendHistories => Set<QuickSendHistory>();
     public DbSet<UnderProcess> UnderProcessBatches => Set<UnderProcess>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<AdminBudget> AdminBudgets => Set<AdminBudget>();
+    public DbSet<AdminBudgetLog> AdminBudgetLogs => Set<AdminBudgetLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

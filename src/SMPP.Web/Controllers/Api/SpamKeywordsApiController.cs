@@ -59,4 +59,13 @@ public class SpamKeywordsApiController : ApiControllerBase
         await _keywords.DeleteAsync(id, ct);
         return NoContent();
     }
+
+    /// <summary>Enables or disables a rule without deleting it.</summary>
+    [HttpPatch("{id:int}/enabled")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> SetEnabled(int id, [FromQuery] bool isEnabled, CancellationToken ct)
+    {
+        await _keywords.SetEnabledAsync(id, isEnabled, ct);
+        return NoContent();
+    }
 }

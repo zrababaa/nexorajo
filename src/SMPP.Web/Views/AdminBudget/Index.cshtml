@@ -1,0 +1,82 @@
+@using SMPP.Domain.Enums
+@using SMPP.Web.ViewModels.Shared
+@model SMPP.Web.ViewModels.AdminBudget.AdminBudgetPageViewModel
+@{
+    ViewData["Title"] = L["Admin Budget"];
+
+    string KindBadge(TransactionKind kind) => kind == TransactionKind.Credit ? "bg-success" : "bg-secondary";
+    string KindLabel(TransactionKind kind) => kind == TransactionKind.Credit ? L["Increased"].Value : L["Decreased"].Value;
+}
+
+<h1 class="h4 mb-4">@L["Admin Budget"]</h1>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                <div class="text-muted small">@L["Remaining budget"]</div>
+                <div class="display-6 fw-semibold">@Model.Balance.ToString("N0")</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-white">@L["Edit budget"]</div>
+            <div class="card-body">
+                <form asp-action="SetBalance" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Form.NewBalance" class="form-label"></label>
+                        <input asp-for="Form.NewBalance" class="form-control" step="1" />
+                        <span asp-validation-for="Form.NewBalance" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Form.Note" class="form-label"></label>
+                        <textarea asp-for="Form.Note" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">@L["Update budget"]</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white">@L["Budget log"]</div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>@L["Date (UTC)"]</th>
+                            <th>@L["Performed by"]</th>
+                            <th>@L["Change"]</th>
+                            <th class="text-end">@L["Amount"]</th>
+                            <th class="text-end">@L["Balance after"]</th>
+                            <th>@L["Account"]</th>
+                            <th>@L["Note"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Log.Items.Any())
+                        {
+                            <tr><td colspan="7" class="text-center text-muted py-4">@L["No budget changes yet."]</td></tr>
+                        }
+                        @foreach (var l in Model.Log.Items)
+                        {
+                            <tr>
+                                <td>@l.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@l.PerformedByUsername</td>
+                                <td><span class="badge @KindBadge(l.Kind)">@KindLabel(l.Kind)</span></td>
+                                <td class="text-end">@l.Amount.ToString("N0")</td>
+                                <td class="text-end">@l.BalanceAfter.ToString("N0")</td>
+                                <td>@l.RelatedUsername</td>
+                                <td class="small text-muted">@l.Note</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <partial name="_Pagination" model="@(new PaginationInfo(Model.Log.PageNumber, Model.Log.TotalPages))" />
+            </div>
+        </div>
+    </div>
+</div>

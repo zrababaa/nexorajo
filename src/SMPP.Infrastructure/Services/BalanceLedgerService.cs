@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using SMPP.Application.Abstractions;
+using SMPP.Application.AdminBudget;
 using SMPP.Application.Common;
 using SMPP.Domain.Entities;
 using SMPP.Domain.Enums;
@@ -11,15 +12,19 @@ namespace SMPP.Infrastructure.Services;
 
 /// <summary>
 /// The single entry point for every balance mutation in the app - see IBalanceLedgerService.
-/// No other code should write to ApplicationUser.Balance directly.
+/// No other code should write to ApplicationUser.Balance directly. A credit also draws the same
+/// amount from the shared AdminBudget pool (see IAdminBudgetService) - a grant that would take
+/// the pool below zero is rejected the same way an insufficient user balance is.
 /// </summary>
 public class BalanceLedgerService : IBalanceLedgerService
 {
     private readonly SmppDbContext _db;
+    private readonly IAdminBudgetService _adminBudget;
 
-    public BalanceLedgerService(SmppDbContext db)
+    public BalanceLedgerService(SmppDbContext db, IAdminBudgetService adminBudget)
     {
         _db = db;
+        _adminBudget = adminBudget;
     }
 
     public async Task<decimal> ApplyAsync(BalanceLedgerRequest request, CancellationToken ct = default)
@@ -47,6 +52,11 @@ public class BalanceLedgerService : IBalanceLedgerService
             }
 
             user.Balance = newBalance;
+
+            if (request.Kind == TransactionKind.Credit)
+            {
+                await _adminBudget.ReserveAsync(request.PerformedByUserId, request.UserId, request.Amount, request.Source, ct);
+            }
 
             _db.Transactions.Add(new Transaction
             {

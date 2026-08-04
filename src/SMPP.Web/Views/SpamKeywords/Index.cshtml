@@ -41,6 +41,7 @@
                         <tr>
                             <th>@L["Keyword"]</th>
                             <th>@L["Type"]</th>
+                            <th>@L["Status"]</th>
                             <th>@L["Added"]</th>
                             <th class="text-end">@L["Actions"]</th>
                         </tr>
@@ -48,15 +49,36 @@
                     <tbody>
                         @if (!Model.Any())
                         {
-                            <tr><td colspan="4" class="text-center text-muted py-4">@L["No keywords configured."]</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">@L["No keywords configured."]</td></tr>
                         }
                         @foreach (var k in Model)
                         {
                             <tr>
                                 <td>@k.Keyword</td>
                                 <td>@L[k.KeywordType.ToString()]</td>
+                                <td>
+                                    @if (k.IsEnabled)
+                                    {
+                                        <span class="badge bg-success">@L["Enabled"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@L["Disabled"]</span>
+                                    }
+                                </td>
                                 <td>@k.CreatedAt.ToString("yyyy-MM-dd")</td>
                                 <td class="text-end">
+                                    <form asp-action="ToggleEnabled" asp-route-id="@k.Id" asp-route-isEnabled="@(!k.IsEnabled)" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        @if (k.IsEnabled)
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">@L["Disable"]</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-outline-success">@L["Enable"]</button>
+                                        }
+                                    </form>
                                     <form asp-action="Delete" asp-route-id="@k.Id" method="post" class="d-inline" onsubmit="return confirm('@confirmDelete');">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>

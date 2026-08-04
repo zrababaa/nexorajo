@@ -54,6 +54,12 @@
             <a class="nav-link @(IsActive("SpamKeywords") ? "active" : "")" asp-controller="SpamKeywords" asp-action="Index">
                 @L["Content Filter"]
             </a>
+            <a class="nav-link @(IsActive("AdminBudget") ? "active" : "")" asp-controller="AdminBudget" asp-action="Index">
+                @L["Admin Budget"]
+            </a>
+            <a class="nav-link @(IsActive("AccountsLogs") ? "active" : "")" asp-controller="AccountsLogs" asp-action="Index">
+                @L["Accounts Logs"]
+            </a>
         }
     </div>
 </nav>

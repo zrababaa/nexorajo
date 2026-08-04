@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Accounts;
+using SMPP.Application.AdminBudget;
 using SMPP.Application.Common;
 using SMPP.Domain.Enums;
 using SMPP.Domain.Pricing;
@@ -13,11 +14,13 @@ public class AccountService : IAccountService
 {
     private readonly SmppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IAdminBudgetService _adminBudget;
 
-    public AccountService(SmppDbContext db, UserManager<ApplicationUser> userManager)
+    public AccountService(SmppDbContext db, UserManager<ApplicationUser> userManager, IAdminBudgetService adminBudget)
     {
         _db = db;
         _userManager = userManager;
+        _adminBudget = adminBudget;
     }
 
     public async Task<PagedResult<AccountListItemDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
@@ -82,6 +85,13 @@ public class AccountService : IAccountService
         }
 
         await _userManager.AddToRoleAsync(user, RoleNames.Account);
+
+        if (request.InitialBalance > 0)
+        {
+            await _adminBudget.ReserveAsync(createdByUserId, user.Id, request.InitialBalance, TransactionSource.ManualAdjustment, ct);
+            await _db.SaveChangesAsync(ct);
+        }
+
         return user.Id;
     }
 
