@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Accounts;
 using SMPP.Application.Common;
 using SMPP.Domain.Enums;
+using SMPP.Domain.Pricing;
 using SMPP.Infrastructure.Identity;
 using SMPP.Infrastructure.Persistence;
 
@@ -29,7 +30,7 @@ public class AccountService : IAccountService
         var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(u => new AccountListItemDto(u.Id, u.UserName!, u.Email!, u.FullName, u.IsActive, u.Balance, u.RatePerMessage, u.CreatedAt))
+            .Select(u => new AccountListItemDto(u.Id, u.UserName!, u.Email!, u.FullName, u.IsActive, u.Balance, u.CreatedAt))
             .ToListAsync(ct);
 
         return new PagedResult<AccountListItemDto>
@@ -40,6 +41,14 @@ public class AccountService : IAccountService
             PageSize = pageSize,
         };
     }
+
+    public async Task<IReadOnlyList<AccountOptionDto>> GetOptionsAsync(CancellationToken ct = default) =>
+        await _db.Users
+            .AsNoTracking()
+            .Where(u => u.Role == UserRole.Account)
+            .OrderBy(u => u.UserName)
+            .Select(u => new AccountOptionDto(u.Id, u.UserName!))
+            .ToListAsync(ct);
 
     public async Task<AccountDetailDto?> GetByIdAsync(int id, CancellationToken ct = default)
     {
@@ -58,7 +67,9 @@ public class AccountService : IAccountService
             Role = UserRole.Account,
             IsActive = true,
             Balance = request.InitialBalance,
-            RatePerMessage = request.RatePerMessage,
+            // Nothing reads this any more (see MessagePricing) - written only so the legacy
+            // NOT NULL column carries the price the account is actually charged.
+            RatePerMessage = MessagePricing.CreditsPerMessagePart,
             SenderIds = request.SenderIds,
             AllowFreeSenderId = request.AllowFreeSenderId,
             CreatedByUserId = createdByUserId,
@@ -82,7 +93,6 @@ public class AccountService : IAccountService
         user.FullName = request.FullName;
         user.MobileNo = request.MobileNo;
         user.IsActive = request.IsActive;
-        user.RatePerMessage = request.RatePerMessage;
         user.SenderIds = request.SenderIds;
         user.AllowFreeSenderId = request.AllowFreeSenderId;
         user.DateFrom = request.DateFrom;
@@ -103,6 +113,6 @@ public class AccountService : IAccountService
     }
 
     private static AccountDetailDto ToDetailDto(ApplicationUser u) => new(
-        u.Id, u.UserName!, u.Email!, u.FullName, u.MobileNo, u.IsActive, u.Balance, u.RatePerMessage,
+        u.Id, u.UserName!, u.Email!, u.FullName, u.MobileNo, u.IsActive, u.Balance,
         u.SenderIds, u.AllowFreeSenderId, u.DateFrom, u.DateTo, u.ApiToken, u.ApiSecret);
 }

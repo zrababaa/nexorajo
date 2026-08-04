@@ -29,10 +29,6 @@ public class CreateAccountViewModel
     [Display(Name = "Initial credits")]
     public decimal InitialBalance { get; set; }
 
-    [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Credits per message part")]
-    public decimal RatePerMessage { get; set; } = 1m;
-
     [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     [Display(Name = "Sender IDs (comma separated)")]
     public string? SenderIds { get; set; }
@@ -57,10 +53,6 @@ public class EditAccountViewModel
 
     [Display(Name = "Active")]
     public bool IsActive { get; set; }
-
-    [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
-    [Display(Name = "Credits per message part")]
-    public decimal RatePerMessage { get; set; }
 
     [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     [Display(Name = "Sender IDs (comma separated)")]

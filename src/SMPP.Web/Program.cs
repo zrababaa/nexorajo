@@ -1,4 +1,6 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
@@ -8,6 +10,7 @@ using SMPP.Infrastructure;
 using SMPP.Infrastructure.Files;
 using SMPP.Infrastructure.Persistence;
 using SMPP.Web;
+using SMPP.Web.Api;
 using SMPP.Web.Filters;
 using SMPP.Web.Seed;
 using SMPP.Web.Services;
@@ -23,6 +26,10 @@ builder.Services.AddScoped<CheckBlacklistFilter>();
 
 builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
 
+// Bearer-token auth, CORS, and the OpenAPI document for the /api/v1 surface. Registered before
+// the MVC services because it contributes the authentication scheme the API controllers name.
+builder.Services.AddSmppApi(builder.Configuration);
+
 builder.Services.AddControllersWithViews(options =>
 {
     // Every page requires authentication by default; Account actions opt out with [AllowAnonymous].
@@ -30,7 +37,9 @@ builder.Services.AddControllersWithViews(options =>
         .RequireAuthenticatedUser()
         .Build()));
     options.Filters.AddService<CheckBlacklistFilter>();
+    options.Filters.Add<ApiExceptionFilter>();
 })
+    .AddSmppApiConventions()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(o =>
         o.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)));
@@ -54,6 +63,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
+
+    // API endpoints accept the cookie as well as a bearer token, so an unauthenticated /api call
+    // would otherwise be answered with a 302 to the HTML login page. Status codes instead - a
+    // client wants to know it needs to authenticate, not receive a sign-in form.
+    options.Events.OnRedirectToLogin = context => WriteApiStatusOrRedirect(context, StatusCodes.Status401Unauthorized);
+    options.Events.OnRedirectToAccessDenied = context => WriteApiStatusOrRedirect(context, StatusCodes.Status403Forbidden);
 });
 
 var app = builder.Build();
@@ -90,6 +105,11 @@ app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
 
+// CORS (so a browser app on another origin can call the API) and the Swagger page. Between
+// routing and authentication, which is where a CORS policy has to sit for preflight requests
+// to be answered before anything asks them to authenticate.
+app.UseSmppApi();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -99,3 +119,20 @@ app.MapControllerRoute(
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
 app.Run();
+
+// An unauthenticated call under /api gets a status code and a JSON body; a browser hitting a
+// page still gets the sign-in redirect.
+static Task WriteApiStatusOrRedirect(RedirectContext<CookieAuthenticationOptions> context, int statusCode)
+{
+    if (!context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    }
+
+    context.Response.StatusCode = statusCode;
+    return context.Response.WriteAsJsonAsync(new ApiErrorResponse(
+        statusCode == StatusCodes.Status401Unauthorized
+            ? "Authentication required. Send an 'Authorization: Bearer <token>' header - get a token from POST /api/v1/auth/login."
+            : "Your account does not have access to this resource."));
+}

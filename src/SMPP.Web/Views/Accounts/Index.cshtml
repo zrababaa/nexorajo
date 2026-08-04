@@ -21,7 +21,6 @@
                     <th>@L["Full name"]</th>
                     <th>@L["Status"]</th>
                     <th>@L["Credits"]</th>
-                    <th>@L["Rate/msg"]</th>
                     <th>@L["Created"]</th>
                     <th class="text-end">@L["Actions"]</th>
                 </tr>
@@ -29,7 +28,7 @@
             <tbody>
                 @if (!Model.Items.Any())
                 {
-                    <tr><td colspan="8" class="text-center text-muted py-4">@L["No accounts yet."]</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted py-4">@L["No accounts yet."]</td></tr>
                 }
                 @foreach (var a in Model.Items)
                 {
@@ -48,7 +47,6 @@
                             }
                         </td>
                         <td>@a.Balance.ToString("N2")</td>
-                        <td>@a.RatePerMessage.ToString("N4")</td>
                         <td>@a.CreatedAt.ToString("yyyy-MM-dd")</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@a.Id">@L["Manage"]</a>

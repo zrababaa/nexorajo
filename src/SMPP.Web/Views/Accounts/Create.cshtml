@@ -37,15 +37,10 @@
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
-            <div class="row">
-                <div class="col-sm-6 mb-3">
-                    <label asp-for="InitialBalance" class="form-label"></label>
-                    <input asp-for="InitialBalance" class="form-control" />
-                </div>
-                <div class="col-sm-6 mb-3">
-                    <label asp-for="RatePerMessage" class="form-label"></label>
-                    <input asp-for="RatePerMessage" class="form-control" />
-                </div>
+            <div class="mb-3">
+                <label asp-for="InitialBalance" class="form-label"></label>
+                <input asp-for="InitialBalance" class="form-control" />
+                <div class="form-text">@L["Every account is charged 1 credit per message part, per recipient."]</div>
             </div>
 
             <div class="mb-3">

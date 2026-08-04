@@ -30,6 +30,9 @@
         <a class="nav-link @(IsActive("History") ? "active" : "")" asp-controller="History" asp-action="Index">
             @L["History"]
         </a>
+        <a class="nav-link @(IsActive("Reports") ? "active" : "")" asp-controller="Reports" asp-action="Index">
+            @L["Reports"]
+        </a>
 
         @if (!isSuperadmin)
         {

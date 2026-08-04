@@ -10,6 +10,9 @@ public interface IAccountService
 {
     Task<PagedResult<AccountListItemDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default);
 
+    /// <summary>Id + username for every Account, for the "filter by account" dropdowns.</summary>
+    Task<IReadOnlyList<AccountOptionDto>> GetOptionsAsync(CancellationToken ct = default);
+
     Task<AccountDetailDto?> GetByIdAsync(int id, CancellationToken ct = default);
 
     Task<int> CreateAsync(int createdByUserId, CreateAccountRequest request, CancellationToken ct = default);

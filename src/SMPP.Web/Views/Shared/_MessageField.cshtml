@@ -2,7 +2,7 @@
 @{
     // Charged per part, so the readout has to show parts and not just characters - see site.js,
     // which mirrors the server's SegmentCounter to work them out.
-    var rate = (ViewData["SendPolicy"] as SMPP.Application.Abstractions.SendPolicy)?.RatePerMessage ?? 0m;
+    var rate = (ViewData["SendPolicy"] as SMPP.Application.Abstractions.SendPolicy)?.CreditsPerMessagePart ?? 0m;
     var counterTemplate = L["{chars} characters · {parts} part(s) · {encoding}"].Value;
     var creditsTemplate = L["{credits} credits per recipient"].Value;
 }

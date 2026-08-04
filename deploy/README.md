@@ -90,6 +90,63 @@ rewrite the vhost for you — just re-add the `ProxyPass`/`RequestHeader` lines
 into the `:443` block it creates), or use the commented-out HTTPS block
 already in `deploy/apache/smpp-web.conf`.
 
+## 6. Publish the REST API and its Swagger page
+
+Everything the portal does is also a REST endpoint under `/api/v1`, documented by a Swagger
+page the same host serves. Once the vhost above is up, they are already online:
+
+- **Swagger UI** — `https://your-domain/swagger`
+- **OpenAPI document** — `https://your-domain/swagger/v1/swagger.json`
+
+Two settings in `appsettings.Production.json` matter before you publish:
+
+```jsonc
+"Jwt": {
+  // Required. The app refuses to start without it - a missing or short key would mean
+  // tokens anyone can forge. Generate with: openssl rand -base64 48
+  "Key": "..."
+},
+"Api": {
+  // Becomes the server in the OpenAPI document, so "Try it out" targets the public host
+  // rather than the 127.0.0.1:5083 Kestrel sees behind Apache.
+  "PublicBaseUrl": "https://your-domain",
+  "ContactEmail": "support@your-domain",
+  "EnableSwagger": true,
+  // Empty means any browser origin may call the API. Safe, because the API authenticates
+  // with bearer tokens rather than cookies. List origins explicitly to lock it down.
+  "AllowedCorsOrigins": []
+}
+```
+
+Rotating `Jwt:Key` invalidates every token already issued — that is how you revoke them all.
+Set `Api:EnableSwagger` to `false` to keep the API but take the documentation page offline.
+
+How a client authenticates:
+
+```bash
+# A person, with portal credentials
+curl -X POST https://your-domain/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"identifier":"someaccount","password":"..."}'
+
+# A server-to-server integration, with the account's API credentials
+# (Superadmin issues them: POST /api/v1/accounts/{id}/api-credentials)
+curl -X POST https://your-domain/api/v1/auth/token \
+  -H 'Content-Type: application/json' \
+  -d '{"tokenId":"...","secretKey":"..."}'
+
+# then, on every other call
+curl https://your-domain/api/v1/messages/send-policy -H "Authorization: Bearer $TOKEN"
+```
+
+Sending answers `202` with a `batchId` once the batch is accepted and charged; delivery is the
+daemon's job, so per-recipient outcomes are polled from
+`GET /api/v1/history?campaignBatchId={batchId}`.
+
+The pre-existing `POST /api/send-message-api` and `GET|POST /api/getStatus` are unchanged —
+same routes, same headers, same response bodies — so integrations already built against them,
+and the daemon's delivery callback, keep working.
+
 ## Notes
 
 - `Program.cs` now calls `UseForwardedHeaders` (X-Forwarded-For/Proto) so

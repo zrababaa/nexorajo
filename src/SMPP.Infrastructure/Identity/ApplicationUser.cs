@@ -16,6 +16,12 @@ public class ApplicationUser : IdentityUser<int>
     public bool IsActive { get; set; } = true;
 
     public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Legacy per-account price, no longer used for anything: every account is charged the flat
+    /// <see cref="Domain.Pricing.MessagePricing.CreditsPerMessagePart"/>. Kept only because the
+    /// column is NOT NULL on the shared SMPP schema, and written with the flat price on create.
+    /// </summary>
     public decimal RatePerMessage { get; set; }
 
     /// <summary>

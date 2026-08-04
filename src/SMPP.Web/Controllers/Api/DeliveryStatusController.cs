@@ -15,6 +15,7 @@ namespace SMPP.Web.Controllers.Api;
 [ApiController]
 [AllowAnonymous]
 [Route("api")]
+[Tags("Legacy API")]
 public class DeliveryStatusController : ControllerBase
 {
     private static readonly Dictionary<string, MessageStatus> StatusCodes = new(StringComparer.OrdinalIgnoreCase)

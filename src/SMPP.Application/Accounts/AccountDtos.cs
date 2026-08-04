@@ -1,5 +1,7 @@
 namespace SMPP.Application.Accounts;
 
+public record AccountOptionDto(int Id, string Username);
+
 public record AccountListItemDto(
     int Id,
     string Username,
@@ -7,7 +9,6 @@ public record AccountListItemDto(
     string FullName,
     bool IsActive,
     decimal Balance,
-    decimal RatePerMessage,
     DateTime CreatedAt);
 
 public record AccountDetailDto(
@@ -18,7 +19,6 @@ public record AccountDetailDto(
     string? MobileNo,
     bool IsActive,
     decimal Balance,
-    decimal RatePerMessage,
     string? SenderIds,
     bool AllowFreeSenderId,
     DateOnly? DateFrom,
@@ -33,7 +33,6 @@ public record CreateAccountRequest(
     string? MobileNo,
     string Password,
     decimal InitialBalance,
-    decimal RatePerMessage,
     string? SenderIds,
     bool AllowFreeSenderId);
 
@@ -41,7 +40,6 @@ public record UpdateAccountRequest(
     string FullName,
     string? MobileNo,
     bool IsActive,
-    decimal RatePerMessage,
     string? SenderIds,
     bool AllowFreeSenderId,
     DateOnly? DateFrom,

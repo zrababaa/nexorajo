@@ -1,0 +1,64 @@
+@using SMPP.Application.Reports
+@model IReadOnlyList<AccountUsageRowDto>
+
+<table class="table table-hover table-sm mb-0 align-middle">
+    <thead>
+        <tr>
+            <th>@L["Account"]</th>
+            <th>@L["Full name"]</th>
+            <th>@L["Status"]</th>
+            <th class="text-end">@L["Messages"]</th>
+            <th class="text-end">@L["Delivered"]</th>
+            <th class="text-end">@L["Failed"]</th>
+            <th class="text-end">@L["Delivery rate"]</th>
+            <th class="text-end">@L["Credits used"]</th>
+            <th class="text-end">@L["Credits added"]</th>
+            <th class="text-end">@L["Balance"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="10" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
+        }
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Username</td>
+                <td>@r.FullName</td>
+                <td>
+                    @if (r.IsActive)
+                    {
+                        <span class="badge bg-success">@L["Active"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@L["Inactive"]</span>
+                    }
+                </td>
+                <td class="text-end fw-semibold">@r.TotalSent</td>
+                <td class="text-end">@r.Delivered</td>
+                <td class="text-end">@r.Failed</td>
+                <td class="text-end">@(r.DeliveryRate.HasValue ? $"{r.DeliveryRate:0.#}%" : "-")</td>
+                <td class="text-end">@r.CreditsConsumed.ToString("N2")</td>
+                <td class="text-end">@r.CreditsAdded.ToString("N2")</td>
+                <td class="text-end fw-semibold">@r.Balance.ToString("N2")</td>
+            </tr>
+        }
+    </tbody>
+    @if (Model.Any())
+    {
+        <tfoot class="table-light fw-semibold">
+            <tr>
+                <td colspan="3">@L["Total"]</td>
+                <td class="text-end">@Model.Sum(r => r.TotalSent)</td>
+                <td class="text-end">@Model.Sum(r => r.Delivered)</td>
+                <td class="text-end">@Model.Sum(r => r.Failed)</td>
+                <td></td>
+                <td class="text-end">@Model.Sum(r => r.CreditsConsumed).ToString("N2")</td>
+                <td class="text-end">@Model.Sum(r => r.CreditsAdded).ToString("N2")</td>
+                <td class="text-end">@Model.Sum(r => r.Balance).ToString("N2")</td>
+            </tr>
+        </tfoot>
+    }
+</table>

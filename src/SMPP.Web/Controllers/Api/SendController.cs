@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SMPP.Application.Common;
 using SMPP.Application.PublicApi;
+using SMPP.Web.Api;
 
 namespace SMPP.Web.Controllers.Api;
 
@@ -11,10 +12,16 @@ public record SendMessageApiRequest(string Numbers, string Message, string? Send
 /// Public send API. Ports legacy's SendMessageApi::sendMessage contract: auth via the
 /// token-id/secret-key headers (an account's regenerable API credentials, managed by a
 /// Superadmin under Accounts), same balance/segment/spam-filter pipeline as Quick Send.
+///
+/// Kept at its original route and response shape so existing integrations keep working;
+/// new ones should use <c>/api/v1/messages/quick-send</c>, which returns the standard
+/// error shape and reaches the rest of the platform with the same bearer token.
 /// </summary>
 [ApiController]
 [AllowAnonymous]
+[LegacyApiKeyAuth]
 [Route("api")]
+[Tags("Legacy API")]
 public class SendController : ControllerBase
 {
     private readonly IPublicApiAuthenticator _authenticator;

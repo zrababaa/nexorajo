@@ -5,6 +5,7 @@ using SMPP.Application.Common;
 using SMPP.Application.Sending;
 using SMPP.Domain.Entities;
 using SMPP.Domain.Enums;
+using SMPP.Domain.Pricing;
 using SMPP.Infrastructure.Persistence;
 
 namespace SMPP.Infrastructure.Services;
@@ -67,11 +68,11 @@ public class SendCore
 
         senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);
 
-        // One credit per message part per recipient at the account's rate, so a message long
+        // One flat credit per message part per recipient (MessagePricing), so a message long
         // enough to split into two parts costs twice as much as a single-part one.
         var segments = _segmentCounter.CountSegments(message);
         var isFree = user.Role == UserRole.Superadmin;
-        var totalCost = isFree ? 0m : numbers.Count * segments * user.RatePerMessage;
+        var totalCost = isFree ? 0m : MessagePricing.CostOf(numbers.Count, segments);
 
         if (totalCost > user.Balance)
         {

@@ -36,7 +36,7 @@ public static class HistoryExportWriter
             }.Select(CsvEscape)));
         }
 
-        return new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetBytes(sb.ToString());
+        return Utf8WithBom(sb.ToString());
     }
 
     public static byte[] WriteExcelHtml(IReadOnlyList<HistoryExportRowDto> rows)
@@ -70,8 +70,15 @@ public static class HistoryExportWriter
         }
 
         sb.Append("</tbody></table></body></html>");
-        return new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetBytes(sb.ToString());
+        return Utf8WithBom(sb.ToString());
     }
+
+    /// <summary>
+    /// The BOM has to be written explicitly - Encoding.GetBytes never emits the preamble - and
+    /// without it Excel opens the file in the system codepage and mangles Arabic message text.
+    /// </summary>
+    private static byte[] Utf8WithBom(string content) =>
+        Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(content)).ToArray();
 
     private static string CsvEscape(string value)
     {

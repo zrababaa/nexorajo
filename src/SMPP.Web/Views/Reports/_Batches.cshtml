@@ -1,0 +1,57 @@
+@using SMPP.Application.Reports
+@using SMPP.Web.Services
+@model IReadOnlyList<BatchReportRowDto>
+
+<table class="table table-hover table-sm mb-0 align-middle">
+    <thead>
+        <tr>
+            <th>@L["Batch"]</th>
+            <th>@L["Campaign"]</th>
+            <th>@L["Channel"]</th>
+            <th>@L["Sender"]</th>
+            <th>@L["Account"]</th>
+            <th class="text-end">@L["Recipients"]</th>
+            <th class="text-end">@L["Delivered"]</th>
+            <th class="text-end">@L["Failed"]</th>
+            <th class="text-end">@L["Processing"]</th>
+            <th class="text-end">@L["Cost"]</th>
+            <th>@L["Date (UTC)"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="11" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
+        }
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td><code title="@r.BatchId">@r.BatchId[..Math.Min(10, r.BatchId.Length)]</code></td>
+                <td>@r.CampaignName</td>
+                <td>@L[ChartColors.SourceLabel(r.Source)]</td>
+                <td>@r.SenderId</td>
+                <td>@r.AccountUsername</td>
+                <td class="text-end fw-semibold">@r.Recipients</td>
+                <td class="text-end">@r.Delivered</td>
+                <td class="text-end">@r.Failed</td>
+                <td class="text-end">@r.Pending</td>
+                <td class="text-end">@r.Cost.ToString("N2")</td>
+                <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        }
+    </tbody>
+    @if (Model.Any())
+    {
+        <tfoot class="table-light fw-semibold">
+            <tr>
+                <td colspan="5">@L["Total"]</td>
+                <td class="text-end">@Model.Sum(r => r.Recipients)</td>
+                <td class="text-end">@Model.Sum(r => r.Delivered)</td>
+                <td class="text-end">@Model.Sum(r => r.Failed)</td>
+                <td class="text-end">@Model.Sum(r => r.Pending)</td>
+                <td class="text-end">@Model.Sum(r => r.Cost).ToString("N2")</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    }
+</table>

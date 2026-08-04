@@ -41,12 +41,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="RatePerMessage" class="form-label"></label>
-                        <input asp-for="RatePerMessage" class="form-control" />
-                        <span asp-validation-for="RatePerMessage" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
                         <label asp-for="SenderIds" class="form-label"></label>
                         <input asp-for="SenderIds" class="form-control" maxlength="500" placeholder="NEXORA, MYSHOP" />
                         <div class="form-text">@L["The account picks one of these when sending."]</div>

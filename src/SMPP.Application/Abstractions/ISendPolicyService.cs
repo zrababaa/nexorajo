@@ -4,11 +4,12 @@ namespace SMPP.Application.Abstractions;
 /// What one account may send under, and what it is charged for it.
 ///
 /// <paramref name="AllowFreeSenderId"/> means the account can type its own Sender ID; otherwise
-/// it must pick one of <paramref name="AllowedSenderIds"/>. <paramref name="RatePerMessage"/> is
-/// the credit cost of a single message part for a single recipient - zero for Superadmin, which
-/// sends free and is never held to a Sender ID list.
+/// it must pick one of <paramref name="AllowedSenderIds"/>. <paramref name="CreditsPerMessagePart"/>
+/// is the credit cost of a single message part for a single recipient - the flat
+/// MessagePricing price, or zero for Superadmin, which sends free and is never held to a
+/// Sender ID list.
 /// </summary>
-public record SendPolicy(bool AllowFreeSenderId, IReadOnlyList<string> AllowedSenderIds, decimal RatePerMessage)
+public record SendPolicy(bool AllowFreeSenderId, IReadOnlyList<string> AllowedSenderIds, decimal CreditsPerMessagePart)
 {
     public bool HasSenderIdList => AllowedSenderIds.Count > 0;
 }

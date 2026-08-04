@@ -1,0 +1,35 @@
+@using SMPP.Application.History
+@using SMPP.Web.Services
+@model IReadOnlyList<HistoryExportRowDto>
+
+<table class="table table-hover table-sm mb-0 align-middle">
+    <thead>
+        <tr>
+            <th>@L["Batch"]</th>
+            <th>@L["Channel"]</th>
+            <th>@L["Sender"]</th>
+            <th>@L["Receiver"]</th>
+            <th>@L["Status"]</th>
+            <th>@L["Message"]</th>
+            <th>@L["Date (UTC)"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="7" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
+        }
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td><code title="@r.CampaignBatchId">@r.CampaignBatchId[..Math.Min(8, r.CampaignBatchId.Length)]</code></td>
+                <td>@L[ChartColors.SourceLabel(r.Source)]</td>
+                <td>@r.SenderNumber</td>
+                <td>@r.ReceiverNumber</td>
+                <td><span style="color:@ChartColors.StatusColor(r.Status)">&#9679;</span> @L[r.Status.ToString()]</td>
+                <td class="text-truncate" style="max-width:22rem" title="@r.MessageText">@r.MessageText</td>
+                <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        }
+    </tbody>
+</table>

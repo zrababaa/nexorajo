@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SMPP.Domain.Enums;
+using SMPP.Domain.Pricing;
 using SMPP.Infrastructure.Identity;
 
 namespace SMPP.Web.Seed;
@@ -62,7 +63,7 @@ public static class DbSeeder
                 Role = UserRole.Account,
                 IsActive = true,
                 Balance = 1000,
-                RatePerMessage = 1m,
+                RatePerMessage = MessagePricing.CreditsPerMessagePart,
                 SenderIds = "NEXORA",
                 CreatedByUserId = superadmin.Id,
             };

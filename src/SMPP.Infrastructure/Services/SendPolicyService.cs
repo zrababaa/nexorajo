@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
 using SMPP.Domain.Enums;
+using SMPP.Domain.Pricing;
 using SMPP.Infrastructure.Persistence;
 
 namespace SMPP.Infrastructure.Services;
@@ -20,15 +21,15 @@ public class SendPolicyService : ISendPolicyService
         var user = await _db.Users
             .AsNoTracking()
             .Where(u => u.Id == userId)
-            .Select(u => new { u.Role, u.SenderIds, u.AllowFreeSenderId, u.RatePerMessage })
+            .Select(u => new { u.Role, u.SenderIds, u.AllowFreeSenderId })
             .FirstOrDefaultAsync(ct)
             ?? throw new AppException("Account not found.");
 
         // Superadmin is not an account that sends on a customer's behalf: it is never held to a
         // Sender ID list and is never charged, so it gets the free-text field and no price.
         return user.Role == UserRole.Superadmin
-            ? new SendPolicy(AllowFreeSenderId: true, Array.Empty<string>(), RatePerMessage: 0m)
-            : new SendPolicy(user.AllowFreeSenderId, SplitSenderIds(user.SenderIds), user.RatePerMessage);
+            ? new SendPolicy(AllowFreeSenderId: true, Array.Empty<string>(), CreditsPerMessagePart: 0m)
+            : new SendPolicy(user.AllowFreeSenderId, SplitSenderIds(user.SenderIds), MessagePricing.CreditsPerMessagePart);
     }
 
     public async Task<string> ResolveSenderIdAsync(int userId, string? requestedSenderId, CancellationToken ct = default)

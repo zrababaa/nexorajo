@@ -10,6 +10,7 @@ using SMPP.Application.Dashboard;
 using SMPP.Application.History;
 using SMPP.Application.Payments;
 using SMPP.Application.PublicApi;
+using SMPP.Application.Reports;
 using SMPP.Application.Sending;
 using SMPP.Application.SpamKeywords;
 using SMPP.Infrastructure.Files;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IBulkSendService, BulkSendService>();
         services.AddScoped<IHistoryService, HistoryService>();
         services.AddScoped<IHistoryResendService, HistoryResendService>();
+        services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IPublicApiAuthenticator, PublicApiAuthenticator>();
         services.AddScoped<IPublicApiSendService, PublicApiSendService>();

@@ -286,4 +286,24 @@
   <data name="The field {0} must be between {1} and {2}." xml:space="preserve"><value>يجب أن تكون قيمة حقل {0} بين {1} و{2}.</value></data>
   <data name="'{0}' and '{1}' do not match." xml:space="preserve"><value>'{0}' و'{1}' غير متطابقين.</value></data>
   <data name="The {0} field is not a valid e-mail address." xml:space="preserve"><value>حقل {0} ليس عنوان بريد إلكتروني صالحًا.</value></data>
+  <data name="Reports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Daily Traffic" xml:space="preserve"><value>الحركة اليومية</value></data>
+  <data name="Batches" xml:space="preserve"><value>الدفعات</value></data>
+  <data name="Account Usage" xml:space="preserve"><value>استخدام الحسابات</value></data>
+  <data name="Transactions" xml:space="preserve"><value>الحركات المالية</value></data>
+  <data name="Date" xml:space="preserve"><value>التاريخ</value></data>
+  <data name="Cost" xml:space="preserve"><value>التكلفة</value></data>
+  <data name="Credits used" xml:space="preserve"><value>الرصيد المستهلك</value></data>
+  <data name="Credits added" xml:space="preserve"><value>الرصيد المضاف</value></data>
+  <data name="Balance" xml:space="preserve"><value>الرصيد</value></data>
+  <data name="Net change" xml:space="preserve"><value>صافي التغير</value></data>
+  <data name="Reviewed" xml:space="preserve"><value>تمت المراجعة</value></data>
+  <data name="Approved total" xml:space="preserve"><value>إجمالي المعتمد</value></data>
+  <data name="No rows match these filters." xml:space="preserve"><value>لا توجد سجلات مطابقة لهذه الفلاتر.</value></data>
+  <data name="ManualAdjustment" xml:space="preserve"><value>تعديل يدوي</value></data>
+  <data name="QuickSend" xml:space="preserve"><value>إرسال سريع</value></data>
+  <data name="BulkSend" xml:space="preserve"><value>إرسال جماعي</value></data>
+  <data name="PublicApi" xml:space="preserve"><value>واجهة برمجية</value></data>
+  <data name="PaymentApproval" xml:space="preserve"><value>اعتماد دفعة</value></data>
+  <data name="Every account is charged 1 credit per message part, per recipient." xml:space="preserve"><value>يُخصم من كل حساب رصيد واحد لكل جزء من الرسالة ولكل مستلم.</value></data>
 </root>
