@@ -114,7 +114,10 @@ public class QuickSendController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    /// <summary>Returns the numbers for one of the current user's saved lists, for the "Use a saved list" picker to inject into the Numbers box.</summary>
+    /// <summary>
+    /// Returns the numbers for one of the current user's saved lists as the re-rendered Numbers
+    /// textarea, for the "Use a saved list" picker (an htmx hx-get, outerHTML-swapped into the box).
+    /// </summary>
     public async Task<IActionResult> CampaignNumbers(int id, CancellationToken ct)
     {
         var campaign = await _campaignService.GetByIdAsync(id, _currentUser.UserId, ct);
@@ -123,7 +126,7 @@ public class QuickSendController : Controller
             return NotFound();
         }
 
-        return Json(new { numbers = campaign.Numbers });
+        return PartialView("_RawNumbersField", campaign.Numbers);
     }
 
     private async Task LoadViewDataAsync(int page, CancellationToken ct)

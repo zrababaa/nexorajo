@@ -6,12 +6,14 @@
         string.Equals(current, controllerName, StringComparison.OrdinalIgnoreCase);
 }
 
-<nav class="app-sidebar" id="appSidebar">
+<div class="sidebar-backdrop" x-show="open" x-cloak x-transition.opacity @@click="close()"></div>
+
+<nav class="app-sidebar" id="appSidebar" :class="{ show: open }" @@keydown.escape.window="close()">
     <a class="brand" href="/">
         <img src="~/images/nexora-logo.png" alt="Nexora SMS Portal" class="brand-logo" />
     </a>
 
-    <div class="nav flex-column">
+    <div class="nav flex-column" @@click="close()">
         <div class="nav-section-title">@L["Overview"]</div>
         <a class="nav-link @(IsActive("Dashboard") ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
             @L["Dashboard"]

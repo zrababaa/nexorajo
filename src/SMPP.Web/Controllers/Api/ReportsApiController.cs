@@ -29,38 +29,56 @@ public class ReportsApiController : ApiControllerBase
     /// <summary>Per-recipient message rows - the finest grain available.</summary>
     [HttpGet("messages")]
     [ProducesResponseType(typeof(IReadOnlyList<HistoryExportRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Messages([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetMessagesAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> Messages([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var page = await _reports.GetMessagesAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>One row per calendar day: volume and delivery outcome.</summary>
     [HttpGet("daily-traffic")]
     [ProducesResponseType(typeof(IReadOnlyList<DailyTrafficRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> DailyTraffic([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetDailyTrafficAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> DailyTraffic([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var (page, _) = await _reports.GetDailyTrafficAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>One row per send batch: size, outcome, and cost.</summary>
     [HttpGet("batches")]
     [ProducesResponseType(typeof(IReadOnlyList<BatchReportRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Batches([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetBatchesAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> Batches([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var (page, _) = await _reports.GetBatchesAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>One row per account: volume, delivery rate, credits in and out. An account calling it gets its own row.</summary>
     [HttpGet("account-usage")]
     [ProducesResponseType(typeof(IReadOnlyList<AccountUsageRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> AccountUsage([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetAccountUsageAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> AccountUsage([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var (page, _) = await _reports.GetAccountUsageAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>The balance ledger - every credit and debit.</summary>
     [HttpGet("transactions")]
     [ProducesResponseType(typeof(IReadOnlyList<TransactionReportRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Transactions([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetTransactionsAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> Transactions([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var (page, _) = await _reports.GetTransactionsAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>Submitted credit requests and how they were reviewed.</summary>
     [HttpGet("credit-requests")]
     [ProducesResponseType(typeof(IReadOnlyList<CreditRequestRowDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreditRequests([FromQuery] ReportQuery query, CancellationToken ct) =>
-        Ok(await _reports.GetCreditRequestsAsync(CurrentUserId, CurrentRole, Filter(query), ct));
+    public async Task<IActionResult> CreditRequests([FromQuery] ReportQuery query, CancellationToken ct)
+    {
+        var (page, _) = await _reports.GetCreditRequestsAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
+        return Ok(page.Items);
+    }
 
     /// <summary>Any report as a downloadable file, with the same filters as its JSON endpoint.</summary>
     /// <param name="report">Which report to render.</param>
@@ -86,6 +104,16 @@ public class ReportsApiController : ApiControllerBase
     /// </summary>
     private ReportFilterDto Filter(ReportQuery query) => new(
         query.DateFrom, query.DateTo, query.Source, query.Status, IsSuperadmin ? query.AccountId : null);
+
+    /// <summary>
+    /// Clamped so a caller that never heard of <see cref="ReportQuery.PageSize"/> still gets a
+    /// bounded response instead of the old unbounded/near-unbounded dump.
+    /// </summary>
+    private static int PageSize(ReportQuery query) => Math.Clamp(query.PageSize, 1, MaxPageSize);
+
+    private static int PageNumber(ReportQuery query) => Math.Max(1, query.Page);
+
+    private const int MaxPageSize = 5_000;
 }
 
 /// <summary>
@@ -107,4 +135,10 @@ public record ReportQuery
 
     /// <summary>Restrict to one account. Superadmin only; ignored otherwise.</summary>
     public int? AccountId { get; init; }
+
+    /// <summary>1-based page number.</summary>
+    public int Page { get; init; } = 1;
+
+    /// <summary>Rows per page, capped at 5,000.</summary>
+    public int PageSize { get; init; } = 500;
 }

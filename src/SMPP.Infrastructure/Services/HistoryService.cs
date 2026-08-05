@@ -17,7 +17,7 @@ namespace SMPP.Infrastructure.Services;
 /// </summary>
 public class HistoryService : IHistoryService
 {
-    private const int MaxExportRows = 50_000;
+    internal const int MaxExportRows = 50_000;
 
     private readonly SmppDbContext _db;
     private readonly IUserScopeResolver _scopeResolver;

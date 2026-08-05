@@ -75,12 +75,18 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    // DatabaseBootstrapper, not MigrateAsync directly: against the shared smpp_bulk_db_new it
-    // creates the app's own tables and stamps the baseline instead of running migrations that
-    // would rewrite the SMPP daemon's historys/under_process. See its class comment.
-    // Set Database:AutoMigrate=false to take the schema into your own hands.
-    if (app.Configuration.GetValue("Database:AutoMigrate", defaultValue: true))
+    if (app.Configuration.GetValue("Database:UseInMemory", defaultValue: false))
     {
+        // No migrations to run against the in-memory provider - build the schema straight from
+        // the current EF model instead.
+        await scope.ServiceProvider.GetRequiredService<SmppDbContext>().Database.EnsureCreatedAsync();
+    }
+    else if (app.Configuration.GetValue("Database:AutoMigrate", defaultValue: true))
+    {
+        // DatabaseBootstrapper, not MigrateAsync directly: against the shared smpp_bulk_db_new it
+        // creates the app's own tables and stamps the baseline instead of running migrations that
+        // would rewrite the SMPP daemon's historys/under_process. See its class comment.
+        // Set Database:AutoMigrate=false to take the schema into your own hands.
         await scope.ServiceProvider.GetRequiredService<DatabaseBootstrapper>().BootstrapAsync();
     }
 

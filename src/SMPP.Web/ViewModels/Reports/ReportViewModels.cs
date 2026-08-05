@@ -1,3 +1,4 @@
+using SMPP.Application.Common;
 using SMPP.Application.History;
 using SMPP.Application.Reports;
 using SMPP.Domain.Enums;
@@ -50,10 +51,15 @@ public class ReportsViewModel
 {
     public ReportFilterViewModel Filter { get; set; } = new();
 
-    public IReadOnlyList<HistoryExportRowDto> Messages { get; set; } = Array.Empty<HistoryExportRowDto>();
-    public IReadOnlyList<DailyTrafficRowDto> DailyTraffic { get; set; } = Array.Empty<DailyTrafficRowDto>();
-    public IReadOnlyList<BatchReportRowDto> Batches { get; set; } = Array.Empty<BatchReportRowDto>();
-    public IReadOnlyList<AccountUsageRowDto> AccountUsage { get; set; } = Array.Empty<AccountUsageRowDto>();
-    public IReadOnlyList<TransactionReportRowDto> Transactions { get; set; } = Array.Empty<TransactionReportRowDto>();
-    public IReadOnlyList<CreditRequestRowDto> CreditRequests { get; set; } = Array.Empty<CreditRequestRowDto>();
+    public PagedResult<HistoryExportRowDto> Messages { get; set; } = new();
+    public PagedResult<DailyTrafficRowDto> DailyTraffic { get; set; } = new();
+    public DailyTrafficTotals DailyTrafficTotals { get; set; } = new(0, 0, 0, 0, 0, 0, 0);
+    public PagedResult<BatchReportRowDto> Batches { get; set; } = new();
+    public BatchTotals BatchTotals { get; set; } = new(0, 0, 0, 0, 0m);
+    public PagedResult<AccountUsageRowDto> AccountUsage { get; set; } = new();
+    public AccountUsageTotals AccountUsageTotals { get; set; } = new(0, 0, 0, 0m, 0m, 0m);
+    public PagedResult<TransactionReportRowDto> Transactions { get; set; } = new();
+    public TransactionTotals TransactionTotals { get; set; } = new(0m);
+    public PagedResult<CreditRequestRowDto> CreditRequests { get; set; } = new();
+    public CreditRequestTotals CreditRequestTotals { get; set; } = new(0m);
 }

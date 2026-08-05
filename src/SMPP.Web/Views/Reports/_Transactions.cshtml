@@ -1,6 +1,7 @@
+@using SMPP.Application.Common
 @using SMPP.Application.Reports
 @using SMPP.Domain.Enums
-@model IReadOnlyList<TransactionReportRowDto>
+@model (PagedResult<TransactionReportRowDto> Page, TransactionTotals Totals)
 
 <table class="table table-hover table-sm mb-0 align-middle">
     <thead>
@@ -14,11 +15,11 @@
         </tr>
     </thead>
     <tbody>
-        @if (!Model.Any())
+        @if (!Model.Page.Items.Any())
         {
             <tr><td colspan="6" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
         }
-        @foreach (var r in Model)
+        @foreach (var r in Model.Page.Items)
         {
             <tr>
                 <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
@@ -44,15 +45,12 @@
             </tr>
         }
     </tbody>
-    @if (Model.Any())
+    @if (Model.Page.Items.Any())
     {
         <tfoot class="table-light fw-semibold">
             <tr>
                 <td colspan="4">@L["Net change"]</td>
-                <td class="text-end">
-                    @((Model.Where(r => r.Kind == TransactionKind.Credit).Sum(r => r.Amount)
-                       - Model.Where(r => r.Kind == TransactionKind.Debit).Sum(r => r.Amount)).ToString("N2"))
-                </td>
+                <td class="text-end">@Model.Totals.NetChange.ToString("N2")</td>
                 <td></td>
             </tr>
         </tfoot>

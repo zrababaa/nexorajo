@@ -1,27 +1,57 @@
 @model SMPP.Web.ViewModels.Shared.PaginationInfo
 
-@if (Model.TotalPages > 1)
+@if (Model.TotalCount > 0)
 {
     var routeValues = new RouteValueDictionary(ViewContext.RouteData.Values);
     foreach (var kv in Context.Request.Query)
     {
-        if (!string.Equals(kv.Key, "page", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(kv.Key, Model.QueryKey, StringComparison.OrdinalIgnoreCase))
         {
             routeValues[kv.Key] = kv.Value.ToString();
         }
     }
 
-    <nav aria-label="@L["Page navigation"]">
-        <ul class="pagination pagination-sm">
-            @for (var i = 1; i <= Model.TotalPages; i++)
-            {
-                var pageRoute = new RouteValueDictionary(routeValues) { ["page"] = i };
-                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" asp-all-route-data="@ToStringDictionary(pageRoute)">@i</a>
-                </li>
-            }
-        </ul>
-    </nav>
+    var firstItem = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+    var lastItem = Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount);
+    var pageWindow = BuildPageWindow(Model.PageNumber, Model.TotalPages);
+
+    <div class="app-pagination">
+        <div class="app-pagination-summary">
+            @L["Showing {0}-{1} of {2}", firstItem, lastItem, Model.TotalCount]
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="@L["Page navigation"]">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                        @{ var prevRoute = new RouteValueDictionary(routeValues) { [Model.QueryKey] = Math.Max(1, Model.PageNumber - 1) }; }
+                        <a class="page-link" aria-label="@L["Previous"]" tabindex="@(Model.PageNumber == 1 ? "-1" : null)"
+                           asp-all-route-data="@ToStringDictionary(prevRoute)">&laquo;</a>
+                    </li>
+                    @foreach (var p in pageWindow)
+                    {
+                        if (p is null)
+                        {
+                            <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                        }
+                        else
+                        {
+                            var pageRoute = new RouteValueDictionary(routeValues) { [Model.QueryKey] = p.Value };
+                            <li class="page-item @(p == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" asp-all-route-data="@ToStringDictionary(pageRoute)">@p</a>
+                            </li>
+                        }
+                    }
+                    <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                        @{ var nextRoute = new RouteValueDictionary(routeValues) { [Model.QueryKey] = Math.Min(Model.TotalPages, Model.PageNumber + 1) }; }
+                        <a class="page-link" aria-label="@L["Next"]" tabindex="@(Model.PageNumber == Model.TotalPages ? "-1" : null)"
+                           asp-all-route-data="@ToStringDictionary(nextRoute)">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
 }
 
 @functions {
@@ -36,5 +66,43 @@
             }
         }
         return result;
+    }
+
+    /// <summary>
+    /// Always shows the first and last page, plus a small window around the current page,
+    /// collapsing any gaps into a single null "..." entry so a 500-page result set still
+    /// renders a handful of links instead of hundreds.
+    /// </summary>
+    private static List<int?> BuildPageWindow(int current, int total)
+    {
+        const int edgeCount = 1;
+        const int aroundCurrent = 1;
+
+        var pages = new SortedSet<int> { 1, total };
+        for (var i = current - aroundCurrent; i <= current + aroundCurrent; i++)
+        {
+            if (i >= 1 && i <= total)
+            {
+                pages.Add(i);
+            }
+        }
+        for (var i = 1; i <= edgeCount && i <= total; i++)
+        {
+            pages.Add(i);
+            pages.Add(total - i + 1);
+        }
+
+        var window = new List<int?>();
+        var previous = 0;
+        foreach (var page in pages)
+        {
+            if (previous != 0 && page - previous > 1)
+            {
+                window.Add(null);
+            }
+            window.Add(page);
+            previous = page;
+        }
+        return window;
     }
 }

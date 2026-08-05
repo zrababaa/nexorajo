@@ -5,6 +5,7 @@ using SMPP.Application.Common;
 using SMPP.Application.Payments;
 using SMPP.Domain.Enums;
 using SMPP.Infrastructure.Identity;
+using SMPP.Web.Extensions;
 using SMPP.Web.ViewModels.Payments;
 
 namespace SMPP.Web.Controllers;
@@ -78,7 +79,9 @@ public class PaymentsController : Controller
     {
         var result = await _paymentService.GetForReviewAsync(status, page, PageSize, ct);
         ViewBag.StatusFilter = status;
-        return View(result);
+
+        // Live-filtering htmx requests only need the results fragment re-rendered, not the whole page.
+        return Request.IsHtmxFragment("payments-review-results") ? PartialView("_ReviewResults", result) : View(result);
     }
 
     [Authorize(Roles = RoleNames.Superadmin)]

@@ -128,6 +128,7 @@ a {
 .card {
   border: 1px solid var(--smpp-border);
   border-radius: var(--smpp-radius);
+  overflow: hidden;
 }
 
 /* KPI cards ---------------------------------------------------------- */
@@ -198,4 +199,152 @@ a {
 
 .btn-group-wrap {
   flex-wrap: wrap;
+}
+
+/* Alpine / htmx plumbing ------------------------------------------------ */
+
+[x-cloak] {
+  display: none !important;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1030;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 769px) {
+  .sidebar-backdrop {
+    display: none;
+  }
+}
+
+/* Slim top-of-page indicator shown for the duration of any htmx request. */
+.htmx-loading::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 2000;
+  background: var(--smpp-primary);
+  animation: smpp-progress 1s ease-in-out infinite;
+}
+
+@keyframes smpp-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Alpine-driven modals: deliberately not Bootstrap's .modal class, whose stylesheet default of
+   display:none fights with x-show toggling the same property. Reuses Bootstrap's .modal-dialog /
+   .modal-content / .modal-header / .modal-body / .modal-footer, which don't have that default. */
+.app-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1055;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.app-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Tables ----------------------------------------------------------------
+   One look for every data table in the app: card-body tables lose their
+   own borders/radius (the enclosing .card clips to its own radius via
+   overflow: hidden, above) and get a quieter, denser, more "product" feel
+   than raw Bootstrap defaults. */
+
+.table {
+  --bs-table-hover-bg: #f8f7f4;
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+.table > thead > tr > th {
+  background-color: #fafaf8;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--smpp-border);
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  white-space: nowrap;
+}
+
+.table > tbody > tr > td {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  border-bottom-color: var(--smpp-border);
+  vertical-align: middle;
+}
+
+.table > tbody > tr:last-child > td {
+  border-bottom: none;
+}
+
+.table-sm > thead > tr > th,
+.table-sm > tbody > tr > td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.table > tbody > tr:hover > td {
+  transition: background-color 0.1s ease-in-out;
+}
+
+.table tfoot {
+  border-top: 2px solid var(--smpp-border);
+}
+
+/* Pagination --------------------------------------------------------- */
+
+.app-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-pagination-summary {
+  color: #6b7280;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.app-pagination .pagination {
+  margin-bottom: 0;
+}
+
+.app-pagination .page-link {
+  color: #374151;
+  border-color: var(--smpp-border);
+}
+
+.app-pagination .page-link:hover {
+  background-color: #f8f7f4;
+  color: var(--smpp-primary);
+}
+
+.app-pagination .page-item.active .page-link {
+  background-color: var(--smpp-primary);
+  border-color: var(--smpp-primary);
+}
+
+.app-pagination .page-item.disabled .page-link {
+  color: #c1c2c5;
+  background-color: transparent;
+  border-color: var(--smpp-border);
 }

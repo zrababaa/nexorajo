@@ -21,6 +21,26 @@ public class SpamKeywordService : ISpamKeywordService
             .Select(k => new SpamKeywordListItemDto(k.Id, k.Keyword, k.KeywordType, k.IsEnabled, k.CreatedAt))
             .ToListAsync(ct);
 
+    public async Task<PagedResult<SpamKeywordListItemDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _db.SpamKeywords.AsNoTracking().OrderByDescending(k => k.CreatedAt);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(k => new SpamKeywordListItemDto(k.Id, k.Keyword, k.KeywordType, k.IsEnabled, k.CreatedAt))
+            .ToListAsync(ct);
+
+        return new PagedResult<SpamKeywordListItemDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
+    }
+
     public async Task<int> CreateAsync(int createdByUserId, CreateSpamKeywordRequest request, CancellationToken ct = default)
     {
         var keyword = new SpamKeyword

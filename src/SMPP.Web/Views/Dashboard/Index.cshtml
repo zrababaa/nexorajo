@@ -7,6 +7,16 @@
     ViewData["Title"] = L["Dashboard"];
     bool isSuperadmin = User.IsInRole(RoleNames.Superadmin);
     var s = Model.Summary;
+
+    var chartConfig = System.Net.WebUtility.HtmlEncode(System.Text.Json.JsonSerializer.Serialize(new
+    {
+        trend = Model.Trend.Select(p => new { date = p.Date.ToString("MMM d"), total = p.Total, delivered = p.Delivered }),
+        sourceBreakdown = Model.SourceBreakdown.Select(x => new { label = L[ChartColors.SourceLabel(x.Source)].Value, count = x.Count, color = ChartColors.SourceColor(x.Source) }),
+        statusBreakdown = Model.StatusBreakdown.Select(slice => new { label = L[slice.Status.ToString()].Value, count = slice.Count, color = ChartColors.StatusColor(slice.Status) }),
+        totalLabel = L["Total"].Value,
+        deliveredLabel = L["Delivered"].Value,
+        messagesLabel = L["Messages"].Value,
+    }));
 }
 
 <h1 class="h4 mb-4">@L["Dashboard"]</h1>
@@ -66,135 +76,46 @@
     </div>
 </div>
 
-<div class="row g-3 mt-1">
-    <div class="col-lg-7">
-        <div class="card h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span>@L["Sends — last 14 days"]</span>
-                <span class="small text-muted">@L["Total vs. delivered"]</span>
+<div x-data="dashboardCharts(@Html.Raw(chartConfig))" x-init="init()">
+    <div class="row g-3 mt-1">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span>@L["Sends — last 14 days"]</span>
+                    <span class="small text-muted">@L["Total vs. delivered"]</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="110" role="img" aria-label="@L["Line chart of total and delivered messages per day over the last 14 days"]"></canvas>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas id="trendChart" height="110" role="img" aria-label="@L["Line chart of total and delivered messages per day over the last 14 days"]"></canvas>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header bg-white">@L["Sends by channel"]</div>
+                <div class="card-body">
+                    <canvas id="sourceChart" height="110" role="img" aria-label="@L["Bar chart of message counts by sending channel"]"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-header bg-white">@L["Sends by channel"]</div>
-            <div class="card-body">
-                <canvas id="sourceChart" height="110" role="img" aria-label="@L["Bar chart of message counts by sending channel"]"></canvas>
+
+    <div class="row g-3 mt-1">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">@L["Delivery status breakdown (all time)"]</div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="70" role="img" aria-label="@L["Stacked bar chart of message counts by delivery status"]"></canvas>
+                    <ul class="list-unstyled d-flex flex-wrap gap-3 mt-3 mb-0 small">
+                        @foreach (var slice in Model.StatusBreakdown)
+                        {
+                            <li class="d-flex align-items-center gap-2">
+                                <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:@ChartColors.StatusColor(slice.Status)"></span>
+                                <span>@L[slice.Status.ToString()]: <strong>@slice.Count</strong></span>
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row g-3 mt-1">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-white">@L["Delivery status breakdown (all time)"]</div>
-            <div class="card-body">
-                <canvas id="statusChart" height="70" role="img" aria-label="@L["Stacked bar chart of message counts by delivery status"]"></canvas>
-                <ul class="list-unstyled d-flex flex-wrap gap-3 mt-3 mb-0 small">
-                    @foreach (var slice in Model.StatusBreakdown)
-                    {
-                        <li class="d-flex align-items-center gap-2">
-                            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:@ChartColors.StatusColor(slice.Status)"></span>
-                            <span>@L[slice.Status.ToString()]: <strong>@slice.Count</strong></span>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script src="~/lib/chartjs/chart.umd.min.js"></script>
-    <script>
-        const mutedInk = '#898781';
-        const gridColor = '#e1e0d9';
-
-        Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
-        Chart.defaults.color = '#52514e';
-
-        new Chart(document.getElementById('trendChart'), {
-            type: 'line',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.Trend.Select(p => $"'{p.Date:MMM d}'")))],
-                datasets: [
-                    {
-                        label: '@L["Total"]',
-                        data: [@string.Join(",", Model.Trend.Select(p => p.Total))],
-                        borderColor: '#2a78d6',
-                        backgroundColor: '#2a78d6',
-                        tension: 0.25,
-                        borderWidth: 2,
-                        pointRadius: 3,
-                    },
-                    {
-                        label: '@L["Delivered"]',
-                        data: [@string.Join(",", Model.Trend.Select(p => p.Delivered))],
-                        borderColor: '#1baf7a',
-                        backgroundColor: '#1baf7a',
-                        tension: 0.25,
-                        borderWidth: 2,
-                        pointRadius: 3,
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { position: 'bottom' } },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } },
-                },
-            },
-        });
-
-        new Chart(document.getElementById('sourceChart'), {
-            type: 'bar',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.SourceBreakdown.Select(x => $"'{L[ChartColors.SourceLabel(x.Source)].Value}'")))],
-                datasets: [{
-                    label: '@L["Messages"]',
-                    data: [@string.Join(",", Model.SourceBreakdown.Select(x => x.Count))],
-                    backgroundColor: [@Html.Raw(string.Join(",", Model.SourceBreakdown.Select(x => $"'{ChartColors.SourceColor(x.Source)}'")))],
-                    borderRadius: 4,
-                    maxBarThickness: 56,
-                }],
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } },
-                },
-            },
-        });
-
-        new Chart(document.getElementById('statusChart'), {
-            type: 'bar',
-            data: {
-                labels: ['@L["Messages"]'],
-                datasets: [
-                    @foreach (var slice in Model.StatusBreakdown)
-                    {
-                        @:{ label: '@L[slice.Status.ToString()].Value', data: [@slice.Count], backgroundColor: '@ChartColors.StatusColor(slice.Status)' },
-                    }
-                ],
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { stacked: true, beginAtZero: true, grid: { color: gridColor } },
-                    y: { stacked: true, grid: { display: false } },
-                },
-            },
-        });
-    </script>
-}

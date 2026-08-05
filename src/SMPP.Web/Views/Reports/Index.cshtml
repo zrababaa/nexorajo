@@ -48,7 +48,9 @@
 
 <div class="card mb-3">
     <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end"
+              hx-get="@Url.Action("Index")" hx-target="#report-results" hx-swap="innerHTML" hx-push-url="true"
+              hx-trigger="change, submit">
             <input type="hidden" name="report" value="@filter.Report" />
 
             <div class="col-sm-6 col-lg-2">
@@ -102,28 +104,6 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        @switch (filter.Report)
-        {
-            case ReportType.DailyTraffic:
-                <partial name="_DailyTraffic" model="Model.DailyTraffic" />
-                break;
-            case ReportType.Batches:
-                <partial name="_Batches" model="Model.Batches" />
-                break;
-            case ReportType.AccountUsage:
-                <partial name="_AccountUsage" model="Model.AccountUsage" />
-                break;
-            case ReportType.Transactions:
-                <partial name="_Transactions" model="Model.Transactions" />
-                break;
-            case ReportType.CreditRequests:
-                <partial name="_CreditRequests" model="Model.CreditRequests" />
-                break;
-            default:
-                <partial name="_Messages" model="Model.Messages" />
-                break;
-        }
-    </div>
+<div id="report-results" hx-target="this" hx-swap="innerHTML" hx-push-url="true">
+    <partial name="_Results" model="Model" />
 </div>

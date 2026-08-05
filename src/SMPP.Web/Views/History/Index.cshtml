@@ -3,14 +3,11 @@
 @using SMPP.Domain.Enums
 @using SMPP.Web.Services
 @using SMPP.Web.ViewModels.History
-@using SMPP.Web.ViewModels.Shared
-@inject ICurrentUserService CurrentUser
 @model HistoryIndexViewModel
 @{
     ViewData["Title"] = L["History"];
     var sourceOptions = new SelectList(Enum.GetValues<MessageSource>().Select(v => new SelectListItem(L[ChartColors.SourceLabel(v)].Value, v.ToString())), "Value", "Text");
     var statusOptions = new SelectList(Enum.GetValues<MessageStatus>().Select(v => new SelectListItem(L[v.ToString()].Value, v.ToString())), "Value", "Text");
-    var resendableStatuses = new[] { MessageStatus.Failed, MessageStatus.Undelivered, MessageStatus.Expired };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -21,48 +18,11 @@
     </div>
 </div>
 
-<div class="row g-3 mb-1">
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Total"]</div>
-            <div class="kpi-value">@Model.Summary.Total</div>
-        </div>
-    </div>
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Delivered"]</div>
-            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Delivered)">@Model.Summary.Delivered</div>
-        </div>
-    </div>
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Sent"]</div>
-            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Sent)">@Model.Summary.Sent</div>
-        </div>
-    </div>
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Processing"]</div>
-            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Processing)">@Model.Summary.Processing</div>
-        </div>
-    </div>
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Undelivered"]</div>
-            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Undelivered)">@Model.Summary.Undelivered</div>
-        </div>
-    </div>
-    <div class="col-6 col-lg">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Failed / Expired"]</div>
-            <div class="kpi-value" style="color:@ChartColors.StatusColor(MessageStatus.Failed)">@(Model.Summary.Failed + Model.Summary.Expired)</div>
-        </div>
-    </div>
-</div>
-
 <div class="card mb-3">
     <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end"
+              hx-get="@Url.Action("Index")" hx-target="#history-results" hx-swap="innerHTML" hx-push-url="true"
+              hx-trigger="change, keyup changed delay:400ms from:input[type=text], submit">
             <div class="col-sm-6 col-lg-2">
                 <label class="form-label small mb-1">@L["Channel"]</label>
                 <select asp-for="Source" class="form-select form-select-sm" asp-items="sourceOptions">
@@ -99,51 +59,8 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
-            <thead>
-                <tr>
-                    <th>@L["Batch"]</th>
-                    <th>@L["Channel"]</th>
-                    <th>@L["Sender"]</th>
-                    <th>@L["Receiver"]</th>
-                    <th>@L["Status"]</th>
-                    <th>@L["Date (UTC)"]</th>
-                    <th class="text-end">@L["Actions"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Page.Items.Any())
-                {
-                    <tr><td colspan="7" class="text-center text-muted py-4">@L["No messages match these filters."]</td></tr>
-                }
-                @foreach (var h in Model.Page.Items)
-                {
-                    <tr>
-                        <td><code title="@h.CampaignBatchId">@h.CampaignBatchId[..Math.Min(8, h.CampaignBatchId.Length)]</code></td>
-                        <td>@L[ChartColors.SourceLabel(h.Source)]</td>
-                        <td>@h.SenderNumber</td>
-                        <td>@h.ReceiverNumber</td>
-                        <td><span style="color:@ChartColors.StatusColor(h.Status)">&#9679;</span> @L[h.Status.ToString()]</td>
-                        <td>@h.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="text-end">
-                            @if (h.CreatedByUserId == CurrentUser.UserId && resendableStatuses.Contains(h.Status))
-                            {
-                                <form asp-action="Resend" asp-route-id="@h.Id" asp-route-source="@h.Source" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">@L["Resend"]</button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer bg-white">
-        <partial name="_Pagination" model="@(new PaginationInfo(Model.Page.PageNumber, Model.Page.TotalPages))" />
-    </div>
+<div id="history-results" hx-target="this" hx-swap="innerHTML" hx-push-url="true">
+    <partial name="_Results" model="Model" />
 </div>
 
 @functions {

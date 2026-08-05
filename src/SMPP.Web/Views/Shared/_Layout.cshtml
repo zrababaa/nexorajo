@@ -10,24 +10,27 @@
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(isRtl ? "bootstrap.rtl.min.css" : "bootstrap.min.css")" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @* htmx/Chart.js/app.js/Alpine live in <head>, never inside the hx-boost swap region, so a
+       boosted navigation can't cause them to be re-fetched and re-executed on every page. *@
+    <script src="~/lib/htmx/htmx.min.js"></script>
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    <script src="~/lib/alpinejs/alpine.min.js" defer></script>
 </head>
-<body>
-    <div class="app-shell">
+<body hx-boost="true">
+    <div class="app-shell" x-data="sidebar">
         <partial name="_Sidebar" />
 
         <div class="app-main">
             <partial name="_Topbar" />
 
-            <main class="app-content">
+            <main class="app-content" id="app-content">
                 <partial name="_FlashMessages" />
                 @RenderBody()
             </main>
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

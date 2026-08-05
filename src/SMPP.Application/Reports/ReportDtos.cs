@@ -1,3 +1,4 @@
+using SMPP.Application.Common;
 using SMPP.Domain.Enums;
 
 namespace SMPP.Application.Reports;
@@ -111,3 +112,18 @@ public record CreditRequestRowDto(
 /// Excel are written once (ReportExportWriter) rather than once per report.
 /// </summary>
 public record ReportTable(string FileNameStem, IReadOnlyList<string> Headers, IReadOnlyList<IReadOnlyList<string>> Rows);
+
+/// <summary>
+/// The footer totals for a report table are computed over every row matching the filter, not
+/// just the page on screen - otherwise "Total" would silently mean "total of this page" the
+/// moment a report grew past one page.
+/// </summary>
+public record BatchTotals(int Recipients, int Delivered, int Failed, int Pending, decimal Cost);
+
+public record AccountUsageTotals(int TotalSent, int Delivered, int Failed, decimal CreditsConsumed, decimal CreditsAdded, decimal Balance);
+
+public record DailyTrafficTotals(int Total, int Delivered, int Sent, int Processing, int Undelivered, int Failed, int Expired);
+
+public record TransactionTotals(decimal NetChange);
+
+public record CreditRequestTotals(decimal ApprovedTotal);

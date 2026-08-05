@@ -1,3 +1,4 @@
+using SMPP.Application.Common;
 using SMPP.Application.Reports;
 using SMPP.Web.ViewModels.Reports;
 
@@ -11,7 +12,8 @@ public class AccountsLogsViewModel
     public int? AccountId { get; set; }
 
     public IReadOnlyList<AccountOption> Accounts { get; set; } = Array.Empty<AccountOption>();
-    public IReadOnlyList<BatchReportRowDto> Batches { get; set; } = Array.Empty<BatchReportRowDto>();
+    public PagedResult<BatchReportRowDto> Batches { get; set; } = new();
+    public BatchTotals BatchTotals { get; set; } = new(0, 0, 0, 0, 0m);
 
     public Dictionary<string, string> RouteValues()
     {

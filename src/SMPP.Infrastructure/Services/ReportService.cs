@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
+using SMPP.Application.Common;
 using SMPP.Application.History;
 using SMPP.Application.Reports;
 using SMPP.Domain.Common;
@@ -11,19 +12,27 @@ using SMPP.Infrastructure.Persistence;
 namespace SMPP.Infrastructure.Services;
 
 /// <summary>
-/// Backs the Reports tab. Everything here obeys two rules the rest of the reporting code
+/// Backs the Reports tab. Everything here obeys the rules the rest of the reporting code
 /// already lives by:
 ///
 /// - Send figures span both of the daemon's log tables, <c>historys</c> and
 ///   <c>quick_send_history</c>, because Quick Send rows only ever land in the latter. Counting
 ///   one would under-report every account that uses Quick Send.
-/// - Row sets are capped. A report is something a human reads or exports to a spreadsheet, not
-///   a full table dump, and the legacy log tables are large.
+/// - The on-screen table only ever pulls one page's worth of rows from the database; a report
+///   is something a human reads a page at a time, not a full table dump into one HTML response.
+///   Export is the deliberate exception (BuildExportAsync / IHistoryService.GetForExportAsync) -
+///   a spreadsheet is meant to be a bulk dump, capped generously rather than paged.
+/// - Footer "Total" rows are computed over every row matching the filter, not just the page on
+///   screen, so they keep meaning "grand total" once a report grows past one page.
 /// </summary>
 public class ReportService : IReportService
 {
-    private const int MaxRows = 5_000;
-    private const int MaxBatchRows = 2_000;
+    /// <summary>
+    /// Batches and daily-traffic rows are grouped/merged across two legacy tables in memory (see
+    /// class remarks on HistoryService for why), so - like HistoryService's own list - "all
+    /// matching rows" is bounded here rather than a true unbounded scan.
+    /// </summary>
+    private const int MaxGroupedRows = 2_000;
 
     /// <summary>MySQL copes badly with a single enormous IN list, so batch-id lookups go in slices.</summary>
     private const int LookupChunkSize = 500;
@@ -45,15 +54,68 @@ public class ReportService : IReportService
         _historyService = historyService;
     }
 
-    public Task<IReadOnlyList<HistoryExportRowDto>> GetMessagesAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default) =>
-        _historyService.GetForExportAsync(currentUserId, role, ToHistoryFilter(filter), ct);
-
-    public async Task<IReadOnlyList<DailyTrafficRowDto>> GetDailyTrafficAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
+    public async Task<PagedResult<HistoryExportRowDto>> GetMessagesAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
     {
         var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
 
+        // Neither table can contribute more than one page's worth to the merged page, so each
+        // side only needs the newest page*pageSize rows before the merge decides the order (same
+        // approach as HistoryService.GetPagedAsync for the identical two-table shape).
+        var take = page * pageSize;
+
+        var bulkQuery = ApplyHistoryFilters(_db.Histories.AsNoTracking(), userIds, filter);
+        var bulk = await bulkQuery
+            .OrderByDescending(h => h.CreatedAt)
+            .Take(take)
+            .Select(h => new HistoryExportRowDto(
+                h.Id, h.CampaignBatchId, h.Source, h.SenderNumber, h.ReceiverNumber,
+                h.MessageText, h.Status, h.ExternalMessageId, h.CreatedAt))
+            .ToListAsync(ct);
+
+        var quick = await ReadQuickSendAsync(userIds, filter, new List<HistoryExportRowDto>(), query => query
+            .OrderByDescending(h => h.CreatedAt)
+            .Take(take)
+            .Select(h => new HistoryExportRowDto(
+                h.Id, h.CampaignBatchId, MessageSource.QuickSend, h.SenderNumber, h.ReceiverNumber,
+                h.MessageText, h.Status, h.ExternalMessageId, h.CreatedAt))
+            .ToListAsync(ct));
+
+        var totalCount = await bulkQuery.CountAsync(ct)
+            + await ReadQuickSendAsync(userIds, filter, 0, query => query.CountAsync(ct));
+
+        var items = bulk
+            .Concat(quick)
+            .OrderByDescending(h => h.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new PagedResult<HistoryExportRowDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
+    }
+
+    public async Task<(PagedResult<DailyTrafficRowDto> Page, DailyTrafficTotals Totals)> GetDailyTrafficAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
+    {
+        var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
+        var all = await GetDailyTrafficAllAsync(userIds, filter, ct);
+
+        var totals = new DailyTrafficTotals(
+            all.Sum(r => r.Total), all.Sum(r => r.Delivered), all.Sum(r => r.Sent), all.Sum(r => r.Processing),
+            all.Sum(r => r.Undelivered), all.Sum(r => r.Failed), all.Sum(r => r.Expired));
+
+        return (Paginate(all, page, pageSize), totals);
+    }
+
+    private async Task<List<DailyTrafficRowDto>> GetDailyTrafficAllAsync(
+        IReadOnlyCollection<int> userIds, ReportFilterDto filter, CancellationToken ct)
+    {
         var bulk = await ApplyHistoryFilters(_db.Histories.AsNoTracking(), userIds, filter)
             .GroupBy(h => h.CreatedAt.Date)
             .Select(g => new DayCounts(
@@ -93,15 +155,58 @@ public class ReportService : IReportService
                 g.Sum(r => r.Failed),
                 g.Sum(r => r.Expired)))
             .OrderByDescending(r => r.Date)
-            .Take(MaxRows)
             .ToList();
     }
 
-    public async Task<IReadOnlyList<BatchReportRowDto>> GetBatchesAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
+    public async Task<(PagedResult<BatchReportRowDto> Page, BatchTotals Totals)> GetBatchesAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
     {
         var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
+        var batches = await GetBatchesAllAsync(userIds, filter, ct);
 
+        var totals = new BatchTotals(
+            batches.Sum(b => b.Recipients), batches.Sum(b => b.Delivered), batches.Sum(b => b.Failed),
+            batches.Sum(b => b.Pending), 0m); // Cost totalled below once costs are looked up.
+
+        var pageOfBatches = batches
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        // Usernames/costs are only looked up for the page actually shown, not every batch in the
+        // (already capped) full match set.
+        var usernames = await GetUsernamesAsync(pageOfBatches.Select(b => b.CreatedByUserId), ct);
+        var allCosts = await GetBatchCostsAsync(batches.Select(b => b.CampaignBatchId), ct);
+
+        var items = pageOfBatches
+            .Select(b => new BatchReportRowDto(
+                b.CampaignBatchId,
+                b.CampaignName,
+                b.Source,
+                b.SenderNumber,
+                usernames.GetValueOrDefault(b.CreatedByUserId, b.CreatedByUserId.ToString(CultureInfo.InvariantCulture)),
+                b.Recipients,
+                b.Delivered,
+                b.Failed,
+                b.Pending,
+                allCosts.GetValueOrDefault(b.CampaignBatchId),
+                b.CreatedAt))
+            .ToList();
+
+        var result = new PagedResult<BatchReportRowDto>
+        {
+            Items = items,
+            TotalCount = batches.Count,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
+
+        return (result, totals with { Cost = batches.Sum(b => allCosts.GetValueOrDefault(b.CampaignBatchId)) });
+    }
+
+    private async Task<List<BatchCounts>> GetBatchesAllAsync(
+        IReadOnlyCollection<int> userIds, ReportFilterDto filter, CancellationToken ct)
+    {
         // A status filter would silently distort every count on this report (a batch's "failed"
         // column cannot be read off a set already narrowed to failures), so it is not applied.
         var batchFilter = filter with { Status = null };
@@ -124,7 +229,7 @@ public class ReportService : IReportService
                 CreatedAt = g.Min(x => x.CreatedAt),
             })
             .OrderByDescending(g => g.CreatedAt)
-            .Take(MaxBatchRows)
+            .Take(MaxGroupedRows)
             .ToListAsync(ct);
 
         var quick = await ReadQuickSendAsync(userIds, batchFilter, new List<BatchCounts>(), async query =>
@@ -143,7 +248,7 @@ public class ReportService : IReportService
                     CreatedAt = g.Min(x => x.CreatedAt),
                 })
                 .OrderByDescending(g => g.CreatedAt)
-                .Take(MaxBatchRows)
+                .Take(MaxGroupedRows)
                 .ToListAsync(ct);
 
             return rows
@@ -153,36 +258,18 @@ public class ReportService : IReportService
                 .ToList();
         });
 
-        var batches = bulk
+        return bulk
             .Select(r => new BatchCounts(
                 r.Key.CampaignBatchId, r.Key.CampaignName, r.Key.Source, r.Key.SenderNumber,
                 r.Key.CreatedByUserId, r.Recipients, r.Delivered, r.Failed, r.Pending, r.CreatedAt))
             .Concat(quick)
             .OrderByDescending(b => b.CreatedAt)
-            .Take(MaxBatchRows)
-            .ToList();
-
-        var usernames = await GetUsernamesAsync(batches.Select(b => b.CreatedByUserId), ct);
-        var costs = await GetBatchCostsAsync(batches.Select(b => b.CampaignBatchId), ct);
-
-        return batches
-            .Select(b => new BatchReportRowDto(
-                b.CampaignBatchId,
-                b.CampaignName,
-                b.Source,
-                b.SenderNumber,
-                usernames.GetValueOrDefault(b.CreatedByUserId, b.CreatedByUserId.ToString(CultureInfo.InvariantCulture)),
-                b.Recipients,
-                b.Delivered,
-                b.Failed,
-                b.Pending,
-                costs.GetValueOrDefault(b.CampaignBatchId),
-                b.CreatedAt))
+            .Take(MaxGroupedRows)
             .ToList();
     }
 
-    public async Task<IReadOnlyList<AccountUsageRowDto>> GetAccountUsageAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
+    public async Task<(PagedResult<AccountUsageRowDto> Page, AccountUsageTotals Totals)> GetAccountUsageAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
     {
         var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
 
@@ -238,7 +325,7 @@ public class ReportService : IReportService
             .Select(u => new { u.Id, Username = u.UserName!, u.FullName, u.IsActive, u.Balance })
             .ToListAsync(ct);
 
-        return accounts
+        var all = accounts
             .Select(a =>
             {
                 var t = traffic.GetValueOrDefault(a.Id) ?? new UserCounts(a.Id, 0, 0, 0, 0);
@@ -260,23 +347,34 @@ public class ReportService : IReportService
             .OrderByDescending(a => a.TotalSent)
             .ThenBy(a => a.Username)
             .ToList();
+
+        var totals = new AccountUsageTotals(
+            all.Sum(a => a.TotalSent), all.Sum(a => a.Delivered), all.Sum(a => a.Failed),
+            all.Sum(a => a.CreditsConsumed), all.Sum(a => a.CreditsAdded), all.Sum(a => a.Balance));
+
+        return (Paginate(all, page, pageSize), totals);
     }
 
-    public async Task<IReadOnlyList<TransactionReportRowDto>> GetTransactionsAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
+    public async Task<(PagedResult<TransactionReportRowDto> Page, TransactionTotals Totals)> GetTransactionsAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
     {
         var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
+        var query = ApplyDateRange(_db.Transactions.AsNoTracking().Where(t => userIds.Contains(t.UserId)), filter);
 
-        var rows = await ApplyDateRange(
-                _db.Transactions.AsNoTracking().Where(t => userIds.Contains(t.UserId)), filter)
+        var totalCount = await query.CountAsync(ct);
+        var creditTotal = await query.Where(t => t.Kind == TransactionKind.Credit).SumAsync(t => t.Amount, ct);
+        var debitTotal = await query.Where(t => t.Kind == TransactionKind.Debit).SumAsync(t => t.Amount, ct);
+
+        var rows = await query
             .OrderByDescending(t => t.CreatedAt)
-            .Take(MaxRows)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(t => new { t.Id, t.CreatedAt, t.UserId, t.Kind, t.Source, t.Amount, t.RelatedBatchId })
             .ToListAsync(ct);
 
         var usernames = await GetUsernamesAsync(rows.Select(r => r.UserId), ct);
 
-        return rows
+        var items = rows
             .Select(r => new TransactionReportRowDto(
                 r.Id,
                 r.CreatedAt,
@@ -286,17 +384,31 @@ public class ReportService : IReportService
                 r.Amount,
                 r.RelatedBatchId))
             .ToList();
+
+        var result = new PagedResult<TransactionReportRowDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
+
+        return (result, new TransactionTotals(creditTotal - debitTotal));
     }
 
-    public async Task<IReadOnlyList<CreditRequestRowDto>> GetCreditRequestsAsync(
-        int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
+    public async Task<(PagedResult<CreditRequestRowDto> Page, CreditRequestTotals Totals)> GetCreditRequestsAsync(
+        int currentUserId, UserRole role, ReportFilterDto filter, int page, int pageSize, CancellationToken ct = default)
     {
         var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
+        var query = ApplyDateRange(_db.Payments.AsNoTracking().Where(p => userIds.Contains(p.SubmittedByUserId)), filter);
 
-        var rows = await ApplyDateRange(
-                _db.Payments.AsNoTracking().Where(p => userIds.Contains(p.SubmittedByUserId)), filter)
+        var totalCount = await query.CountAsync(ct);
+        var approvedTotal = await query.Where(p => p.Status == PaymentStatus.Approved).SumAsync(p => p.Amount, ct);
+
+        var rows = await query
             .OrderByDescending(p => p.CreatedAt)
-            .Take(MaxRows)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(p => new
             {
                 p.Id, p.CreatedAt, p.SubmittedByUserId, p.Amount, p.Method,
@@ -306,7 +418,7 @@ public class ReportService : IReportService
 
         var usernames = await GetUsernamesAsync(rows.Select(r => r.SubmittedByUserId), ct);
 
-        return rows
+        var items = rows
             .Select(r => new CreditRequestRowDto(
                 r.Id,
                 r.CreatedAt,
@@ -318,16 +430,28 @@ public class ReportService : IReportService
                 r.ReviewedAt,
                 r.ReviewNote))
             .ToList();
+
+        var result = new PagedResult<CreditRequestRowDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
+
+        return (result, new CreditRequestTotals(approvedTotal));
     }
 
     public async Task<ReportTable> BuildExportAsync(
         ReportType type, int currentUserId, UserRole role, ReportFilterDto filter, CancellationToken ct = default)
     {
+        var userIds = await ResolveUserIdsAsync(currentUserId, role, filter, ct);
+
         switch (type)
         {
             case ReportType.DailyTraffic:
             {
-                var rows = await GetDailyTrafficAsync(currentUserId, role, filter, ct);
+                var rows = await GetDailyTrafficAllAsync(userIds, filter, ct);
                 return new ReportTable(
                     "daily-traffic",
                     new[] { "Date", "Total", "Delivered", "Sent", "Processing", "Undelivered", "Failed", "Expired", "Delivery rate %" },
@@ -341,11 +465,11 @@ public class ReportService : IReportService
 
             case ReportType.Batches:
             {
-                var rows = await GetBatchesAsync(currentUserId, role, filter, ct);
+                var (page, _) = await GetBatchesAsync(currentUserId, role, filter, 1, MaxGroupedRows, ct);
                 return new ReportTable(
                     "batches",
                     new[] { "Batch Id", "Campaign", "Channel", "Sender", "Account", "Recipients", "Delivered", "Failed", "Processing", "Cost", "Date (UTC)" },
-                    rows.Select(r => (IReadOnlyList<string>)new[]
+                    page.Items.Select(r => (IReadOnlyList<string>)new[]
                     {
                         r.BatchId, r.CampaignName ?? string.Empty, r.Source.ToString(), r.SenderId, r.AccountUsername,
                         Num(r.Recipients), Num(r.Delivered), Num(r.Failed), Num(r.Pending), Money(r.Cost), Timestamp(r.CreatedAt),
@@ -354,11 +478,11 @@ public class ReportService : IReportService
 
             case ReportType.AccountUsage:
             {
-                var rows = await GetAccountUsageAsync(currentUserId, role, filter, ct);
+                var (page, _) = await GetAccountUsageAsync(currentUserId, role, filter, 1, int.MaxValue, ct);
                 return new ReportTable(
                     "account-usage",
                     new[] { "Account", "Full name", "Status", "Messages", "Delivered", "Failed", "Delivery rate %", "Credits used", "Credits added", "Balance" },
-                    rows.Select(r => (IReadOnlyList<string>)new[]
+                    page.Items.Select(r => (IReadOnlyList<string>)new[]
                     {
                         r.Username, r.FullName, r.IsActive ? "Active" : "Inactive",
                         Num(r.TotalSent), Num(r.Delivered), Num(r.Failed), Rate(r.DeliveryRate),
@@ -368,11 +492,11 @@ public class ReportService : IReportService
 
             case ReportType.Transactions:
             {
-                var rows = await GetTransactionsAsync(currentUserId, role, filter, ct);
+                var (page, _) = await GetTransactionsAsync(currentUserId, role, filter, 1, HistoryService.MaxExportRows, ct);
                 return new ReportTable(
                     "transactions",
                     new[] { "Date (UTC)", "Account", "Type", "Source", "Amount", "Batch Id" },
-                    rows.Select(r => (IReadOnlyList<string>)new[]
+                    page.Items.Select(r => (IReadOnlyList<string>)new[]
                     {
                         Timestamp(r.CreatedAt), r.Username, r.Kind.ToString(), r.Source.ToString(),
                         Money(r.Amount), r.RelatedBatchId ?? string.Empty,
@@ -381,11 +505,11 @@ public class ReportService : IReportService
 
             case ReportType.CreditRequests:
             {
-                var rows = await GetCreditRequestsAsync(currentUserId, role, filter, ct);
+                var (page, _) = await GetCreditRequestsAsync(currentUserId, role, filter, 1, HistoryService.MaxExportRows, ct);
                 return new ReportTable(
                     "credit-requests",
                     new[] { "Date (UTC)", "Account", "Amount", "Method", "Reference", "Status", "Reviewed (UTC)", "Review note" },
-                    rows.Select(r => (IReadOnlyList<string>)new[]
+                    page.Items.Select(r => (IReadOnlyList<string>)new[]
                     {
                         Timestamp(r.CreatedAt), r.Username, Money(r.Amount), r.Method.ToString(),
                         r.TransactionRef ?? string.Empty, r.Status.ToString(),
@@ -396,7 +520,7 @@ public class ReportService : IReportService
 
             default:
             {
-                var rows = await GetMessagesAsync(currentUserId, role, filter, ct);
+                var rows = await _historyService.GetForExportAsync(currentUserId, role, ToHistoryFilter(filter), ct);
                 return new ReportTable(
                     "messages",
                     new[] { "Batch Id", "Channel", "Sender", "Receiver", "Status", "Message", "Gateway Message Id", "Date (UTC)" },
@@ -409,6 +533,14 @@ public class ReportService : IReportService
             }
         }
     }
+
+    private static PagedResult<T> Paginate<T>(IReadOnlyList<T> all, int page, int pageSize) => new()
+    {
+        Items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
+        TotalCount = all.Count,
+        PageNumber = page,
+        PageSize = pageSize,
+    };
 
     private static HistoryFilterDto ToHistoryFilter(ReportFilterDto filter) =>
         new(filter.Source, filter.Status, CampaignBatchId: null, ReceiverSearch: null, filter.DateFrom, filter.DateTo);

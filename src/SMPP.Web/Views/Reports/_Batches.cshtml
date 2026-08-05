@@ -1,6 +1,7 @@
+@using SMPP.Application.Common
 @using SMPP.Application.Reports
 @using SMPP.Web.Services
-@model IReadOnlyList<BatchReportRowDto>
+@model (PagedResult<BatchReportRowDto> Page, BatchTotals Totals)
 
 <table class="table table-hover table-sm mb-0 align-middle">
     <thead>
@@ -19,11 +20,11 @@
         </tr>
     </thead>
     <tbody>
-        @if (!Model.Any())
+        @if (!Model.Page.Items.Any())
         {
             <tr><td colspan="11" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
         }
-        @foreach (var r in Model)
+        @foreach (var r in Model.Page.Items)
         {
             <tr>
                 <td><code title="@r.BatchId">@r.BatchId[..Math.Min(10, r.BatchId.Length)]</code></td>
@@ -40,16 +41,16 @@
             </tr>
         }
     </tbody>
-    @if (Model.Any())
+    @if (Model.Page.Items.Any())
     {
         <tfoot class="table-light fw-semibold">
             <tr>
                 <td colspan="5">@L["Total"]</td>
-                <td class="text-end">@Model.Sum(r => r.Recipients)</td>
-                <td class="text-end">@Model.Sum(r => r.Delivered)</td>
-                <td class="text-end">@Model.Sum(r => r.Failed)</td>
-                <td class="text-end">@Model.Sum(r => r.Pending)</td>
-                <td class="text-end">@Model.Sum(r => r.Cost).ToString("N2")</td>
+                <td class="text-end">@Model.Totals.Recipients</td>
+                <td class="text-end">@Model.Totals.Delivered</td>
+                <td class="text-end">@Model.Totals.Failed</td>
+                <td class="text-end">@Model.Totals.Pending</td>
+                <td class="text-end">@Model.Totals.Cost.ToString("N2")</td>
                 <td></td>
             </tr>
         </tfoot>

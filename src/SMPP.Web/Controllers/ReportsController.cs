@@ -3,6 +3,7 @@ using SMPP.Application.Abstractions;
 using SMPP.Application.Accounts;
 using SMPP.Application.Reports;
 using SMPP.Domain.Enums;
+using SMPP.Web.Extensions;
 using SMPP.Web.Services;
 using SMPP.Web.ViewModels.Reports;
 
@@ -18,6 +19,8 @@ namespace SMPP.Web.Controllers;
 /// </summary>
 public class ReportsController : Controller
 {
+    private const int PageSize = 25;
+
     private readonly IReportService _reports;
     private readonly IAccountService _accounts;
     private readonly ICurrentUserService _currentUser;
@@ -33,7 +36,7 @@ public class ReportsController : Controller
         ReportType report = ReportType.Messages,
         DateOnly? dateFrom = null, DateOnly? dateTo = null,
         MessageSource? source = null, MessageStatus? status = null, int? accountId = null,
-        CancellationToken ct = default)
+        int page = 1, CancellationToken ct = default)
     {
         var filter = await BuildFilterAsync(report, dateFrom, dateTo, source, status, accountId, ct);
         var model = new ReportsViewModel { Filter = filter };
@@ -45,26 +48,27 @@ public class ReportsController : Controller
         switch (report)
         {
             case ReportType.DailyTraffic:
-                model.DailyTraffic = await _reports.GetDailyTrafficAsync(userId, role, dto, ct);
+                (model.DailyTraffic, model.DailyTrafficTotals) = await _reports.GetDailyTrafficAsync(userId, role, dto, page, PageSize, ct);
                 break;
             case ReportType.Batches:
-                model.Batches = await _reports.GetBatchesAsync(userId, role, dto, ct);
+                (model.Batches, model.BatchTotals) = await _reports.GetBatchesAsync(userId, role, dto, page, PageSize, ct);
                 break;
             case ReportType.AccountUsage:
-                model.AccountUsage = await _reports.GetAccountUsageAsync(userId, role, dto, ct);
+                (model.AccountUsage, model.AccountUsageTotals) = await _reports.GetAccountUsageAsync(userId, role, dto, page, PageSize, ct);
                 break;
             case ReportType.Transactions:
-                model.Transactions = await _reports.GetTransactionsAsync(userId, role, dto, ct);
+                (model.Transactions, model.TransactionTotals) = await _reports.GetTransactionsAsync(userId, role, dto, page, PageSize, ct);
                 break;
             case ReportType.CreditRequests:
-                model.CreditRequests = await _reports.GetCreditRequestsAsync(userId, role, dto, ct);
+                (model.CreditRequests, model.CreditRequestTotals) = await _reports.GetCreditRequestsAsync(userId, role, dto, page, PageSize, ct);
                 break;
             default:
-                model.Messages = await _reports.GetMessagesAsync(userId, role, dto, ct);
+                model.Messages = await _reports.GetMessagesAsync(userId, role, dto, page, PageSize, ct);
                 break;
         }
 
-        return View(model);
+        // Live-filtering htmx requests only need the results fragment re-rendered, not the whole page.
+        return Request.IsHtmxFragment("report-results") ? PartialView("_Results", model) : View(model);
     }
 
     public Task<IActionResult> ExportExcel(

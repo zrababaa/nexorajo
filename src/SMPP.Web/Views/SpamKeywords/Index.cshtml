@@ -48,11 +48,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Keywords.Any())
+                        @if (!Model.Keywords.Items.Any())
                         {
                             <tr><td colspan="5" class="text-center text-muted py-4">@L["No keywords configured."]</td></tr>
                         }
-                        @foreach (var k in Model.Keywords)
+                        @foreach (var k in Model.Keywords.Items)
                         {
                             <tr>
                                 <td>@k.Keyword</td>
@@ -80,7 +80,7 @@
                                             <button type="submit" class="btn btn-sm btn-outline-success">@L["Enable"]</button>
                                         }
                                     </form>
-                                    <form asp-action="Delete" asp-route-id="@k.Id" method="post" class="d-inline" onsubmit="return confirm('@confirmDelete');">
+                                    <form asp-action="Delete" asp-route-id="@k.Id" method="post" class="d-inline" hx-confirm="@confirmDelete">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
                                     </form>
@@ -89,6 +89,9 @@
                         }
                     </tbody>
                 </table>
+            </div>
+            <div class="card-footer bg-white">
+                <partial name="_Pagination" model="@PaginationInfo.From(Model.Keywords, "keywordsPage")" />
             </div>
         </div>
     </div>
@@ -131,6 +134,6 @@
         </table>
     </div>
     <div class="card-footer bg-white">
-        <partial name="_Pagination" model="@(new PaginationInfo(Model.BlockedAttempts.PageNumber, Model.BlockedAttempts.TotalPages))" />
+        <partial name="_Pagination" model="@PaginationInfo.From(Model.BlockedAttempts)" />
     </div>
 </div>

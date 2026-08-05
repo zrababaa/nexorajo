@@ -79,7 +79,7 @@
                 </table>
             </div>
             <div class="card-footer bg-white">
-                <partial name="_Pagination" model="@(new PaginationInfo(requests.PageNumber, requests.TotalPages))" />
+                <partial name="_Pagination" model="@PaginationInfo.From(requests)" />
             </div>
         </div>
     </div>

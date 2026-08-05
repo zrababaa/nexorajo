@@ -5,6 +5,6 @@ namespace SMPP.Web.ViewModels.SpamKeywords;
 
 public class SpamKeywordsPageViewModel
 {
-    public IReadOnlyList<SpamKeywordListItemDto> Keywords { get; set; } = Array.Empty<SpamKeywordListItemDto>();
+    public PagedResult<SpamKeywordListItemDto> Keywords { get; set; } = new();
     public PagedResult<SpamBlockedAttemptRowDto> BlockedAttempts { get; set; } = new();
 }

@@ -1,6 +1,7 @@
+@using SMPP.Application.Common
 @using SMPP.Application.History
 @using SMPP.Web.Services
-@model IReadOnlyList<HistoryExportRowDto>
+@model PagedResult<HistoryExportRowDto>
 
 <table class="table table-hover table-sm mb-0 align-middle">
     <thead>
@@ -15,11 +16,11 @@
         </tr>
     </thead>
     <tbody>
-        @if (!Model.Any())
+        @if (!Model.Items.Any())
         {
             <tr><td colspan="7" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
         }
-        @foreach (var r in Model)
+        @foreach (var r in Model.Items)
         {
             <tr>
                 <td><code title="@r.CampaignBatchId">@r.CampaignBatchId[..Math.Min(8, r.CampaignBatchId.Length)]</code></td>

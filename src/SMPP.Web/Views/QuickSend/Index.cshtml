@@ -26,7 +26,9 @@
                     {
                         <div class="mb-3">
                             <label class="form-label">@L["Use a saved list"]</label>
-                            <select id="savedListPicker" class="form-select">
+                            <select id="savedListPicker" name="id" class="form-select"
+                                    hx-get="@Url.Action("CampaignNumbers")" hx-target="#RawNumbers" hx-swap="outerHTML"
+                                    hx-trigger="change[target.value]">
                                 <option value="">@L["Select a saved list..."]</option>
                                 @foreach (var l in savedLists)
                                 {
@@ -89,22 +91,8 @@
                 </table>
             </div>
             <div class="card-footer bg-white">
-                <partial name="_Pagination" model="@(new PaginationInfo(history.PageNumber, history.TotalPages))" />
+                <partial name="_Pagination" model="@PaginationInfo.From(history)" />
             </div>
         </div>
     </div>
 </div>
-
-@if (savedLists.Any())
-{
-    <script>
-        document.getElementById('savedListPicker').addEventListener('change', function () {
-            if (!this.value) return;
-            fetch('@Url.Action("CampaignNumbers")/' + this.value)
-                .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-                .then(function (data) {
-                    document.querySelector('#quickSendForm textarea[name="RawNumbers"]').value = data.numbers;
-                });
-        });
-    </script>
-}

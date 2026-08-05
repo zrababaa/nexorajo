@@ -26,11 +26,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("Default")
-            ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
+        // Escape hatch for local testing with no MySQL server available: everything above EF runs
+        // unchanged against an in-memory database. Set via environment variable
+        // (Database__UseInMemory=true) rather than checked-in appsettings, since it resets all
+        // data on every restart and isn't something a shared dev/production config should default to.
+        if (configuration.GetValue("Database:UseInMemory", defaultValue: false))
+        {
+            services.AddDbContext<SmppDbContext>(options => options.UseInMemoryDatabase("SmppDevDb"));
+        }
+        else
+        {
+            var connectionString = configuration.GetConnectionString("Default")
+                ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
 
-        services.AddDbContext<SmppDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            services.AddDbContext<SmppDbContext>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        }
 
         services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {

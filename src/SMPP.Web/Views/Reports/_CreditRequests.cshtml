@@ -1,6 +1,7 @@
+@using SMPP.Application.Common
 @using SMPP.Application.Reports
 @using SMPP.Domain.Enums
-@model IReadOnlyList<CreditRequestRowDto>
+@model (PagedResult<CreditRequestRowDto> Page, CreditRequestTotals Totals)
 @{
     string StatusBadge(PaymentStatus status) => status switch
     {
@@ -24,11 +25,11 @@
         </tr>
     </thead>
     <tbody>
-        @if (!Model.Any())
+        @if (!Model.Page.Items.Any())
         {
             <tr><td colspan="8" class="text-center text-muted py-4">@L["No rows match these filters."]</td></tr>
         }
-        @foreach (var r in Model)
+        @foreach (var r in Model.Page.Items)
         {
             <tr>
                 <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
@@ -42,14 +43,12 @@
             </tr>
         }
     </tbody>
-    @if (Model.Any())
+    @if (Model.Page.Items.Any())
     {
         <tfoot class="table-light fw-semibold">
             <tr>
                 <td colspan="2">@L["Approved total"]</td>
-                <td class="text-end">
-                    @Model.Where(r => r.Status == PaymentStatus.Approved).Sum(r => r.Amount).ToString("N2")
-                </td>
+                <td class="text-end">@Model.Totals.ApprovedTotal.ToString("N2")</td>
                 <td colspan="5"></td>
             </tr>
         </tfoot>

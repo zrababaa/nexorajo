@@ -1,0 +1,71 @@
+@using SMPP.Application.Common
+@using SMPP.Application.Payments
+@using SMPP.Domain.Enums
+@using SMPP.Web.ViewModels.Shared
+@model PagedResult<PaymentListItemDto>
+@{
+    string StatusBadge(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Approved => "bg-success",
+        PaymentStatus.Rejected => "bg-danger",
+        _ => "bg-warning text-dark",
+    };
+
+    var confirmApprove = L["Approve this request and credit the account?"].Value;
+}
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>@L["Account"]</th>
+                    <th>@L["Amount"]</th>
+                    <th>@L["Method"]</th>
+                    <th>@L["Reference"]</th>
+                    <th>@L["Note"]</th>
+                    <th>@L["Status"]</th>
+                    <th>@L["Submitted"]</th>
+                    <th class="text-end">@L["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">@L["No credit requests."]</td></tr>
+                }
+                @foreach (var r in Model.Items)
+                {
+                    <tr>
+                        <td>@r.SubmittedByUsername</td>
+                        <td>@r.Amount.ToString("N2")</td>
+                        <td>@r.Method</td>
+                        <td>
+                            @r.TransactionRef
+                            @if (!string.IsNullOrEmpty(r.ProofFilePath))
+                            {
+                                <a href="~/@r.ProofFilePath" target="_blank" class="d-block small">@L["View proof"]</a>
+                            }
+                        </td>
+                        <td class="small text-muted">@(r.Status == PaymentStatus.Rejected ? r.ReviewNote : r.Note)</td>
+                        <td><span class="badge @StatusBadge(r.Status)">@L[r.Status.ToString()]</span></td>
+                        <td>@r.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end">
+                            @if (r.Status == PaymentStatus.Pending)
+                            {
+                                <form asp-action="Approve" asp-route-id="@r.Id" method="post" class="d-inline" hx-confirm="@confirmApprove">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-success">@L["Approve"]</button>
+                                </form>
+                                <button type="button" class="btn btn-sm btn-outline-danger" @@click="open = true; paymentId = @r.Id">@L["Reject"]</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white">
+        <partial name="_Pagination" model="@PaginationInfo.From(Model)" />
+    </div>
+</div>

@@ -13,7 +13,9 @@
 
 <div class="card mb-3">
     <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end"
+              hx-get="@Url.Action("Index")" hx-target="#accountslogs-results" hx-swap="innerHTML" hx-push-url="true"
+              hx-trigger="change, submit">
             <div class="col-sm-6 col-lg-3">
                 <label class="form-label small mb-1">@L["From"]</label>
                 <input type="date" name="dateFrom" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
@@ -40,8 +42,6 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <partial name="~/Views/Reports/_Batches.cshtml" model="Model.Batches" />
-    </div>
+<div id="accountslogs-results" hx-target="this" hx-swap="innerHTML" hx-push-url="true">
+    <partial name="_Results" model="(Page: Model.Batches, Totals: Model.BatchTotals)" />
 </div>

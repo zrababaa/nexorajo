@@ -1,0 +1,44 @@
+@using SMPP.Application.Reports
+@using SMPP.Web.ViewModels.Reports
+@using SMPP.Web.ViewModels.Shared
+@model ReportsViewModel
+
+<div class="card">
+    <div class="table-responsive">
+        @switch (Model.Filter.Report)
+        {
+            case ReportType.DailyTraffic:
+                <partial name="_DailyTraffic" model="(Page: Model.DailyTraffic, Totals: Model.DailyTrafficTotals)" />
+                break;
+            case ReportType.Batches:
+                <partial name="_Batches" model="(Page: Model.Batches, Totals: Model.BatchTotals)" />
+                break;
+            case ReportType.AccountUsage:
+                <partial name="_AccountUsage" model="(Page: Model.AccountUsage, Totals: Model.AccountUsageTotals)" />
+                break;
+            case ReportType.Transactions:
+                <partial name="_Transactions" model="(Page: Model.Transactions, Totals: Model.TransactionTotals)" />
+                break;
+            case ReportType.CreditRequests:
+                <partial name="_CreditRequests" model="(Page: Model.CreditRequests, Totals: Model.CreditRequestTotals)" />
+                break;
+            default:
+                <partial name="_Messages" model="Model.Messages" />
+                break;
+        }
+    </div>
+    <div class="card-footer bg-white">
+        @{
+            var pagination = Model.Filter.Report switch
+            {
+                ReportType.DailyTraffic => PaginationInfo.From(Model.DailyTraffic),
+                ReportType.Batches => PaginationInfo.From(Model.Batches),
+                ReportType.AccountUsage => PaginationInfo.From(Model.AccountUsage),
+                ReportType.Transactions => PaginationInfo.From(Model.Transactions),
+                ReportType.CreditRequests => PaginationInfo.From(Model.CreditRequests),
+                _ => PaginationInfo.From(Model.Messages),
+            };
+        }
+        <partial name="_Pagination" model="pagination" />
+    </div>
+</div>

@@ -3,6 +3,7 @@ using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
 using SMPP.Application.History;
 using SMPP.Domain.Enums;
+using SMPP.Web.Extensions;
 using SMPP.Web.Services;
 using SMPP.Web.ViewModels.History;
 
@@ -37,7 +38,7 @@ public class HistoryController : Controller
         var pageResult = await _historyService.GetPagedAsync(_currentUser.UserId, _currentUser.Role, filter, page, PageSize, ct);
         var summary = await _historyService.GetSummaryAsync(_currentUser.UserId, _currentUser.Role, filter, ct);
 
-        return View(new HistoryIndexViewModel
+        var model = new HistoryIndexViewModel
         {
             Page = pageResult,
             Summary = summary,
@@ -47,7 +48,10 @@ public class HistoryController : Controller
             Receiver = receiver,
             DateFrom = dateFrom,
             DateTo = dateTo,
-        });
+        };
+
+        // Live-filtering htmx requests only need the results fragment re-rendered, not the whole page.
+        return Request.IsHtmxFragment("history-results") ? PartialView("_Results", model) : View(model);
     }
 
     [HttpPost]

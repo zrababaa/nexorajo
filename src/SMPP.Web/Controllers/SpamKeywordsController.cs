@@ -10,6 +10,7 @@ namespace SMPP.Web.Controllers;
 public class SpamKeywordsController : Controller
 {
     private const int BlockedAttemptsPageSize = 20;
+    private const int KeywordsPageSize = 20;
 
     private readonly ISpamKeywordService _spamKeywordService;
     private readonly ICurrentUserService _currentUser;
@@ -20,11 +21,11 @@ public class SpamKeywordsController : Controller
         _currentUser = currentUser;
     }
 
-    public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Index(int page = 1, int keywordsPage = 1, CancellationToken ct = default)
     {
         var model = new SpamKeywordsPageViewModel
         {
-            Keywords = await _spamKeywordService.GetAllAsync(ct),
+            Keywords = await _spamKeywordService.GetPagedAsync(keywordsPage, KeywordsPageSize, ct),
             BlockedAttempts = await _spamKeywordService.GetBlockedAttemptsAsync(page, BlockedAttemptsPageSize, ct),
         };
         return View(model);

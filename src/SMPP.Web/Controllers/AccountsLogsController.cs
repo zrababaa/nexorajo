@@ -5,6 +5,7 @@ using SMPP.Application.Accounts;
 using SMPP.Application.Reports;
 using SMPP.Domain.Enums;
 using SMPP.Infrastructure.Identity;
+using SMPP.Web.Extensions;
 using SMPP.Web.Services;
 using SMPP.Web.ViewModels.AccountsLogs;
 using SMPP.Web.ViewModels.Reports;
@@ -18,6 +19,8 @@ namespace SMPP.Web.Controllers;
 [Authorize(Roles = RoleNames.Superadmin)]
 public class AccountsLogsController : Controller
 {
+    private const int PageSize = 25;
+
     private readonly IReportService _reports;
     private readonly IAccountService _accounts;
     private readonly ICurrentUserService _currentUser;
@@ -29,18 +32,26 @@ public class AccountsLogsController : Controller
         _currentUser = currentUser;
     }
 
-    public async Task<IActionResult> Index(DateOnly? dateFrom = null, DateOnly? dateTo = null, int? accountId = null, CancellationToken ct = default)
+    public async Task<IActionResult> Index(
+        DateOnly? dateFrom = null, DateOnly? dateTo = null, int? accountId = null, int page = 1, CancellationToken ct = default)
     {
+        var (batches, totals) = await _reports.GetBatchesAsync(
+            _currentUser.UserId, _currentUser.Role, ToFilter(dateFrom, dateTo, accountId), page, PageSize, ct);
+
         var model = new AccountsLogsViewModel
         {
             DateFrom = dateFrom,
             DateTo = dateTo,
             AccountId = accountId,
             Accounts = (await _accounts.GetOptionsAsync(ct)).Select(a => new AccountOption(a.Id, a.Username)).ToList(),
-            Batches = await _reports.GetBatchesAsync(_currentUser.UserId, _currentUser.Role, ToFilter(dateFrom, dateTo, accountId), ct),
+            Batches = batches,
+            BatchTotals = totals,
         };
 
-        return View(model);
+        // Live-filtering htmx requests only need the results fragment re-rendered, not the whole page.
+        return Request.IsHtmxFragment("accountslogs-results")
+            ? PartialView("_Results", (Page: model.Batches, Totals: model.BatchTotals))
+            : View(model);
     }
 
     public Task<IActionResult> ExportExcel(DateOnly? dateFrom = null, DateOnly? dateTo = null, int? accountId = null, CancellationToken ct = default) =>

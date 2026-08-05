@@ -326,4 +326,7 @@
   <data name="PublicApi" xml:space="preserve"><value>واجهة برمجية</value></data>
   <data name="PaymentApproval" xml:space="preserve"><value>اعتماد دفعة</value></data>
   <data name="Every account is charged 1 credit per message part, per recipient." xml:space="preserve"><value>يُخصم من كل حساب رصيد واحد لكل جزء من الرسالة ولكل مستلم.</value></data>
+  <data name="Showing {0}-{1} of {2}" xml:space="preserve"><value>عرض {0}-{1} من {2}</value></data>
+  <data name="Previous" xml:space="preserve"><value>السابق</value></data>
+  <data name="Next" xml:space="preserve"><value>التالي</value></data>
 </root>

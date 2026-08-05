@@ -11,8 +11,11 @@
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(isRtl ? "bootstrap.rtl.min.css" : "bootstrap.min.css")" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/lib/htmx/htmx.min.js"></script>
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    <script src="~/lib/alpinejs/alpine.min.js" defer></script>
 </head>
-<body>
+<body hx-boost="true">
     <div class="auth-shell">
         <div class="auth-card">
             <div class="d-flex justify-content-end small mb-2 lang-switch">
@@ -28,8 +31,6 @@
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
