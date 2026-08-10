@@ -30,7 +30,7 @@ builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
 // the MVC services because it contributes the authentication scheme the API controllers name.
 builder.Services.AddSmppApi(builder.Configuration);
 
-builder.Services.AddControllersWithViews(options =>
+builder.Services.AddControllers(options =>
 {
     // Every page requires authentication by default; Account actions opt out with [AllowAnonymous].
     options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder()
@@ -39,10 +39,7 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.AddService<CheckBlacklistFilter>();
     options.Filters.Add<ApiExceptionFilter>();
 })
-    .AddSmppApiConventions()
-    .AddViewLocalization()
-    .AddDataAnnotationsLocalization(o =>
-        o.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)));
+    .AddSmppApiConventions();
 
 var supportedUICultures = new[] { new CultureInfo("en"), new CultureInfo("ar") };
 var localizationOptions = new RequestLocalizationOptions
@@ -100,7 +97,6 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -120,9 +116,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+
+// Angular SPA: any request that doesn't match an API/Swagger endpoint above falls through to
+// index.html, letting the client-side router handle deep links (e.g. a hard refresh on /customers).
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

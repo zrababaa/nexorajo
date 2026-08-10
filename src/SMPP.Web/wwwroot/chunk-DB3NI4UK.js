@@ -1,0 +1,1 @@
+var s={Delivered:"#0ca30c",Sent:"#2a78d6",Processing:"#fab219",Expired:"#4a3aa7",Undelivered:"#ec835a",Failed:"#d03b3b"},r={QuickSend:"#2a78d6",BulkSend:"#eb6834",PublicApi:"#1baf7a"},t={QuickSend:"Quick Send",BulkSend:"Bulk Send",PublicApi:"Public API"};function a(e){return s[e]??"#898781"}function c(e){return r[e]??"#898781"}function n(e){return t[e]??e}export{a,c as b,n as c};
