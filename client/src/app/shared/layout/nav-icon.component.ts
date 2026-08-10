@@ -72,6 +72,17 @@ import { Component, input } from '@angular/core';
           <path d="M15 2v4h4" />
           <path d="M9 13h6M9 17h6M9 9h2" />
         }
+        @case ('customers') {
+          <circle cx="9" cy="8" r="3.25" />
+          <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+          <path d="M16 4.5a3.25 3.25 0 0 1 0 6.3" />
+          <path d="M17.5 14.5a4.5 4.5 0 0 1 3 4.2" />
+        }
+        @case ('company') {
+          <rect x="4" y="9" width="16" height="12" rx="1" />
+          <path d="M9 3h6v6H9z" />
+          <path d="M10 21v-4h4v4" />
+        }
       }
     </svg>
   `,

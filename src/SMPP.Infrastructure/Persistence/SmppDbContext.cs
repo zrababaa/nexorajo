@@ -22,6 +22,9 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<AdminBudget> AdminBudgets => Set<AdminBudget>();
     public DbSet<AdminBudgetLog> AdminBudgetLogs => Set<AdminBudgetLog>();
     public DbSet<SpamBlockedAttempt> SpamBlockedAttempts => Set<SpamBlockedAttempt>();
+    public DbSet<CompanyProfile> CompanyProfiles => Set<CompanyProfile>();
+    public DbSet<CompanyDocument> CompanyDocuments => Set<CompanyDocument>();
+    public DbSet<Customer> Customers => Set<Customer>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

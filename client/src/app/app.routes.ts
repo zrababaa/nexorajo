@@ -79,6 +79,26 @@ export const routes: Routes = [
         canActivate: [roleGuard('Superadmin')],
         loadComponent: () => import('./features/accounts/accounts-logs.component').then((m) => m.AccountsLogsComponent),
       },
+      {
+        path: 'customers',
+        canActivate: [roleGuard('Account')],
+        loadComponent: () => import('./features/customers/customers-list.component').then((m) => m.CustomersListComponent),
+      },
+      {
+        path: 'customers/new',
+        canActivate: [roleGuard('Account')],
+        loadComponent: () => import('./features/customers/customer-form.component').then((m) => m.CustomerFormComponent),
+      },
+      {
+        path: 'customers/:id/edit',
+        canActivate: [roleGuard('Account')],
+        loadComponent: () => import('./features/customers/customer-form.component').then((m) => m.CustomerFormComponent),
+      },
+      {
+        path: 'company-profile',
+        canActivate: [roleGuard('Account')],
+        loadComponent: () => import('./features/company-profile/company-profile.component').then((m) => m.CompanyProfileComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

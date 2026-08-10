@@ -7,6 +7,8 @@ using SMPP.Application.Abstractions;
 using SMPP.Application.Accounts;
 using SMPP.Application.AdminBudget;
 using SMPP.Application.Campaigns;
+using SMPP.Application.CompanyProfiles;
+using SMPP.Application.Customers;
 using SMPP.Application.Dashboard;
 using SMPP.Application.History;
 using SMPP.Application.Payments;
@@ -79,6 +81,8 @@ public static class DependencyInjection
         services.AddScoped<IHistoryResendService, HistoryResendService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<ICompanyProfileService, CompanyProfileService>();
+        services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IPublicApiAuthenticator, PublicApiAuthenticator>();
         services.AddScoped<IPublicApiSendService, PublicApiSendService>();
 

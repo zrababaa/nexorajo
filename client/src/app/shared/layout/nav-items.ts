@@ -29,6 +29,14 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    titleKey: 'CRM',
+    onlyRole: 'Account',
+    items: [
+      { labelKey: 'Customers', route: '/customers', icon: 'customers' },
+      { labelKey: 'Company Profile', route: '/company-profile', icon: 'company' },
+    ],
+  },
+  {
     titleKey: 'Billing',
     onlyRole: 'Account',
     items: [{ labelKey: 'Request Credits', route: '/payments', icon: 'credits' }],
