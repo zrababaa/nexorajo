@@ -14,6 +14,7 @@ using SMPP.Application.PublicApi;
 using SMPP.Application.Reports;
 using SMPP.Application.Sending;
 using SMPP.Application.SpamKeywords;
+using SMPP.Infrastructure.Email;
 using SMPP.Infrastructure.Files;
 using SMPP.Infrastructure.Identity;
 using SMPP.Infrastructure.Persistence;
@@ -53,6 +54,9 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddScoped<DatabaseBootstrapper>();
+
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         services.AddScoped<ISegmentCounter, SegmentCounter>();
         services.AddScoped<ISendPolicyService, SendPolicyService>();

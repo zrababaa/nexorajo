@@ -1,0 +1,905 @@
+{
+  "info": {
+    "name": "SMPP Bulk Messaging API",
+    "description": "REST API (api/v1) plus the two legacy endpoints (send-message-api, getStatus) for the SMPP bulk messaging platform. Sign in with Auth > Login or Auth > Machine Token first — both auto-fill the {{accessToken}} collection variable used by every other request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5083" },
+    { "key": "accessToken", "value": "" },
+    { "key": "identifier", "value": "admin" },
+    { "key": "password", "value": "ChangeMe123!" },
+    { "key": "tokenId", "value": "" },
+    { "key": "secretKey", "value": "" },
+    { "key": "campaignId", "value": "1" },
+    { "key": "accountId", "value": "1" },
+    { "key": "historyId", "value": "1" },
+    { "key": "spamKeywordId", "value": "1" },
+    { "key": "paymentId", "value": "1" },
+    { "key": "reportType", "value": "Messages" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{identifier}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Signs in with a username (or email) and password. Returns a bearer token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Machine Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tokenId\": \"{{tokenId}}\",\n  \"secretKey\": \"{{secretKey}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "token"]
+            },
+            "description": "Exchanges an account's API token-id/secret-key pair for a bearer token. Get these from Accounts > Regenerate API Credentials (Superadmin) or Auth > Me."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            },
+            "description": "The signed-in account: profile, balance, sender-ID policy, and API credentials."
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"ChangeMe123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "forgot-password"]
+            },
+            "description": "Always answers 202. No mail transport is wired up yet — the reset token is written to the app log."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"token\": \"paste-token-from-log\",\n  \"password\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Meta",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Enums",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/enums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "enums"]
+            },
+            "description": "Every enum the API uses (UserRole, MessageSource, MessageStatus, etc.) as name/value pairs."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "item": [
+        {
+          "name": "Get Send Policy",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/send-policy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "send-policy"]
+            }
+          }
+        },
+        {
+          "name": "Preview Message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello from SMPP\",\n  \"recipientCount\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "preview"]
+            },
+            "description": "Prices a message without sending it: segment count and total cost."
+          }
+        },
+        {
+          "name": "Quick Send",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numbers\": \"962790000000, 962790000001\",\n  \"message\": \"Hello from SMPP\",\n  \"senderId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/quick-send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "quick-send"]
+            },
+            "description": "Sends to numbers supplied inline. Returns 202 with a batch id and a `statuses` array (each recipient's delivery status as of 2 seconds after queuing); keep polling History > List History with that campaignBatchId for the final outcome."
+          }
+        },
+        {
+          "name": "Bulk Send",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": {{campaignId}},\n  \"message\": \"Hello from SMPP\",\n  \"senderId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/bulk-send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "bulk-send"]
+            },
+            "description": "Sends to every number in one of your saved lists (Campaigns)."
+          }
+        },
+        {
+          "name": "Get Pricing",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/pricing",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "pricing"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaigns",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Campaign By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns", "{{campaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Campaign",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Recipient List\",\n  \"externalCampaignCode\": null,\n  \"numbers\": \"962790000000, 962790000001\\n962790000002\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns"]
+            }
+          }
+        },
+        {
+          "name": "Import Campaign (file)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "Name", "value": "Imported List", "type": "text" },
+                { "key": "ExternalCampaignCode", "value": "", "type": "text" },
+                { "key": "File", "type": "file", "src": "" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns", "import"]
+            },
+            "description": "Imports a recipient list from a CSV/TXT/XLSX file. Set the File field to a local file before sending."
+          }
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Renamed List\",\n  \"numbers\": \"962790000000, 962790000001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns", "{{campaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "campaigns", "{{campaignId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "History",
+      "item": [
+        {
+          "name": "List History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history"],
+              "query": [
+                { "key": "source", "value": "QuickSend", "disabled": true },
+                { "key": "status", "value": "Delivered", "disabled": true },
+                { "key": "campaignBatchId", "value": "", "disabled": true },
+                { "key": "receiver", "value": "", "disabled": true },
+                { "key": "dateFrom", "value": "", "disabled": true },
+                { "key": "dateTo", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "History Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history", "summary"]
+            }
+          }
+        },
+        {
+          "name": "History Rows (JSON export)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/rows",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history", "rows"]
+            }
+          }
+        },
+        {
+          "name": "Export History (file)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/export?format=csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history", "export"],
+              "query": [{ "key": "format", "value": "csv" }]
+            }
+          }
+        },
+        {
+          "name": "Resend Message",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/{{historyId}}/resend?source=QuickSend",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history", "{{historyId}}", "resend"],
+              "query": [{ "key": "source", "value": "QuickSend" }]
+            },
+            "description": "Re-queues a Failed/Undelivered/Expired message as a new single-recipient batch. Source must match which history the id came from."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Messages Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/messages?page=1&pageSize=500",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "messages"],
+              "query": [
+                { "key": "dateFrom", "value": "", "disabled": true },
+                { "key": "dateTo", "value": "", "disabled": true },
+                { "key": "source", "value": "", "disabled": true },
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "accountId", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "500" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Daily Traffic",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/daily-traffic",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "daily-traffic"]
+            }
+          }
+        },
+        {
+          "name": "Batches",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/batches",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "batches"]
+            }
+          }
+        },
+        {
+          "name": "Account Usage",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/account-usage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "account-usage"]
+            }
+          }
+        },
+        {
+          "name": "Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Credit Requests",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/credit-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "credit-requests"]
+            }
+          }
+        },
+        {
+          "name": "Export Report (file)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/{{reportType}}/export?format=csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "{{reportType}}", "export"],
+              "query": [{ "key": "format", "value": "csv" }]
+            },
+            "description": "{{reportType}} must be one of the ReportType enum names (see Meta > Enums): Messages, DailyTraffic, Batches, AccountUsage, Transactions, CreditRequests."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard (all)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard?trendDays=14",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard"],
+              "query": [{ "key": "trendDays", "value": "14" }]
+            }
+          }
+        },
+        {
+          "name": "Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Trend",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/trend?days=14",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "trend"],
+              "query": [{ "key": "days", "value": "14" }]
+            }
+          }
+        },
+        {
+          "name": "Status Breakdown",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/status-breakdown",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "status-breakdown"]
+            }
+          }
+        },
+        {
+          "name": "Source Breakdown",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/source-breakdown",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "source-breakdown"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts (Superadmin)",
+      "item": [
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts?page=1&pageSize=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "15" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Account Options",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/options",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "options"]
+            }
+          }
+        },
+        {
+          "name": "Get Account By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{accountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newaccount\",\n  \"email\": \"newaccount@example.com\",\n  \"fullName\": \"New Account\",\n  \"mobileNo\": null,\n  \"password\": \"ChangeMe123!\",\n  \"initialBalance\": 100,\n  \"senderIds\": \"MyBrand\",\n  \"allowFreeSenderId\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts"]
+            }
+          }
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"mobileNo\": null,\n  \"isActive\": true,\n  \"senderIds\": \"MyBrand\",\n  \"allowFreeSenderId\": false,\n  \"dateFrom\": null,\n  \"dateTo\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{accountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Regenerate API Credentials",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/api-credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{accountId}}", "api-credentials"]
+            },
+            "description": "Issues a fresh token/secret pair; the previous pair stops working immediately."
+          }
+        },
+        {
+          "name": "Credit Account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/credit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{accountId}}", "credit"]
+            }
+          }
+        },
+        {
+          "name": "Debit Account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/debit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{accountId}}", "debit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spam Keywords (Superadmin)",
+      "item": [
+        {
+          "name": "List Spam Keywords",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/spam-keywords",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "spam-keywords"]
+            }
+          }
+        },
+        {
+          "name": "Create Spam Keyword",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"free-money\",\n  \"keywordType\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/spam-keywords",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "spam-keywords"]
+            },
+            "description": "keywordType: 0=Include (block on match), 1=Exclude, 2=Url — confirm exact values via Meta > Enums (spamKeywordType)."
+          }
+        },
+        {
+          "name": "Delete Spam Keyword",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/spam-keywords/{{spamKeywordId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "spam-keywords", "{{spamKeywordId}}"]
+            }
+          }
+        },
+        {
+          "name": "Enable/Disable Spam Keyword",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/spam-keywords/{{spamKeywordId}}/enabled?isEnabled=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "spam-keywords", "{{spamKeywordId}}", "enabled"],
+              "query": [{ "key": "isEnabled", "value": "true" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Upload Proof (file)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "File", "type": "file", "src": "" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/proof",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "proof"]
+            },
+            "description": "Returns a stored path; pass it as proofFilePath in Submit Payment."
+          }
+        },
+        {
+          "name": "Submit Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"method\": 0,\n  \"transactionRef\": \"TXN-12345\",\n  \"note\": \"Top-up\",\n  \"proofFilePath\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments"]
+            },
+            "description": "method is a PaymentMethod enum value — see Meta > Enums (paymentMethod)."
+          }
+        },
+        {
+          "name": "My Payments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/mine?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "mine"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review Queue (Superadmin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/review?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "review"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Payment (Superadmin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "{{paymentId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Payment (Superadmin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewNote\": \"Proof unclear, please resubmit.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "{{paymentId}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Legacy API",
+      "item": [
+        {
+          "name": "Send Message (legacy)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "token-id", "value": "{{tokenId}}" },
+              { "key": "secret-key", "value": "{{secretKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numbers\": \"962790000000, 962790000001\",\n  \"message\": \"Hello from SMPP\",\n  \"senderId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/send-message-api",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "send-message-api"]
+            },
+            "description": "Legacy integration route, authenticated via token-id/secret-key headers instead of a bearer token. Same pipeline as Quick Send."
+          }
+        },
+        {
+          "name": "Delivery Status Callback",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/getStatus?message_id=EXAMPLE-MSG-ID&status=DELIVRD",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "getStatus"],
+              "query": [
+                { "key": "message_id", "value": "EXAMPLE-MSG-ID" },
+                { "key": "status", "value": "DELIVRD" }
+              ]
+            },
+            "description": "Called by the external SMPP daemon as delivery receipts come back. status one of: PROCESS, SENT, DELIVRD, UNDELIV, EXPIRED, FAILED."
+          }
+        }
+      ]
+    }
+  ]
+}

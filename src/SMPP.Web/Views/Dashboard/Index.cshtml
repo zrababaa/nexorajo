@@ -19,31 +19,54 @@
     }));
 }
 
+@{
+    string KpiIcon(string path) =>
+        $"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>{path}</svg>";
+
+    var walletIcon = KpiIcon("<rect x='2' y='5' width='20' height='14' rx='2'/><path d='M2 10h20'/>");
+    var sendIcon = KpiIcon("<path d='M22 2 11 13'/><path d='M22 2 15 22l-4-9-9-4 20-7Z'/>");
+    var checkIcon = KpiIcon("<circle cx='12' cy='12' r='9'/><path d='m8.5 12.5 2.5 2.5 4.5-5'/>");
+    var inboxIcon = KpiIcon("<path d='M4 12h4l2 3h4l2-3h4'/><path d='M4 12 6 5h12l2 7'/><path d='M4 12v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6'/>");
+    var usersIcon = KpiIcon("<circle cx='9' cy='8' r='3.25'/><path d='M3.5 20a5.5 5.5 0 0 1 11 0'/><circle cx='18' cy='9' r='2.5'/><path d='M15.5 20a4.5 4.5 0 0 1 6.9-3.8'/>");
+}
+
 <h1 class="h4 mb-4">@L["Dashboard"]</h1>
 
 <div class="row g-3">
     <div class="col-sm-6 col-lg-3">
         <div class="kpi-card">
-            <div class="kpi-label">@L["Credits"]</div>
-            <div class="kpi-value">@s.Balance.ToString("N2")</div>
+            <span class="kpi-icon">@Html.Raw(walletIcon)</span>
+            <div>
+                <div class="kpi-label">@L["Credits"]</div>
+                <div class="kpi-value">@s.Balance.ToString("N2")</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Sends today"]</div>
-            <div class="kpi-value">@s.SendsToday</div>
+        <div class="kpi-card kpi-info">
+            <span class="kpi-icon">@Html.Raw(sendIcon)</span>
+            <div>
+                <div class="kpi-label">@L["Sends today"]</div>
+                <div class="kpi-value">@s.SendsToday</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card">
-            <div class="kpi-label">@L["Delivery rate"]</div>
-            <div class="kpi-value">@(s.DeliveryRatePercent.HasValue ? $"{s.DeliveryRatePercent:0.0}%" : "—")</div>
+        <div class="kpi-card kpi-success">
+            <span class="kpi-icon">@Html.Raw(checkIcon)</span>
+            <div>
+                <div class="kpi-label">@L["Delivery rate"]</div>
+                <div class="kpi-value">@(s.DeliveryRatePercent.HasValue ? $"{s.DeliveryRatePercent:0.0}%" : "—")</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <a class="kpi-card d-block text-decoration-none" asp-controller="Payments" asp-action="@(isSuperadmin ? "Review" : "Index")">
-            <div class="kpi-label">@L["Pending credit requests"]</div>
-            <div class="kpi-value">@s.PendingPayments</div>
+        <a class="kpi-card kpi-warning d-block text-decoration-none" asp-controller="Payments" asp-action="@(isSuperadmin ? "Review" : "Index")">
+            <span class="kpi-icon">@Html.Raw(inboxIcon)</span>
+            <div>
+                <div class="kpi-label">@L["Pending credit requests"]</div>
+                <div class="kpi-value">@s.PendingPayments</div>
+            </div>
         </a>
     </div>
 
@@ -51,14 +74,20 @@
     {
         <div class="col-sm-6 col-lg-3">
             <div class="kpi-card">
-                <div class="kpi-label">@L["Total accounts"]</div>
-                <div class="kpi-value">@s.TotalAccounts</div>
+                <span class="kpi-icon">@Html.Raw(usersIcon)</span>
+                <div>
+                    <div class="kpi-label">@L["Total accounts"]</div>
+                    <div class="kpi-value">@s.TotalAccounts</div>
+                </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="kpi-card">
-                <div class="kpi-label">@L["Credits issued (accounts)"]</div>
-                <div class="kpi-value">@s.TotalCreditsIssued?.ToString("N2")</div>
+                <span class="kpi-icon">@Html.Raw(walletIcon)</span>
+                <div>
+                    <div class="kpi-label">@L["Credits issued (accounts)"]</div>
+                    <div class="kpi-value">@s.TotalCreditsIssued?.ToString("N2")</div>
+                </div>
             </div>
         </div>
     }

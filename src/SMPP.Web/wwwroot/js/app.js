@@ -106,9 +106,9 @@
         Alpine.data('dashboardCharts', function (config) {
             return {
                 init: function () {
-                    var gridColor = '#e1e0d9';
+                    var gridColor = '#e6e8f0';
                     Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
-                    Chart.defaults.color = '#52514e';
+                    Chart.defaults.color = '#6b7280';
 
                     this.renderChart('trendChart', 'line', {
                         labels: config.trend.map(function (p) { return p.date; }),

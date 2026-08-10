@@ -4,6 +4,27 @@
 
     bool IsActive(string controllerName) =>
         string.Equals(current, controllerName, StringComparison.OrdinalIgnoreCase);
+
+    // Small inline stroke icons (24x24, currentColor) so the menu doesn't need an icon-font
+    // dependency. Keyed by name and reused via IconMarkup(...) below.
+    var icons = new Dictionary<string, string>
+    {
+        ["dashboard"] = "<rect x='3' y='3' width='7' height='7' rx='1.5'/><rect x='14' y='3' width='7' height='7' rx='1.5'/><rect x='3' y='14' width='7' height='7' rx='1.5'/><rect x='14' y='14' width='7' height='7' rx='1.5'/>",
+        ["quick-send"] = "<path d='M22 2 11 13'/><path d='M22 2 15 22l-4-9-9-4 20-7Z'/>",
+        ["bulk-send"] = "<path d='M12 2 2 7l10 5 10-5-10-5Z'/><path d='M2 12l10 5 10-5'/><path d='M2 17l10 5 10-5'/>",
+        ["campaigns"] = "<path d='M3 10v4a1 1 0 0 0 1 1h2l9 4V5L6 9H4a1 1 0 0 0-1 1Z'/><path d='M17 9a4 4 0 0 1 0 6'/>",
+        ["history"] = "<circle cx='12' cy='12' r='9'/><path d='M12 7v5l3.5 2'/>",
+        ["reports"] = "<path d='M4 20V10'/><path d='M12 20V4'/><path d='M20 20v-7'/>",
+        ["credits"] = "<rect x='2' y='5' width='20' height='14' rx='2'/><path d='M2 10h20'/>",
+        ["accounts"] = "<circle cx='9' cy='8' r='3.25'/><path d='M3.5 20a5.5 5.5 0 0 1 11 0'/><circle cx='18' cy='9' r='2.5'/><path d='M15.5 20a4.5 4.5 0 0 1 6.9-3.8'/>",
+        ["inbox"] = "<path d='M4 12h4l2 3h4l2-3h4'/><path d='M4 12 6 5h12l2 7'/><path d='M4 12v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6'/>",
+        ["shield"] = "<path d='M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z'/>",
+        ["wallet"] = "<path d='M3 6a2 2 0 0 1 2-2h12a1 1 0 0 1 1 1v3'/><rect x='3' y='6' width='18' height='13' rx='2'/><circle cx='16' cy='13' r='1.25'/>",
+        ["logs"] = "<path d='M6 2h9l4 4v16H6Z'/><path d='M15 2v4h4'/><path d='M9 13h6M9 17h6M9 9h2'/>",
+    };
+
+    string IconMarkup(string name) =>
+        $"<span class=\"nav-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">{icons[name]}</svg></span>";
 }
 
 <div class="sidebar-backdrop" x-show="open" x-cloak x-transition.opacity @@click="close()"></div>
@@ -13,34 +34,34 @@
         <img src="~/images/nexora-logo.png" alt="Nexora SMS Portal" class="brand-logo" />
     </a>
 
-    <div class="nav flex-column" @@click="close()">
+    <div class="nav flex-column nav-flex-column" @@click="close()">
         <div class="nav-section-title">@L["Overview"]</div>
         <a class="nav-link @(IsActive("Dashboard") ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
-            @L["Dashboard"]
+            @Html.Raw(IconMarkup("dashboard")) <span>@L["Dashboard"]</span>
         </a>
 
         <div class="nav-section-title">@L["Messaging"]</div>
         <a class="nav-link @(IsActive("QuickSend") ? "active" : "")" asp-controller="QuickSend" asp-action="Index">
-            @L["Quick Send"]
+            @Html.Raw(IconMarkup("quick-send")) <span>@L["Quick Send"]</span>
         </a>
         <a class="nav-link @(IsActive("BulkSend") ? "active" : "")" asp-controller="BulkSend" asp-action="Index">
-            @L["Bulk Send"]
+            @Html.Raw(IconMarkup("bulk-send")) <span>@L["Bulk Send"]</span>
         </a>
         <a class="nav-link @(IsActive("Campaigns") ? "active" : "")" asp-controller="Campaigns" asp-action="Index">
-            @L["Campaigns"]
+            @Html.Raw(IconMarkup("campaigns")) <span>@L["Campaigns"]</span>
         </a>
         <a class="nav-link @(IsActive("History") ? "active" : "")" asp-controller="History" asp-action="Index">
-            @L["History"]
+            @Html.Raw(IconMarkup("history")) <span>@L["History"]</span>
         </a>
         <a class="nav-link @(IsActive("Reports") ? "active" : "")" asp-controller="Reports" asp-action="Index">
-            @L["Reports"]
+            @Html.Raw(IconMarkup("reports")) <span>@L["Reports"]</span>
         </a>
 
         @if (!isSuperadmin)
         {
             <div class="nav-section-title">@L["Billing"]</div>
             <a class="nav-link @(IsActive("Payments") ? "active" : "")" asp-controller="Payments" asp-action="Index">
-                @L["Request Credits"]
+                @Html.Raw(IconMarkup("credits")) <span>@L["Request Credits"]</span>
             </a>
         }
 
@@ -48,19 +69,19 @@
         {
             <div class="nav-section-title">@L["Administration"]</div>
             <a class="nav-link @(IsActive("Accounts") ? "active" : "")" asp-controller="Accounts" asp-action="Index">
-                @L["Accounts"]
+                @Html.Raw(IconMarkup("accounts")) <span>@L["Accounts"]</span>
             </a>
             <a class="nav-link @(IsActive("Payments") ? "active" : "")" asp-controller="Payments" asp-action="Review">
-                @L["Credit Requests"]
+                @Html.Raw(IconMarkup("inbox")) <span>@L["Credit Requests"]</span>
             </a>
             <a class="nav-link @(IsActive("SpamKeywords") ? "active" : "")" asp-controller="SpamKeywords" asp-action="Index">
-                @L["Content Filter"]
+                @Html.Raw(IconMarkup("shield")) <span>@L["Content Filter"]</span>
             </a>
             <a class="nav-link @(IsActive("AdminBudget") ? "active" : "")" asp-controller="AdminBudget" asp-action="Index">
-                @L["Admin Budget"]
+                @Html.Raw(IconMarkup("wallet")) <span>@L["Admin Budget"]</span>
             </a>
             <a class="nav-link @(IsActive("AccountsLogs") ? "active" : "")" asp-controller="AccountsLogs" asp-action="Index">
-                @L["Accounts Logs"]
+                @Html.Raw(IconMarkup("logs")) <span>@L["Accounts Logs"]</span>
             </a>
         }
     </div>

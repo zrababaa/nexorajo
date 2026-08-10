@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SMPP.Application.Common;
 using SMPP.Application.History;
 using SMPP.Application.Reports;
 using SMPP.Domain.Enums;
@@ -28,56 +29,56 @@ public class ReportsApiController : ApiControllerBase
 
     /// <summary>Per-recipient message rows - the finest grain available.</summary>
     [HttpGet("messages")]
-    [ProducesResponseType(typeof(IReadOnlyList<HistoryExportRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<HistoryExportRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Messages([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var page = await _reports.GetMessagesAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>One row per calendar day: volume and delivery outcome.</summary>
     [HttpGet("daily-traffic")]
-    [ProducesResponseType(typeof(IReadOnlyList<DailyTrafficRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<DailyTrafficRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> DailyTraffic([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var (page, _) = await _reports.GetDailyTrafficAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>One row per send batch: size, outcome, and cost.</summary>
     [HttpGet("batches")]
-    [ProducesResponseType(typeof(IReadOnlyList<BatchReportRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<BatchReportRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Batches([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var (page, _) = await _reports.GetBatchesAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>One row per account: volume, delivery rate, credits in and out. An account calling it gets its own row.</summary>
     [HttpGet("account-usage")]
-    [ProducesResponseType(typeof(IReadOnlyList<AccountUsageRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<AccountUsageRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> AccountUsage([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var (page, _) = await _reports.GetAccountUsageAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>The balance ledger - every credit and debit.</summary>
     [HttpGet("transactions")]
-    [ProducesResponseType(typeof(IReadOnlyList<TransactionReportRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<TransactionReportRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Transactions([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var (page, _) = await _reports.GetTransactionsAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>Submitted credit requests and how they were reviewed.</summary>
     [HttpGet("credit-requests")]
-    [ProducesResponseType(typeof(IReadOnlyList<CreditRequestRowDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<CreditRequestRowDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreditRequests([FromQuery] ReportQuery query, CancellationToken ct)
     {
         var (page, _) = await _reports.GetCreditRequestsAsync(CurrentUserId, CurrentRole, Filter(query), PageNumber(query), PageSize(query), ct);
-        return Ok(page.Items);
+        return Ok(page);
     }
 
     /// <summary>Any report as a downloadable file, with the same filters as its JSON endpoint.</summary>

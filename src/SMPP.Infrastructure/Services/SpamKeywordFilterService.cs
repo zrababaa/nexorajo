@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SMPP.Application.Abstractions;
 using SMPP.Domain.Entities;
 using SMPP.Domain.Enums;
+using SMPP.Infrastructure.Email;
 using SMPP.Infrastructure.Persistence;
 
 namespace SMPP.Infrastructure.Services;
@@ -22,10 +25,20 @@ namespace SMPP.Infrastructure.Services;
 public class SpamKeywordFilterService : ISpamKeywordFilterService
 {
     private readonly SmppDbContext _db;
+    private readonly IEmailSender _emailSender;
+    private readonly EmailOptions _emailOptions;
+    private readonly ILogger<SpamKeywordFilterService> _logger;
 
-    public SpamKeywordFilterService(SmppDbContext db)
+    public SpamKeywordFilterService(
+        SmppDbContext db,
+        IEmailSender emailSender,
+        IOptions<EmailOptions> emailOptions,
+        ILogger<SpamKeywordFilterService> logger)
     {
         _db = db;
+        _emailSender = emailSender;
+        _emailOptions = emailOptions.Value;
+        _logger = logger;
     }
 
     public async Task<SpamFilterResult> CheckAsync(string message, CancellationToken ct = default)
@@ -78,5 +91,53 @@ public class SpamKeywordFilterService : ISpamKeywordFilterService
             Message = message,
         });
         await _db.SaveChangesAsync(ct);
+
+        await SendAlertEmailAsync(userId, source, senderId, recipientCount, matchedTerms, message, ct);
+    }
+
+    /// <summary>Best-effort: an SMTP outage must never surface as a failure of the send the user
+    /// just made (which is already blocked and reported to them independently of this).</summary>
+    private async Task SendAlertEmailAsync(
+        int userId,
+        MessageSource source,
+        string senderId,
+        int recipientCount,
+        IReadOnlyCollection<string> matchedTerms,
+        string message,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(_emailOptions.SpamAlertRecipient))
+        {
+            return;
+        }
+
+        try
+        {
+            var user = await _db.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new { u.UserName, u.Email })
+                .FirstOrDefaultAsync(ct);
+
+            var subject = $"[SMPP] Spam keyword blocked ({source})";
+            var body =
+                $"""
+                A message was blocked by the spam keyword filter.
+
+                User: {user?.UserName} (#{userId}) <{user?.Email}>
+                Source: {source}
+                Sender ID: {senderId}
+                Recipients: {recipientCount}
+                Matched terms: {string.Join(", ", matchedTerms)}
+
+                Message:
+                {message}
+                """;
+
+            await _emailSender.SendAsync(_emailOptions.SpamAlertRecipient, subject, body, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to send spam-keyword alert email for user {UserId}", userId);
+        }
     }
 }
