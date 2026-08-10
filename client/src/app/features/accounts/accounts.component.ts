@@ -54,10 +54,8 @@ const PAGE_SIZE = 15;
                 <td class="px-4 py-2 text-right">
                   <a
                     [routerLink]="['/accounts', a.id, 'company-profile']"
-                    class="inline-flex align-middle text-text-muted hover:text-primary-600"
-                    [title]="'Company Profile' | transloco"
-                    [attr.aria-label]="'Company Profile' | transloco"
-                  ><app-nav-icon name="company" /></a>
+                    class="inline-flex items-center gap-1 align-middle text-primary-600 hover:underline"
+                  ><app-nav-icon name="company" />{{ 'Company Profile' | transloco }}</a>
                   <button type="button" class="ml-3 text-primary-600 hover:underline" (click)="openEdit(a)">{{ 'Edit' | transloco }}</button>
                   <button type="button" class="ml-3 text-success hover:underline" (click)="credit(a)">{{ 'Credit' | transloco }}</button>
                   <button type="button" class="ml-3 text-danger hover:underline" (click)="debit(a)">{{ 'Debit' | transloco }}</button>

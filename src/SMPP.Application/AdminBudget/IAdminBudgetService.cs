@@ -26,4 +26,12 @@ public interface IAdminBudgetService
     /// </summary>
     /// <exception cref="AppException">Thrown when the pool does not cover <paramref name="amount"/>.</exception>
     Task ReserveAsync(int performedByUserId, int creditedUserId, decimal amount, TransactionSource source, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns <paramref name="amount"/> to the pool after a Superadmin manually debits
+    /// <paramref name="debitedUserId"/>'s balance - the mirror image of <see cref="ReserveAsync"/>.
+    /// Mutates the tracked <c>AdminBudget</c>/<c>AdminBudgetLog</c> entities but does not save or
+    /// open a transaction - the caller commits (see BalanceLedgerService).
+    /// </summary>
+    Task ReleaseAsync(int performedByUserId, int debitedUserId, decimal amount, TransactionSource source, CancellationToken ct = default);
 }

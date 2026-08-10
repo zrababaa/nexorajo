@@ -125,4 +125,22 @@ public class AdminBudgetService : IAdminBudgetService
             RelatedUserId = creditedUserId,
         });
     }
+
+    public async Task ReleaseAsync(int performedByUserId, int debitedUserId, decimal amount, TransactionSource source, CancellationToken ct = default)
+    {
+        var budget = await _db.AdminBudgets.SingleAsync(b => b.Id == SingletonId, ct);
+        var newBalance = budget.Balance + amount;
+
+        budget.Balance = newBalance;
+
+        _db.AdminBudgetLogs.Add(new AdminBudgetLog
+        {
+            PerformedByUserId = performedByUserId,
+            Kind = TransactionKind.Credit,
+            Source = source,
+            Amount = amount,
+            BalanceAfter = newBalance,
+            RelatedUserId = debitedUserId,
+        });
+    }
 }

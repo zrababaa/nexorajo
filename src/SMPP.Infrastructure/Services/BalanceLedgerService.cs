@@ -14,7 +14,10 @@ namespace SMPP.Infrastructure.Services;
 /// The single entry point for every balance mutation in the app - see IBalanceLedgerService.
 /// No other code should write to ApplicationUser.Balance directly. A credit also draws the same
 /// amount from the shared AdminBudget pool (see IAdminBudgetService) - a grant that would take
-/// the pool below zero is rejected the same way an insufficient user balance is.
+/// the pool below zero is rejected the same way an insufficient user balance is. A manual
+/// (Superadmin-initiated) debit returns the amount to the pool, mirroring the credit side; debits
+/// from an account spending its own balance (sending messages) do not, since that balance already
+/// left the pool when it was granted.
 /// </summary>
 public class BalanceLedgerService : IBalanceLedgerService
 {
@@ -56,6 +59,10 @@ public class BalanceLedgerService : IBalanceLedgerService
             if (request.Kind == TransactionKind.Credit)
             {
                 await _adminBudget.ReserveAsync(request.PerformedByUserId, request.UserId, request.Amount, request.Source, ct);
+            }
+            else if (request.Source == TransactionSource.ManualAdjustment)
+            {
+                await _adminBudget.ReleaseAsync(request.PerformedByUserId, request.UserId, request.Amount, request.Source, ct);
             }
 
             _db.Transactions.Add(new Transaction
