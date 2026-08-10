@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SMPP.Application.Abstractions;
+using SMPP.Application.Accounts;
 using SMPP.Application.CompanyProfiles;
 using SMPP.Infrastructure.Identity;
 using SMPP.Web.Api;
@@ -54,13 +55,14 @@ public record AddCompanyDocumentApiRequest
 }
 
 /// <summary>
-/// An Account's self-service company profile: registration details, a logo, and supporting
-/// documents. No Superadmin approval step - the Account activates/deactivates and edits it
-/// directly, and only ever sees its own profile.
+/// An account's company profile: registration details, a logo, and supporting documents.
+/// Superadmin-only, managed on a specific account's behalf from the Accounts page - there is no
+/// Account self-service access.
 /// </summary>
-[Route("api/v1/company-profile")]
+[Route("api/v1/accounts/{accountId:int}/company-profile")]
 [Tags("Company Profile")]
-[Authorize(Roles = RoleNames.Account, AuthenticationSchemes = ApiAuth.Schemes)]
+[Authorize(Roles = RoleNames.Superadmin, AuthenticationSchemes = ApiAuth.Schemes)]
+[ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
 public class CompanyProfileApiController : ApiControllerBase
 {
     private static readonly string[] LogoExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
@@ -69,39 +71,53 @@ public class CompanyProfileApiController : ApiControllerBase
     private const long MaxDocumentBytes = 10 * 1024 * 1024;
 
     private readonly ICompanyProfileService _profiles;
+    private readonly IAccountService _accounts;
     private readonly IFileStorageService _fileStorage;
 
-    public CompanyProfileApiController(ICompanyProfileService profiles, IFileStorageService fileStorage)
+    public CompanyProfileApiController(ICompanyProfileService profiles, IAccountService accounts, IFileStorageService fileStorage)
     {
         _profiles = profiles;
+        _accounts = accounts;
         _fileStorage = fileStorage;
     }
 
-    /// <summary>Your company profile, created with company mode inactive on first access.</summary>
+    /// <summary>The account's company profile, created with company mode inactive on first access.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(CompanyProfileDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(CancellationToken ct) =>
-        Ok(await _profiles.GetAsync(CurrentUserId, ct));
+    public async Task<IActionResult> Get(int accountId, CancellationToken ct)
+    {
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        return notFound ?? Ok(await _profiles.GetAsync(accountId, ct));
+    }
 
-    /// <summary>Saves your company details. Company mode does not need to be active to edit them.</summary>
+    /// <summary>Saves the account's company details. Company mode does not need to be active to edit them.</summary>
     [HttpPut]
     [ProducesResponseType(typeof(CompanyProfileDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Update([FromBody] UpdateCompanyProfileApiRequest request, CancellationToken ct) =>
-        Ok(await _profiles.UpdateAsync(CurrentUserId, new UpdateCompanyProfileRequest(
+    public async Task<IActionResult> Update(int accountId, [FromBody] UpdateCompanyProfileApiRequest request, CancellationToken ct)
+    {
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        return notFound ?? Ok(await _profiles.UpdateAsync(accountId, new UpdateCompanyProfileRequest(
             request.RegistrationId, request.CompanyName, request.Address, request.Phone,
             request.Email, request.Website, request.Description, request.LogoPath), ct));
+    }
 
     /// <summary>Turns company mode on.</summary>
     [HttpPost("activate")]
     [ProducesResponseType(typeof(CompanyProfileDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Activate(CancellationToken ct) =>
-        Ok(await _profiles.ActivateAsync(CurrentUserId, ct));
+    public async Task<IActionResult> Activate(int accountId, CancellationToken ct)
+    {
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        return notFound ?? Ok(await _profiles.ActivateAsync(accountId, ct));
+    }
 
     /// <summary>Turns company mode off. Profile data and documents are kept, not deleted.</summary>
     [HttpPost("deactivate")]
     [ProducesResponseType(typeof(CompanyProfileDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Deactivate(CancellationToken ct) =>
-        Ok(await _profiles.DeactivateAsync(CurrentUserId, ct));
+    public async Task<IActionResult> Deactivate(int accountId, CancellationToken ct)
+    {
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        return notFound ?? Ok(await _profiles.DeactivateAsync(accountId, ct));
+    }
 
     /// <summary>
     /// Uploads a logo image and returns the stored path to pass as <c>logoPath</c> when saving
@@ -123,11 +139,14 @@ public class CompanyProfileApiController : ApiControllerBase
         return Ok(new UploadedFileApiResponse(path));
     }
 
-    /// <summary>Your company's supporting documents.</summary>
+    /// <summary>The account's supporting documents.</summary>
     [HttpGet("documents")]
     [ProducesResponseType(typeof(IReadOnlyList<CompanyDocumentDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDocuments(CancellationToken ct) =>
-        Ok(await _profiles.GetDocumentsAsync(CurrentUserId, ct));
+    public async Task<IActionResult> GetDocuments(int accountId, CancellationToken ct)
+    {
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        return notFound ?? Ok(await _profiles.GetDocumentsAsync(accountId, ct));
+    }
 
     /// <summary>
     /// Uploads a document file and returns the stored path to pass to <c>POST documents</c>.
@@ -148,24 +167,41 @@ public class CompanyProfileApiController : ApiControllerBase
         return Ok(new UploadedFileApiResponse(path));
     }
 
-    /// <summary>Attaches an uploaded document file to your company profile.</summary>
+    /// <summary>Attaches an uploaded document file to the account's company profile.</summary>
     [HttpPost("documents")]
     [ProducesResponseType(typeof(CompanyDocumentDto), StatusCodes.Status201Created)]
-    public async Task<IActionResult> AddDocument([FromBody] AddCompanyDocumentApiRequest request, CancellationToken ct)
+    public async Task<IActionResult> AddDocument(int accountId, [FromBody] AddCompanyDocumentApiRequest request, CancellationToken ct)
     {
-        var document = await _profiles.AddDocumentAsync(CurrentUserId, new AddCompanyDocumentRequest(
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        if (notFound is not null)
+        {
+            return notFound;
+        }
+
+        var document = await _profiles.AddDocumentAsync(accountId, new AddCompanyDocumentRequest(
             request.FileName, request.FilePath, request.FileSizeBytes), ct);
-        return Created($"/api/v1/company-profile/documents/{document.Id}", document);
+        return Created($"/api/v1/accounts/{accountId}/company-profile/documents/{document.Id}", document);
     }
 
-    /// <summary>Removes a document from your company profile.</summary>
+    /// <summary>Removes a document from the account's company profile.</summary>
     [HttpDelete("documents/{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteDocument(int id, CancellationToken ct)
+    public async Task<IActionResult> DeleteDocument(int accountId, int id, CancellationToken ct)
     {
-        await _profiles.DeleteDocumentAsync(CurrentUserId, id, ct);
+        var notFound = await EnsureAccountExistsAsync(accountId, ct);
+        if (notFound is not null)
+        {
+            return notFound;
+        }
+
+        await _profiles.DeleteDocumentAsync(accountId, id, ct);
         return NoContent();
     }
+
+    private async Task<IActionResult?> EnsureAccountExistsAsync(int accountId, CancellationToken ct) =>
+        await _accounts.GetByIdAsync(accountId, ct) is null
+            ? NotFound(new ApiErrorResponse("Account not found."))
+            : null;
 
     private static string? ValidateFile(IFormFile file, string[] allowedExtensions, long maxBytes)
     {

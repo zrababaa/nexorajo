@@ -21,45 +21,49 @@ export interface CompanyProfileFields {
 export class CompanyProfileService {
   private readonly http = inject(HttpClient);
 
-  get(): Promise<CompanyProfile> {
-    return firstValueFrom(this.http.get<CompanyProfile>('/api/v1/company-profile'));
+  private base(accountId: number): string {
+    return `/api/v1/accounts/${accountId}/company-profile`;
   }
 
-  update(fields: CompanyProfileFields): Promise<CompanyProfile> {
-    return firstValueFrom(this.http.put<CompanyProfile>('/api/v1/company-profile', fields));
+  get(accountId: number): Promise<CompanyProfile> {
+    return firstValueFrom(this.http.get<CompanyProfile>(this.base(accountId)));
   }
 
-  activate(): Promise<CompanyProfile> {
-    return firstValueFrom(this.http.post<CompanyProfile>('/api/v1/company-profile/activate', {}));
+  update(accountId: number, fields: CompanyProfileFields): Promise<CompanyProfile> {
+    return firstValueFrom(this.http.put<CompanyProfile>(this.base(accountId), fields));
   }
 
-  deactivate(): Promise<CompanyProfile> {
-    return firstValueFrom(this.http.post<CompanyProfile>('/api/v1/company-profile/deactivate', {}));
+  activate(accountId: number): Promise<CompanyProfile> {
+    return firstValueFrom(this.http.post<CompanyProfile>(`${this.base(accountId)}/activate`, {}));
   }
 
-  uploadLogo(file: File): Promise<{ path?: string }> {
+  deactivate(accountId: number): Promise<CompanyProfile> {
+    return firstValueFrom(this.http.post<CompanyProfile>(`${this.base(accountId)}/deactivate`, {}));
+  }
+
+  uploadLogo(accountId: number, file: File): Promise<{ path?: string }> {
     const form = new FormData();
     form.set('file', file);
-    return firstValueFrom(this.http.post<{ path?: string }>('/api/v1/company-profile/logo', form));
+    return firstValueFrom(this.http.post<{ path?: string }>(`${this.base(accountId)}/logo`, form));
   }
 
-  uploadDocument(file: File): Promise<{ path?: string }> {
+  uploadDocument(accountId: number, file: File): Promise<{ path?: string }> {
     const form = new FormData();
     form.set('file', file);
-    return firstValueFrom(this.http.post<{ path?: string }>('/api/v1/company-profile/documents/upload', form));
+    return firstValueFrom(this.http.post<{ path?: string }>(`${this.base(accountId)}/documents/upload`, form));
   }
 
-  listDocuments(): Promise<CompanyDocument[]> {
-    return firstValueFrom(this.http.get<CompanyDocument[]>('/api/v1/company-profile/documents'));
+  listDocuments(accountId: number): Promise<CompanyDocument[]> {
+    return firstValueFrom(this.http.get<CompanyDocument[]>(`${this.base(accountId)}/documents`));
   }
 
-  addDocument(fileName: string, filePath: string, fileSizeBytes: number): Promise<CompanyDocument> {
+  addDocument(accountId: number, fileName: string, filePath: string, fileSizeBytes: number): Promise<CompanyDocument> {
     return firstValueFrom(
-      this.http.post<CompanyDocument>('/api/v1/company-profile/documents', { fileName, filePath, fileSizeBytes }),
+      this.http.post<CompanyDocument>(`${this.base(accountId)}/documents`, { fileName, filePath, fileSizeBytes }),
     );
   }
 
-  deleteDocument(id: number): Promise<void> {
-    return firstValueFrom(this.http.delete<void>(`/api/v1/company-profile/documents/${id}`));
+  deleteDocument(accountId: number, id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${this.base(accountId)}/documents/${id}`));
   }
 }

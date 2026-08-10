@@ -1,18 +1,25 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import type { ApiErrorResponse } from '../../core/api/api.types';
 import { FlashService } from '../../shared/flash/flash.service';
+import { AccountsService } from '../accounts/accounts.service';
 import { CompanyProfileService, type CompanyDocument } from './company-profile.service';
 
 @Component({
   selector: 'app-company-profile',
   standalone: true,
-  imports: [FormsModule, TranslocoPipe],
+  imports: [FormsModule, RouterLink, TranslocoPipe],
   template: `
     <div class="mb-4 flex items-center justify-between">
-      <h1 class="text-xl font-semibold">{{ 'Company Profile' | transloco }}</h1>
+      <div>
+        <a routerLink="/accounts" class="mb-1 block text-sm text-primary-600 hover:underline">&larr; {{ 'Accounts' | transloco }}</a>
+        <h1 class="text-xl font-semibold">
+          {{ 'Company Profile' | transloco }}@if (accountName()) { <span class="text-text-muted">— {{ accountName() }}</span> }
+        </h1>
+      </div>
       @if (isActive()) {
         <button
           type="button"
@@ -162,9 +169,13 @@ import { CompanyProfileService, type CompanyDocument } from './company-profile.s
 })
 export class CompanyProfileComponent {
   private readonly profileService = inject(CompanyProfileService);
+  private readonly accountsService = inject(AccountsService);
   private readonly flash = inject(FlashService);
   private readonly transloco = inject(TranslocoService);
 
+  readonly id = input<string>();
+
+  protected readonly accountName = signal<string | null>(null);
   protected readonly isActive = signal(false);
   protected readonly registrationId = signal('');
   protected readonly companyName = signal('');
@@ -183,10 +194,19 @@ export class CompanyProfileComponent {
     void this.load();
   }
 
+  private get accountId(): number {
+    return Number(this.id());
+  }
+
   private async load(): Promise<void> {
-    const profile = await this.profileService.get();
+    const accountId = this.accountId;
+    const [account, profile] = await Promise.all([
+      this.accountsService.getById(accountId),
+      this.profileService.get(accountId),
+    ]);
+    this.accountName.set(account.username ?? null);
     this.applyProfile(profile);
-    this.documents.set(await this.profileService.listDocuments());
+    this.documents.set(await this.profileService.listDocuments(accountId));
   }
 
   private applyProfile(profile: Awaited<ReturnType<CompanyProfileService['get']>>): void {
@@ -204,7 +224,7 @@ export class CompanyProfileComponent {
   protected async activate(): Promise<void> {
     this.toggling.set(true);
     try {
-      this.applyProfile(await this.profileService.activate());
+      this.applyProfile(await this.profileService.activate(this.accountId));
       this.flash.success('Company mode activated.');
     } finally {
       this.toggling.set(false);
@@ -214,7 +234,7 @@ export class CompanyProfileComponent {
   protected async deactivate(): Promise<void> {
     this.toggling.set(true);
     try {
-      this.applyProfile(await this.profileService.deactivate());
+      this.applyProfile(await this.profileService.deactivate(this.accountId));
       this.flash.success('Company mode deactivated.');
     } finally {
       this.toggling.set(false);
@@ -227,7 +247,7 @@ export class CompanyProfileComponent {
       return;
     }
     try {
-      const uploaded = await this.profileService.uploadLogo(file);
+      const uploaded = await this.profileService.uploadLogo(this.accountId, file);
       if (uploaded.path) {
         this.logoPath.set(uploaded.path);
       }
@@ -245,9 +265,9 @@ export class CompanyProfileComponent {
       return;
     }
     try {
-      const uploaded = await this.profileService.uploadDocument(file);
+      const uploaded = await this.profileService.uploadDocument(this.accountId, file);
       if (uploaded.path) {
-        const document = await this.profileService.addDocument(file.name, uploaded.path, file.size);
+        const document = await this.profileService.addDocument(this.accountId, file.name, uploaded.path, file.size);
         this.documents.update((list) => [document, ...list]);
         this.flash.success('Document uploaded successfully.');
       }
@@ -265,7 +285,7 @@ export class CompanyProfileComponent {
       return;
     }
     try {
-      await this.profileService.deleteDocument(document.id!);
+      await this.profileService.deleteDocument(this.accountId, document.id!);
       this.documents.update((list) => list.filter((d) => d.id !== document.id));
       this.flash.success('Document deleted successfully.');
     } catch (error) {
@@ -280,7 +300,7 @@ export class CompanyProfileComponent {
     this.saving.set(true);
     try {
       this.applyProfile(
-        await this.profileService.update({
+        await this.profileService.update(this.accountId, {
           registrationId: this.registrationId().trim() || null,
           companyName: this.companyName().trim() || null,
           address: this.address().trim() || null,

@@ -95,8 +95,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/customers/customer-form.component').then((m) => m.CustomerFormComponent),
       },
       {
-        path: 'company-profile',
-        canActivate: [roleGuard('Account')],
+        path: 'accounts/:id/company-profile',
+        canActivate: [roleGuard('Superadmin')],
         loadComponent: () => import('./features/company-profile/company-profile.component').then((m) => m.CompanyProfileComponent),
       },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

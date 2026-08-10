@@ -2,9 +2,11 @@ import { SlicePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import type { ApiErrorResponse } from '../../core/api/api.types';
 import { FlashService } from '../../shared/flash/flash.service';
+import { NavIconComponent } from '../../shared/layout/nav-icon.component';
 import { ModalComponent } from '../../shared/modal/modal.component';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AccountsService, type AccountListItem } from './accounts.service';
@@ -14,7 +16,7 @@ const PAGE_SIZE = 15;
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [FormsModule, SlicePipe, TranslocoPipe, ModalComponent, PaginationComponent],
+  imports: [FormsModule, RouterLink, SlicePipe, TranslocoPipe, ModalComponent, NavIconComponent, PaginationComponent],
   template: `
     <div class="mb-4 flex items-center justify-between">
       <h1 class="text-xl font-semibold">{{ 'Accounts' | transloco }}</h1>
@@ -50,7 +52,13 @@ const PAGE_SIZE = 15;
                 <td class="px-4 py-2">{{ a.balance }}</td>
                 <td class="px-4 py-2">{{ a.createdAt | slice: 0 : 16 }}</td>
                 <td class="px-4 py-2 text-right">
-                  <button type="button" class="text-primary-600 hover:underline" (click)="openEdit(a)">{{ 'Edit' | transloco }}</button>
+                  <a
+                    [routerLink]="['/accounts', a.id, 'company-profile']"
+                    class="inline-flex align-middle text-text-muted hover:text-primary-600"
+                    [title]="'Company Profile' | transloco"
+                    [attr.aria-label]="'Company Profile' | transloco"
+                  ><app-nav-icon name="company" /></a>
+                  <button type="button" class="ml-3 text-primary-600 hover:underline" (click)="openEdit(a)">{{ 'Edit' | transloco }}</button>
                   <button type="button" class="ml-3 text-success hover:underline" (click)="credit(a)">{{ 'Credit' | transloco }}</button>
                   <button type="button" class="ml-3 text-danger hover:underline" (click)="debit(a)">{{ 'Debit' | transloco }}</button>
                   <button type="button" class="ml-3 text-text-muted hover:underline" (click)="regenerateCredentials(a)">{{ 'API keys' | transloco }}</button>
