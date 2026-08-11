@@ -907,24 +907,24 @@
           <div class="form-row">
             <div class="form-group">
               <label data-en="First Name" data-ar="الاسم الأول">First Name</label>
-              <input type="text" placeholder="Ahmad" data-placeholder-en="Ahmad" data-placeholder-ar="أحمد" required />
+              <input type="text" name="firstName" placeholder="Ahmad" data-placeholder-en="Ahmad" data-placeholder-ar="أحمد" required />
             </div>
             <div class="form-group">
               <label data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
-              <input type="text" placeholder="Al-Rashid" data-placeholder-en="Al-Rashid" data-placeholder-ar="الراشد" required />
+              <input type="text" name="lastName" placeholder="Al-Rashid" data-placeholder-en="Al-Rashid" data-placeholder-ar="الراشد" required />
             </div>
           </div>
           <div class="form-group">
             <label data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
-            <input type="email" placeholder="ahmad@company.com" required />
+            <input type="email" name="email" placeholder="ahmad@company.com" required />
           </div>
           <div class="form-group">
             <label data-en="Company" data-ar="الشركة">Company</label>
-            <input type="text" data-placeholder-en="Your Company Name" data-placeholder-ar="اسم شركتك" placeholder="Your Company Name" />
+            <input type="text" name="company" data-placeholder-en="Your Company Name" data-placeholder-ar="اسم شركتك" placeholder="Your Company Name" />
           </div>
           <div class="form-group">
             <label data-en="Service Interested In" data-ar="الخدمة المطلوبة">Service Interested In</label>
-            <select>
+            <select name="service">
               <option value="" data-en="Select a service..." data-ar="اختر خدمة...">Select a service...</option>
               <option value="bss"       data-en="BSS & SMS Platform"       data-ar="منصة BSS والرسائل">BSS & SMS Platform</option>
               <option value="marketing" data-en="Digital Marketing"         data-ar="التسويق الرقمي">Digital Marketing</option>
@@ -937,7 +937,7 @@
           </div>
           <div class="form-group">
             <label data-en="Your Message" data-ar="رسالتك">Your Message</label>
-            <textarea data-placeholder-en="Tell us about your project, goals, and timeline..." data-placeholder-ar="أخبرنا عن مشروعك وأهدافك وجدولك الزمني..." placeholder="Tell us about your project, goals, and timeline..." required></textarea>
+            <textarea name="message" data-placeholder-en="Tell us about your project, goals, and timeline..." data-placeholder-ar="أخبرنا عن مشروعك وأهدافك وجدولك الزمني..." placeholder="Tell us about your project, goals, and timeline..." required></textarea>
           </div>
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;"
                   data-en="Send Message" data-ar="إرسال الرسالة">
@@ -1016,10 +1016,30 @@
 
 <script src="assets/js/main.js"></script>
 <script>
-document.getElementById('contactForm').addEventListener('submit', function() {
+document.getElementById('contactForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  var form = event.target;
+  var firstName = form.firstName.value.trim();
+  var lastName = form.lastName.value.trim();
+  var email = form.email.value.trim();
+  var company = form.company.value.trim();
+  var serviceSelect = form.service;
+  var service = serviceSelect.options[serviceSelect.selectedIndex].text;
+  var message = form.message.value.trim();
+
+  var whatsappMessage = 'طلب جديد من الموقع:\n' +
+    'الاسم: ' + firstName + ' ' + lastName + '\n' +
+    'الإيميل: ' + email + '\n' +
+    'الشركة: ' + company + '\n' +
+    'الخدمة: ' + service + '\n' +
+    'الرسالة: ' + message;
+
   gtag('event', 'conversion', {
       'send_to': 'AW-18360907785/CONVERSION_LABEL',
   });
+
+  window.open('https://wa.me/962780598632?text=' + encodeURIComponent(whatsappMessage), '_blank');
 });
 </script>
 </body>
