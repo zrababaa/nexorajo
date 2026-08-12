@@ -12,6 +12,7 @@ using SMPP.Application.CompanyProfiles;
 using SMPP.Application.Customers;
 using SMPP.Application.Dashboard;
 using SMPP.Application.History;
+using SMPP.Application.LinkTracking;
 using SMPP.Application.Payments;
 using SMPP.Application.PublicApi;
 using SMPP.Application.Reports;
@@ -62,6 +63,10 @@ public static class DependencyInjection
 
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+        services.Configure<LinkTrackingOptions>(configuration.GetSection(LinkTrackingOptions.SectionName));
+        services.AddScoped<ILinkTrackingService, LinkTrackingService>();
+        services.AddScoped<ILinkClickReportService, LinkClickReportService>();
 
         services.AddScoped<ISegmentCounter, SegmentCounter>();
         services.AddScoped<ISendPolicyService, SendPolicyService>();

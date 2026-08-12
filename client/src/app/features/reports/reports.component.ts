@@ -1,6 +1,7 @@
 import { DecimalPipe, SlicePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Schemas } from '../../core/api/api.types';
 import { AuthService } from '../../core/auth/auth.service';
@@ -25,7 +26,7 @@ const TABS: { type: ReportType; label: string; exportName: string }[] = [
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, SlicePipe, TranslocoPipe, PaginationComponent],
+  imports: [FormsModule, DecimalPipe, SlicePipe, RouterLink, TranslocoPipe, PaginationComponent],
   template: `
     <h1 class="mb-4 text-xl font-semibold">{{ 'Reports' | transloco }}</h1>
 
@@ -142,7 +143,7 @@ const TABS: { type: ReportType; label: string; exportName: string }[] = [
             }
             @case ('batches') {
               <thead class="text-left text-xs uppercase tracking-wide text-text-muted">
-                <tr><th class="px-4 py-2">{{ 'Batch' | transloco }}</th><th class="px-4 py-2">{{ 'Campaign' | transloco }}</th><th class="px-4 py-2">{{ 'Channel' | transloco }}</th><th class="px-4 py-2">{{ 'Sender' | transloco }}</th><th class="px-4 py-2">{{ 'Account' | transloco }}</th><th class="px-4 py-2">{{ 'Recipients' | transloco }}</th><th class="px-4 py-2">{{ 'Delivered' | transloco }}</th><th class="px-4 py-2">{{ 'Failed' | transloco }}</th><th class="px-4 py-2">{{ 'Pending' | transloco }}</th><th class="px-4 py-2">{{ 'Cost' | transloco }}</th><th class="px-4 py-2">{{ 'Date (UTC)' | transloco }}</th></tr>
+                <tr><th class="px-4 py-2">{{ 'Batch' | transloco }}</th><th class="px-4 py-2">{{ 'Campaign' | transloco }}</th><th class="px-4 py-2">{{ 'Channel' | transloco }}</th><th class="px-4 py-2">{{ 'Sender' | transloco }}</th><th class="px-4 py-2">{{ 'Account' | transloco }}</th><th class="px-4 py-2">{{ 'Recipients' | transloco }}</th><th class="px-4 py-2">{{ 'Delivered' | transloco }}</th><th class="px-4 py-2">{{ 'Failed' | transloco }}</th><th class="px-4 py-2">{{ 'Pending' | transloco }}</th><th class="px-4 py-2">{{ 'Cost' | transloco }}</th><th class="px-4 py-2">{{ 'Date (UTC)' | transloco }}</th><th class="px-4 py-2"></th></tr>
               </thead>
               <tbody>
                 @for (r of batchRows(); track r.batchId) {
@@ -158,6 +159,9 @@ const TABS: { type: ReportType; label: string; exportName: string }[] = [
                     <td class="px-4 py-2">{{ r.pending }}</td>
                     <td class="px-4 py-2">{{ r.cost }}</td>
                     <td class="px-4 py-2">{{ r.createdAt | slice: 0 : 16 }}</td>
+                    <td class="px-4 py-2 text-right">
+                      <a [routerLink]="['/link-clicks', r.batchId]" class="text-primary-700 hover:underline">{{ 'Clicks' | transloco }}</a>
+                    </td>
                   </tr>
                 }
               </tbody>

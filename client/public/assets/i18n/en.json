@@ -287,5 +287,13 @@
   "Description": "Description",
   "Documents": "Documents",
   "No documents uploaded yet.": "No documents uploaded yet.",
-  "Delete this document?": "Delete this document?"
+  "Delete this document?": "Delete this document?",
+  "Clicks": "Clicks",
+  "Link": "Link",
+  "Total clicks": "Total clicks",
+  "First click": "First click",
+  "Last click": "Last click",
+  "IP address": "IP address",
+  "User agent": "User agent",
+  "No clicks yet.": "No clicks yet."
 }

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
+using SMPP.Application.LinkTracking;
 using SMPP.Application.Sending;
 using SMPP.Application.SendingWindow;
 using SMPP.Domain.Entities;
@@ -30,6 +31,7 @@ public class SendCore
     private readonly ISendPolicyService _sendPolicy;
     private readonly IBalanceLedgerService _ledger;
     private readonly ISendingWindowService _sendingWindow;
+    private readonly ILinkTrackingService _linkTracking;
 
     public SendCore(
         SmppDbContext db,
@@ -37,7 +39,8 @@ public class SendCore
         ISpamKeywordFilterService spamFilter,
         ISendPolicyService sendPolicy,
         IBalanceLedgerService ledger,
-        ISendingWindowService sendingWindow)
+        ISendingWindowService sendingWindow,
+        ILinkTrackingService linkTracking)
     {
         _db = db;
         _segmentCounter = segmentCounter;
@@ -45,6 +48,7 @@ public class SendCore
         _sendPolicy = sendPolicy;
         _ledger = ledger;
         _sendingWindow = sendingWindow;
+        _linkTracking = linkTracking;
     }
 
     public async Task<SendSummaryDto> ExecuteAsync(
@@ -69,6 +73,12 @@ public class SendCore
 
         var user = await _db.Users.FirstAsync(u => u.Id == userId, ct);
 
+        // Generated here (rather than after the cost calc, where it used to live) because the
+        // link-tracking rewrite below needs a batch id to associate TrackedLink rows with - the
+        // id itself has no dependency on anything computed later, so moving it up is a no-op
+        // behavior change.
+        var batchId = NewCampaignId(source);
+
         var filterResult = await _spamFilter.CheckAsync(message, ct);
         if (filterResult.IsBlocked)
         {
@@ -76,6 +86,12 @@ public class SendCore
             await _spamFilter.LogBlockedAttemptAsync(userId, source, senderId, numbers.Count, matchedTerms, message, ct);
             throw new SpamBlockedException(matchedTerms);
         }
+
+        // Runs against the message only after it has passed the spam/URL-blocklist check above -
+        // rewriting first would let a sender hide a blocked destination behind our own tracking
+        // domain. Segment count and cost below run on the rewritten text, since that's what's
+        // actually transmitted (and billed for).
+        message = await _linkTracking.RewriteMessageAsync(message, batchId, userId, ct);
 
         senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);
 
@@ -91,8 +107,6 @@ public class SendCore
                 $"Insufficient balance: this send costs {totalCost:0.####} " +
                 $"({numbers.Count} recipient(s) x {segments} message part(s)) and the balance is {user.Balance:0.####}.");
         }
-
-        var batchId = NewCampaignId(source);
 
         if (totalCost > 0)
         {

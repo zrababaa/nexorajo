@@ -287,5 +287,13 @@
   "Description": "الوصف",
   "Documents": "المستندات",
   "No documents uploaded yet.": "لم يتم رفع أي مستندات بعد.",
-  "Delete this document?": "هل تريد حذف هذا المستند؟"
+  "Delete this document?": "هل تريد حذف هذا المستند؟",
+  "Clicks": "النقرات",
+  "Link": "الرابط",
+  "Total clicks": "إجمالي النقرات",
+  "First click": "أول نقرة",
+  "Last click": "آخر نقرة",
+  "IP address": "عنوان IP",
+  "User agent": "متصفح المستخدم",
+  "No clicks yet.": "لا توجد نقرات بعد."
 }

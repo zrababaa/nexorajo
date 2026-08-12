@@ -3212,6 +3212,139 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/link-tracking/batches/{batchId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per-link summary for a batch: destination, click count, first/last click. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    batchId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BatchLinkStatsDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/link-tracking/batches/{batchId}/clicks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Individual clicks for a batch's tracking links, newest first. */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    batchId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfLinkClickRowDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/messages/send-policy": {
         parameters: {
             query?: never;
@@ -4911,6 +5044,12 @@ export interface components {
             /** Format: double */
             balance?: number;
         };
+        BatchLinkStatsDto: {
+            batchId?: string | null;
+            /** Format: int32 */
+            totalClicks?: number;
+            links?: components["schemas"]["LinkSummaryDto"][] | null;
+        };
         BatchReportRowDto: {
             batchId?: string | null;
             campaignName?: string | null;
@@ -5198,6 +5337,23 @@ export interface components {
             /** Format: int32 */
             expired?: number;
         };
+        LinkClickRowDto: {
+            /** Format: date-time */
+            clickedAt?: string;
+            ipAddress?: string | null;
+            userAgent?: string | null;
+            token?: string | null;
+        };
+        LinkSummaryDto: {
+            token?: string | null;
+            destinationUrl?: string | null;
+            /** Format: int32 */
+            clickCount?: number;
+            /** Format: date-time */
+            firstClickedAt?: string | null;
+            /** Format: date-time */
+            lastClickedAt?: string | null;
+        };
         LoginApiRequest: {
             /** @description Username or email address. */
             identifier: string;
@@ -5333,6 +5489,17 @@ export interface components {
         };
         PagedResultOfHistoryListItemDto: {
             items?: components["schemas"]["HistoryListItemDto"][] | null;
+            /** Format: int32 */
+            totalCount?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
+        PagedResultOfLinkClickRowDto: {
+            items?: components["schemas"]["LinkClickRowDto"][] | null;
             /** Format: int32 */
             totalCount?: number;
             /** Format: int32 */

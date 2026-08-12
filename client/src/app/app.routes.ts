@@ -56,6 +56,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/reports/reports.component').then((m) => m.ReportsComponent),
       },
       {
+        path: 'link-clicks/:batchId',
+        loadComponent: () => import('./features/link-clicks/link-clicks.component').then((m) => m.LinkClicksComponent),
+      },
+      {
         path: 'payments/review',
         canActivate: [roleGuard('Superadmin')],
         loadComponent: () => import('./features/payments/payments-review.component').then((m) => m.PaymentsReviewComponent),
