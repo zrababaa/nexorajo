@@ -3,15 +3,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SMPP.Application.AdminBudget;
 using SMPP.Application.Common;
+using SMPP.Domain.Enums;
 using SMPP.Infrastructure.Identity;
 using SMPP.Web.Api;
 
 namespace SMPP.Web.Controllers.Api;
 
-public record SetAdminBudgetApiRequest
+public record AdjustAdminBudgetApiRequest
 {
-    [Range(0, double.MaxValue)]
-    public decimal NewBalance { get; init; }
+    [Range(0.0001, double.MaxValue)]
+    public decimal Amount { get; init; }
+
+    public TransactionKind Kind { get; init; }
 
     [MaxLength(500)]
     public string? Note { get; init; }
@@ -48,12 +51,12 @@ public class AdminBudgetApiController : ApiControllerBase
     public async Task<IActionResult> GetLog([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default) =>
         Ok(await _adminBudget.GetLogAsync(page, pageSize, ct));
 
-    /// <summary>Manually sets the pool's total. Rejected if the new balance is negative.</summary>
-    [HttpPost("balance")]
+    /// <summary>Increases or decreases the pool's total by an amount. Rejected if a deduction would take it below zero.</summary>
+    [HttpPost("adjust")]
     [ProducesResponseType(typeof(AdminBudgetBalanceApiResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> SetBalance([FromBody] SetAdminBudgetApiRequest request, CancellationToken ct)
+    public async Task<IActionResult> Adjust([FromBody] AdjustAdminBudgetApiRequest request, CancellationToken ct)
     {
-        var balance = await _adminBudget.SetBalanceAsync(CurrentUserId, request.NewBalance, request.Note, ct);
+        var balance = await _adminBudget.AdjustBalanceAsync(CurrentUserId, request.Amount, request.Kind, request.Note, ct);
         return Ok(new AdminBudgetBalanceApiResponse(balance));
     }
 }

@@ -14,9 +14,16 @@ public interface IAdminBudgetService
 
     Task<PagedResult<AdminBudgetLogRowDto>> GetLogAsync(int page, int pageSize, CancellationToken ct = default);
 
-    /// <summary>Manual edit of the pool's total, made directly by a Superadmin.</summary>
-    /// <exception cref="AppException">Thrown when <paramref name="newBalance"/> is negative.</exception>
-    Task<decimal> SetBalanceAsync(int performedByUserId, decimal newBalance, string? note, CancellationToken ct = default);
+    /// <summary>
+    /// Manual increase or decrease of the pool's total, made directly by a Superadmin. Never
+    /// replaces the balance outright - <paramref name="amount"/> is always a positive magnitude,
+    /// applied in the direction given by <paramref name="kind"/>.
+    /// </summary>
+    /// <exception cref="AppException">
+    /// Thrown when <paramref name="amount"/> is not positive, or when a <see cref="TransactionKind.Debit"/>
+    /// would take the balance below zero.
+    /// </exception>
+    Task<decimal> AdjustBalanceAsync(int performedByUserId, decimal amount, TransactionKind kind, string? note, CancellationToken ct = default);
 
     /// <summary>
     /// Draws <paramref name="amount"/> from the pool for a credit about to be granted to

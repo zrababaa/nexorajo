@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using SMPP.Application.Abstractions;
 
 namespace SMPP.Infrastructure.Files;
@@ -30,6 +31,24 @@ public class CampaignNumberParser : ICampaignNumberParser
             var firstColumn = line.Split(',')[0];
             tokens.Add(firstColumn);
         }
+        return BuildResult(tokens);
+    }
+
+    /// <summary>
+    /// Reads the first cell of every used row on the first worksheet - the same "first column"
+    /// convention as <see cref="ParseCsv"/> - so a plain single-column list of numbers, with or
+    /// without a header row (non-numeric first rows just normalize to nothing and drop out),
+    /// works the same way a CSV would.
+    /// </summary>
+    public NumberListResult ParseXlsx(Stream xlsxStream)
+    {
+        using var workbook = new XLWorkbook(xlsxStream);
+        var worksheet = workbook.Worksheets.First();
+
+        var tokens = worksheet.RowsUsed()
+            .Select(row => row.Cell(1).GetString())
+            .ToList();
+
         return BuildResult(tokens);
     }
 

@@ -103,8 +103,14 @@ public class CampaignsApiController : ApiControllerBase
             return BadRequest(new ApiErrorResponse("The uploaded file is empty."));
         }
 
+        var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+        if (extension is not (".csv" or ".txt" or ".xlsx"))
+        {
+            return BadRequest(new ApiErrorResponse("Unsupported file type. Upload a .csv, .txt, or .xlsx file."));
+        }
+
         await using var stream = request.File.OpenReadStream();
-        var parsed = _numberParser.ParseCsv(stream);
+        var parsed = extension == ".xlsx" ? _numberParser.ParseXlsx(stream) : _numberParser.ParseCsv(stream);
         if (parsed.Count == 0)
         {
             return BadRequest(new ApiErrorResponse("No valid phone numbers were found in the uploaded file."));

@@ -9,6 +9,7 @@ import { FlashService } from '../../shared/flash/flash.service';
 import { SpamBlockedModalComponent } from '../../shared/spam-blocked-modal/spam-blocked-modal.component';
 import { CampaignsService, type CampaignListItem } from '../campaigns/campaigns.service';
 import { HistoryService, type HistoryListItem } from '../history/history.service';
+import { ScheduledSendsService } from '../scheduled-sends/scheduled-sends.service';
 import { BulkSendService } from './bulk-send.service';
 import { MessageFieldComponent } from './message-field.component';
 import { SenderIdFieldComponent } from './sender-id-field.component';
@@ -62,13 +63,28 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
             <app-sender-id-field #senderField [policy]="p" />
           }
 
+          <div class="mb-3">
+            <label class="inline-flex items-center gap-2 text-sm">
+              <input type="checkbox" [checked]="scheduled()" (change)="scheduled.set($any($event.target).checked)" />
+              {{ 'Schedule for later' | transloco }}
+            </label>
+            @if (scheduled()) {
+              <input
+                type="datetime-local"
+                class="mt-2 w-full rounded-card border border-border px-3 py-2 text-sm"
+                [ngModel]="scheduledAt()"
+                (ngModelChange)="scheduledAt.set($event)"
+              />
+            }
+          </div>
+
           <button
             type="button"
             class="w-full rounded-card bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
             [disabled]="sending()"
             (click)="submit()"
           >
-            {{ 'Send' | transloco }}
+            {{ (scheduled() ? 'Schedule' : 'Send') | transloco }}
           </button>
         </div>
       </div>
@@ -112,6 +128,7 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
 })
 export class BulkSendComponent {
   private readonly bulkSend = inject(BulkSendService);
+  private readonly scheduledSends = inject(ScheduledSendsService);
   private readonly campaignsService = inject(CampaignsService);
   private readonly historyService = inject(HistoryService);
   private readonly sendPolicy = inject(SendPolicyService);
@@ -123,6 +140,8 @@ export class BulkSendComponent {
   protected readonly campaigns = signal<CampaignListItem[]>([]);
   protected readonly history = signal<HistoryListItem[]>([]);
   protected readonly blockedTerms = signal<readonly string[] | null>(null);
+  protected readonly scheduled = signal(false);
+  protected readonly scheduledAt = signal('');
 
   private readonly messageField = viewChild(MessageFieldComponent);
   private readonly senderField = viewChild(SenderIdFieldComponent);
@@ -150,13 +169,24 @@ export class BulkSendComponent {
       this.flash.error('Select a campaign and enter a message.');
       return;
     }
+    if (this.scheduled() && !this.scheduledAt()) {
+      this.flash.error('Pick a date and time to schedule for.');
+      return;
+    }
 
     this.sending.set(true);
     try {
-      const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), message, senderId });
-      this.flash.success(
-        `Queued ${summary.recipientCount} message(s), cost ${(summary.totalCost ?? 0).toFixed(4)}. Remaining balance: ${(summary.remainingBalance ?? 0).toFixed(4)}.`,
-      );
+      if (this.scheduled()) {
+        const created = await this.scheduledSends.create(this.campaignId(), message, senderId, this.scheduledAt());
+        this.flash.success(`Scheduled for ${new Date(created.scheduledAtUtc).toLocaleString()}.`);
+        this.scheduled.set(false);
+        this.scheduledAt.set('');
+      } else {
+        const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), message, senderId });
+        this.flash.success(
+          `Queued ${summary.recipientCount} message(s), cost ${(summary.totalCost ?? 0).toFixed(4)}. Remaining balance: ${(summary.remainingBalance ?? 0).toFixed(4)}.`,
+        );
+      }
       await this.loadAll();
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 422) {

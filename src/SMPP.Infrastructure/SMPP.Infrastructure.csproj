@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <!-- Only pulled in for Database:UseInMemory=true local dev - see DependencyInjection.AddInfrastructure. -->
@@ -24,6 +25,7 @@
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.10" />
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.19.1" />
   </ItemGroup>
 
   <PropertyGroup>

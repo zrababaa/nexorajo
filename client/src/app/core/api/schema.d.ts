@@ -654,7 +654,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin-budget/balance": {
+    "/api/v1/admin-budget/adjust": {
         parameters: {
             query?: never;
             header?: never;
@@ -663,7 +663,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Manually sets the pool's total. Rejected if the new balance is negative. */
+        /** Increases or decreases the pool's total by an amount. Rejected if a deduction would take it below zero. */
         post: {
             parameters: {
                 query?: never;
@@ -673,9 +673,9 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    "application/json": components["schemas"]["SetAdminBudgetApiRequest"];
-                    "text/json": components["schemas"]["SetAdminBudgetApiRequest"];
-                    "application/*+json": components["schemas"]["SetAdminBudgetApiRequest"];
+                    "application/json": components["schemas"]["AdjustAdminBudgetApiRequest"];
+                    "text/json": components["schemas"]["AdjustAdminBudgetApiRequest"];
+                    "application/*+json": components["schemas"]["AdjustAdminBudgetApiRequest"];
                 };
             };
             responses: {
@@ -1409,19 +1409,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile": {
+    "/api/v1/accounts/{accountId}/company-profile": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Your company profile, created with company mode inactive on first access. */
+        /** The account's company profile, created with company mode inactive on first access. */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -1453,14 +1455,25 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
-        /** Saves your company details. Company mode does not need to be active to edit them. */
+        /** Saves the account's company details. Company mode does not need to be active to edit them. */
         put: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: {
@@ -1498,6 +1511,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         post?: never;
@@ -1507,7 +1529,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/activate": {
+    "/api/v1/accounts/{accountId}/company-profile/activate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1521,7 +1543,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -1553,6 +1577,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1561,7 +1594,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/deactivate": {
+    "/api/v1/accounts/{accountId}/company-profile/deactivate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1575,7 +1608,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -1607,6 +1642,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1615,7 +1659,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/logo": {
+    "/api/v1/accounts/{accountId}/company-profile/logo": {
         parameters: {
             query?: never;
             header?: never;
@@ -1632,7 +1676,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: string;
+                };
                 cookie?: never;
             };
             requestBody?: {
@@ -1671,6 +1717,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1679,19 +1734,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/documents": {
+    "/api/v1/accounts/{accountId}/company-profile/documents": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Your company's supporting documents. */
+        /** The account's supporting documents. */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -1723,15 +1780,26 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         put?: never;
-        /** Attaches an uploaded document file to your company profile. */
+        /** Attaches an uploaded document file to the account's company profile. */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: number;
+                };
                 cookie?: never;
             };
             requestBody?: {
@@ -1769,6 +1837,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1777,7 +1854,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/documents/upload": {
+    "/api/v1/accounts/{accountId}/company-profile/documents/upload": {
         parameters: {
             query?: never;
             header?: never;
@@ -1791,7 +1868,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    accountId: string;
+                };
                 cookie?: never;
             };
             requestBody?: {
@@ -1830,6 +1909,15 @@ export interface paths {
                         "application/json": components["schemas"]["ApiErrorResponse"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1838,7 +1926,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/company-profile/documents/{id}": {
+    "/api/v1/accounts/{accountId}/company-profile/documents/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1848,12 +1936,13 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Removes a document from your company profile. */
+        /** Removes a document from the account's company profile. */
         delete: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
+                    accountId: number;
                     id: number;
                 };
                 cookie?: never;
@@ -1878,6 +1967,15 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4399,6 +4497,277 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scheduled-sends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lists your own scheduled sends, most recently scheduled first. */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfScheduledSendApiResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Schedules a Bulk Send. Rejected if the time is in the past or outside the admin sending window. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateScheduledSendApiRequest"];
+                    "text/json": components["schemas"]["CreateScheduledSendApiRequest"];
+                    "application/*+json": components["schemas"]["CreateScheduledSendApiRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledSendApiResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scheduled-sends/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancels a still-pending scheduled send. */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sending-window": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The current window. When disabled, Bulk Send is unrestricted. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SendingWindowApiResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Updates the window. A window where StartTime is after EndTime wraps past midnight. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SetSendingWindowApiRequest"];
+                    "text/json": components["schemas"]["SetSendingWindowApiRequest"];
+                    "application/*+json": components["schemas"]["SetSendingWindowApiRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SendingWindowApiResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4465,6 +4834,12 @@ export interface components {
             filePath: string;
             /** Format: int64 */
             fileSizeBytes?: number;
+        };
+        AdjustAdminBudgetApiRequest: {
+            /** Format: double */
+            amount?: number;
+            kind?: components["schemas"]["TransactionKind"];
+            note?: string | null;
         };
         AdjustBalanceApiRequest: {
             /** Format: double */
@@ -4649,6 +5024,17 @@ export interface components {
             address?: string | null;
             notes?: string | null;
             status?: components["schemas"]["CustomerStatus"];
+        };
+        CreateScheduledSendApiRequest: {
+            /** Format: int32 */
+            campaignId?: number;
+            message: string;
+            senderId?: string | null;
+            /**
+             * Format: date-time
+             * @description Server local time. Must be in the future.
+             */
+            scheduledAt: string;
         };
         CreateSpamKeywordApiRequest: {
             keyword: string;
@@ -4967,6 +5353,17 @@ export interface components {
             /** Format: int32 */
             readonly totalPages?: number;
         };
+        PagedResultOfScheduledSendApiResponse: {
+            items?: components["schemas"]["ScheduledSendApiResponse"][] | null;
+            /** Format: int32 */
+            totalCount?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
         PagedResultOfTransactionReportRowDto: {
             items?: components["schemas"]["TransactionReportRowDto"][] | null;
             /** Format: int32 */
@@ -5046,6 +5443,20 @@ export interface components {
             token: string;
             password: string;
         };
+        ScheduledSendApiResponse: {
+            /** Format: int32 */
+            id?: number;
+            campaignName?: string | null;
+            message?: string | null;
+            senderId?: string | null;
+            /** Format: date-time */
+            scheduledAtUtc?: string;
+            status?: components["schemas"]["ScheduledSendStatus"];
+            batchId?: string | null;
+            errorMessage?: string | null;
+        };
+        /** @enum {string} */
+        ScheduledSendStatus: "Pending" | "Sent" | "Failed" | "Cancelled";
         SendMessageApiRequest: {
             numbers?: string | null;
             message?: string | null;
@@ -5068,10 +5479,19 @@ export interface components {
             /** Format: double */
             remainingBalance?: number;
         };
-        SetAdminBudgetApiRequest: {
-            /** Format: double */
-            newBalance?: number;
-            note?: string | null;
+        SendingWindowApiResponse: {
+            isEnabled?: boolean;
+            /** Format: time */
+            startTime?: string;
+            /** Format: time */
+            endTime?: string;
+        };
+        SetSendingWindowApiRequest: {
+            isEnabled?: boolean;
+            /** Format: time */
+            startTime?: string;
+            /** Format: time */
+            endTime?: string;
         };
         SpamKeywordListItemDto: {
             /** Format: int32 */

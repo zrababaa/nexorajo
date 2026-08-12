@@ -43,6 +43,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/campaigns/campaign-form.component').then((m) => m.CampaignFormComponent),
       },
       {
+        path: 'scheduled-sends',
+        loadComponent: () =>
+          import('./features/scheduled-sends/scheduled-sends-list.component').then((m) => m.ScheduledSendsListComponent),
+      },
+      {
         path: 'history',
         loadComponent: () => import('./features/history/history.component').then((m) => m.HistoryComponent),
       },
@@ -73,6 +78,11 @@ export const routes: Routes = [
         path: 'admin-budget',
         canActivate: [roleGuard('Superadmin')],
         loadComponent: () => import('./features/admin-budget/admin-budget.component').then((m) => m.AdminBudgetComponent),
+      },
+      {
+        path: 'sending-window',
+        canActivate: [roleGuard('Superadmin')],
+        loadComponent: () => import('./features/sending-window/sending-window.component').then((m) => m.SendingWindowComponent),
       },
       {
         path: 'accounts-logs',

@@ -64,11 +64,11 @@ public class AdminBudgetService : IAdminBudgetService
         };
     }
 
-    public async Task<decimal> SetBalanceAsync(int performedByUserId, decimal newBalance, string? note, CancellationToken ct = default)
+    public async Task<decimal> AdjustBalanceAsync(int performedByUserId, decimal amount, TransactionKind kind, string? note, CancellationToken ct = default)
     {
-        if (newBalance < 0)
+        if (amount <= 0)
         {
-            throw new AppException("The admin budget cannot be set to a negative number.");
+            throw new AppException("The amount must be greater than zero.");
         }
 
         var strategy = _db.Database.CreateExecutionStrategy();
@@ -78,22 +78,26 @@ public class AdminBudgetService : IAdminBudgetService
             await using IDbContextTransaction tx = await _db.Database.BeginTransactionAsync(ct);
 
             var budget = await _db.AdminBudgets.SingleAsync(b => b.Id == SingletonId, ct);
-            var delta = newBalance - budget.Balance;
+            var newBalance = budget.Balance + (kind == TransactionKind.Credit ? amount : -amount);
+
+            if (newBalance < 0)
+            {
+                throw new AppException(
+                    $"Deducting {amount:0.####} would take the admin budget below zero (current balance is {budget.Balance:0.####}).");
+            }
+
             budget.Balance = newBalance;
 
-            if (delta != 0)
+            _db.AdminBudgetLogs.Add(new AdminBudgetLog
             {
-                _db.AdminBudgetLogs.Add(new AdminBudgetLog
-                {
-                    PerformedByUserId = performedByUserId,
-                    Kind = delta > 0 ? TransactionKind.Credit : TransactionKind.Debit,
-                    Source = TransactionSource.ManualAdjustment,
-                    Amount = Math.Abs(delta),
-                    BalanceAfter = newBalance,
-                    RelatedUserId = null,
-                    Note = note,
-                });
-            }
+                PerformedByUserId = performedByUserId,
+                Kind = kind,
+                Source = TransactionSource.ManualAdjustment,
+                Amount = amount,
+                BalanceAfter = newBalance,
+                RelatedUserId = null,
+                Note = note,
+            });
 
             await _db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);

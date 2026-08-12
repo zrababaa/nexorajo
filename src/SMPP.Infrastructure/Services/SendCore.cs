@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
 using SMPP.Application.Sending;
+using SMPP.Application.SendingWindow;
 using SMPP.Domain.Entities;
 using SMPP.Domain.Enums;
 using SMPP.Domain.Pricing;
@@ -28,19 +29,22 @@ public class SendCore
     private readonly ISpamKeywordFilterService _spamFilter;
     private readonly ISendPolicyService _sendPolicy;
     private readonly IBalanceLedgerService _ledger;
+    private readonly ISendingWindowService _sendingWindow;
 
     public SendCore(
         SmppDbContext db,
         ISegmentCounter segmentCounter,
         ISpamKeywordFilterService spamFilter,
         ISendPolicyService sendPolicy,
-        IBalanceLedgerService ledger)
+        IBalanceLedgerService ledger,
+        ISendingWindowService sendingWindow)
     {
         _db = db;
         _segmentCounter = segmentCounter;
         _spamFilter = spamFilter;
         _sendPolicy = sendPolicy;
         _ledger = ledger;
+        _sendingWindow = sendingWindow;
     }
 
     public async Task<SendSummaryDto> ExecuteAsync(
@@ -56,6 +60,11 @@ public class SendCore
         if (numbers.Count == 0)
         {
             throw new AppException("No valid phone numbers were found.");
+        }
+
+        if (source == MessageSource.BulkSend)
+        {
+            await _sendingWindow.EnsureBulkSendAllowedNowAsync(ct);
         }
 
         var user = await _db.Users.FirstAsync(u => u.Id == userId, ct);

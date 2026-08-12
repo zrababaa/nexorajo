@@ -32,8 +32,8 @@ const PAGE_SIZE = 20;
           }
           <div class="flex flex-wrap items-end gap-3">
             <div>
-              <label class="mb-1 block text-sm font-medium">{{ 'New balance' | transloco }}</label>
-              <input type="number" min="0" step="0.0001" class="w-40 rounded-card border border-border px-3 py-2 text-sm" [ngModel]="newBalance()" (ngModelChange)="newBalance.set($event)" />
+              <label class="mb-1 block text-sm font-medium">{{ 'Amount' | transloco }}</label>
+              <input type="number" min="0" step="0.0001" class="w-40 rounded-card border border-border px-3 py-2 text-sm" [ngModel]="amount()" (ngModelChange)="amount.set($event)" />
             </div>
             <div class="min-w-0 flex-1">
               <label class="mb-1 block text-sm font-medium">{{ 'Note' | transloco }}</label>
@@ -41,11 +41,19 @@ const PAGE_SIZE = 20;
             </div>
             <button
               type="button"
-              class="rounded-card bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+              class="rounded-card bg-success px-4 py-2 text-sm font-medium text-white hover:bg-success/90 disabled:opacity-60"
               [disabled]="saving()"
-              (click)="save()"
+              (click)="apply('Credit')"
             >
-              {{ 'Set balance' | transloco }}
+              {{ 'Add Balance' | transloco }}
+            </button>
+            <button
+              type="button"
+              class="rounded-card bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger/90 disabled:opacity-60"
+              [disabled]="saving()"
+              (click)="apply('Debit')"
+            >
+              {{ 'Deduct Balance' | transloco }}
             </button>
           </div>
         </div>
@@ -99,7 +107,7 @@ export class AdminBudgetComponent {
 
   protected readonly PAGE_SIZE = PAGE_SIZE;
   protected readonly balance = signal(0);
-  protected readonly newBalance = signal<number | null>(null);
+  protected readonly amount = signal<number | null>(null);
   protected readonly note = signal('');
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -122,19 +130,19 @@ export class AdminBudgetComponent {
     this.totalPages.set(result.totalPages ?? 0);
   }
 
-  protected async save(): Promise<void> {
+  protected async apply(kind: 'Credit' | 'Debit'): Promise<void> {
     this.errorMessage.set(null);
-    if (this.newBalance() === null || this.newBalance()! < 0) {
-      this.errorMessage.set('Enter a valid balance.');
+    if (this.amount() === null || this.amount()! <= 0) {
+      this.errorMessage.set('Enter a valid amount.');
       return;
     }
 
     this.saving.set(true);
     try {
-      const result = await this.adminBudget.setBalance(this.newBalance()!, this.note());
+      const result = await this.adminBudget.adjustBalance(this.amount()!, kind, this.note());
       this.balance.set(result.balance ?? 0);
-      this.flash.success('Admin budget balance updated.');
-      this.newBalance.set(null);
+      this.flash.success(kind === 'Credit' ? 'Balance added.' : 'Balance deducted.');
+      this.amount.set(null);
       this.note.set('');
       await this.load(1);
     } catch (error) {

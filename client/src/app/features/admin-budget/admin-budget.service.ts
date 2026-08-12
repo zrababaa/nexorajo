@@ -18,9 +18,9 @@ export class AdminBudgetService {
     return firstValueFrom(this.http.get<PagedResult<AdminBudgetLogRow>>('/api/v1/admin-budget/log', { params }));
   }
 
-  setBalance(newBalance: number, note: string): Promise<{ balance?: number }> {
+  adjustBalance(amount: number, kind: 'Credit' | 'Debit', note: string): Promise<{ balance?: number }> {
     return firstValueFrom(
-      this.http.post<{ balance?: number }>('/api/v1/admin-budget/balance', { newBalance, note: note || null }),
+      this.http.post<{ balance?: number }>('/api/v1/admin-budget/adjust', { amount, kind, note: note || null }),
     );
   }
 }

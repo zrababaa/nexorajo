@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Quartz;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Accounts;
 using SMPP.Application.AdminBudget;
@@ -15,10 +16,12 @@ using SMPP.Application.Payments;
 using SMPP.Application.PublicApi;
 using SMPP.Application.Reports;
 using SMPP.Application.Sending;
+using SMPP.Application.SendingWindow;
 using SMPP.Application.SpamKeywords;
 using SMPP.Infrastructure.Email;
 using SMPP.Infrastructure.Files;
 using SMPP.Infrastructure.Identity;
+using SMPP.Infrastructure.Jobs;
 using SMPP.Infrastructure.Persistence;
 using SMPP.Infrastructure.Segmenting;
 using SMPP.Infrastructure.Services;
@@ -64,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<ISendPolicyService, SendPolicyService>();
         services.AddScoped<IBalanceLedgerService, BalanceLedgerService>();
         services.AddScoped<IAdminBudgetService, AdminBudgetService>();
+        services.AddScoped<ISendingWindowService, SendingWindowService>();
         services.AddScoped<IUserScopeResolver, UserScopeResolver>();
         services.AddScoped<ICampaignNumberParser, CampaignNumberParser>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
@@ -85,6 +89,15 @@ public static class DependencyInjection
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IPublicApiAuthenticator, PublicApiAuthenticator>();
         services.AddScoped<IPublicApiSendService, PublicApiSendService>();
+
+        // In-memory job store: ScheduledSends (not Quartz) is the durable source of truth, and
+        // ScheduledSendRecoveryHostedService rebuilds the scheduler's triggers from it on every
+        // startup. No jobs are registered here - ScheduledSendService/the recovery service add
+        // them dynamically, one per scheduled send.
+        services.AddQuartz();
+        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+        services.AddScoped<IScheduledSendService, ScheduledSendService>();
+        services.AddHostedService<ScheduledSendRecoveryHostedService>();
 
         return services;
     }

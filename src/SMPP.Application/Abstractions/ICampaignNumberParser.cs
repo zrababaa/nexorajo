@@ -13,4 +13,6 @@ public interface ICampaignNumberParser
     NumberListResult ParsePasted(string rawNumbers);
 
     NumberListResult ParseCsv(Stream csvStream);
+
+    NumberListResult ParseXlsx(Stream xlsxStream);
 }

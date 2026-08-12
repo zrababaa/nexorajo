@@ -25,6 +25,8 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<CompanyProfile> CompanyProfiles => Set<CompanyProfile>();
     public DbSet<CompanyDocument> CompanyDocuments => Set<CompanyDocument>();
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<SendingWindowSettings> SendingWindowSettings => Set<SendingWindowSettings>();
+    public DbSet<ScheduledSend> ScheduledSends => Set<ScheduledSend>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
