@@ -18,6 +18,7 @@ using SMPP.Application.PublicApi;
 using SMPP.Application.Reports;
 using SMPP.Application.Sending;
 using SMPP.Application.SendingWindow;
+using SMPP.Application.SmsTemplates;
 using SMPP.Application.SpamKeywords;
 using SMPP.Infrastructure.Email;
 using SMPP.Infrastructure.Files;
@@ -81,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<SendCore>();
         services.AddScoped<QuickSendHistoryReader>();
         services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ISmsTemplateService, SmsTemplateService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ISpamKeywordService, SpamKeywordService>();

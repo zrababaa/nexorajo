@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using SMPP.Application.Common;
@@ -49,10 +50,16 @@ public class ScheduledSendDispatchJob : IJob
 
         try
         {
-            var summary = await _sendCore.ExecuteAsync(
+            IReadOnlyDictionary<string, string>? templateVariables = scheduledSend.TemplateVariablesJson is null
+                ? null
+                : JsonSerializer.Deserialize<Dictionary<string, string>>(scheduledSend.TemplateVariablesJson);
+
+            var numberToMessage = await TemplateMessageResolver.ResolveAsync(
+                _db, scheduledSend.CreatedByUserId, numbers, scheduledSend.Message, scheduledSend.TemplateId, templateVariables, ct);
+
+            var summary = await _sendCore.ExecuteGroupedAsync(
                 scheduledSend.CreatedByUserId,
-                numbers,
-                scheduledSend.Message,
+                numberToMessage,
                 scheduledSend.SenderId,
                 MessageSource.BulkSend,
                 TransactionSource.BulkSend,

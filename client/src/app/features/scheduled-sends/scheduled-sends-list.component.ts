@@ -36,7 +36,12 @@ const PAGE_SIZE = 10;
             @for (s of items(); track s.id) {
               <tr class="border-t border-border">
                 <td class="px-4 py-2">{{ s.campaignName }}</td>
-                <td class="px-4 py-2">{{ s.message | slice: 0 : 40 }}</td>
+                <td class="px-4 py-2">
+                  {{ s.message | slice: 0 : 40 }}
+                  @if (s.templateName) {
+                    <div class="text-xs text-text-muted">{{ 'via' | transloco }} {{ s.templateName }}</div>
+                  }
+                </td>
                 <td class="px-4 py-2">{{ s.scheduledAtUtc | slice: 0 : 16 }}</td>
                 <td class="px-4 py-2">{{ s.status | transloco }}</td>
                 <td class="px-4 py-2">

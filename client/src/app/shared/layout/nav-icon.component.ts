@@ -88,6 +88,10 @@ import { Component, input } from '@angular/core';
           <path d="M12 7v5l3.5 2" />
           <path d="M12 2v2" />
         }
+        @case ('template') {
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M7 9h5M7 13h10M7 17h7" />
+        }
       }
     </svg>
   `,

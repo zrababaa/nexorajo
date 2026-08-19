@@ -24,6 +24,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'Quick Send', route: '/quick-send', icon: 'quickSend' },
       { labelKey: 'Bulk Send', route: '/bulk-send', icon: 'bulkSend' },
       { labelKey: 'Campaigns', route: '/campaigns', icon: 'campaigns' },
+      { labelKey: 'SMS Templates', route: '/sms-templates', icon: 'template' },
       { labelKey: 'Scheduled Sends', route: '/scheduled-sends', icon: 'clock' },
       { labelKey: 'History', route: '/history', icon: 'history' },
       { labelKey: 'Reports', route: '/reports', icon: 'reports' },

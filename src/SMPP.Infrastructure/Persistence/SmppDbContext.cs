@@ -29,6 +29,7 @@ public class SmppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int
     public DbSet<ScheduledSend> ScheduledSends => Set<ScheduledSend>();
     public DbSet<TrackedLink> TrackedLinks => Set<TrackedLink>();
     public DbSet<LinkClick> LinkClicks => Set<LinkClick>();
+    public DbSet<SmsTemplate> SmsTemplates => Set<SmsTemplate>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

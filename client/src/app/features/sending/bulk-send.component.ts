@@ -10,6 +10,7 @@ import { SpamBlockedModalComponent } from '../../shared/spam-blocked-modal/spam-
 import { CampaignsService, type CampaignListItem } from '../campaigns/campaigns.service';
 import { HistoryService, type HistoryListItem } from '../history/history.service';
 import { ScheduledSendsService } from '../scheduled-sends/scheduled-sends.service';
+import { TemplatePickerComponent } from '../sms-templates/template-picker.component';
 import { BulkSendService } from './bulk-send.service';
 import { MessageFieldComponent } from './message-field.component';
 import { SenderIdFieldComponent } from './sender-id-field.component';
@@ -26,6 +27,7 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
     MessageFieldComponent,
     SenderIdFieldComponent,
     SpamBlockedModalComponent,
+    TemplatePickerComponent,
   ],
   template: `
     <h1 class="mb-4 text-xl font-semibold">{{ 'Bulk Send' | transloco }}</h1>
@@ -58,8 +60,12 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
             </select>
           </div>
 
+          <app-template-picker #templatePicker />
+
           @if (policy(); as p) {
-            <app-message-field #messageField [ratePerPart]="p.creditsPerMessagePart ?? 0" />
+            @if (!templatePicker.useTemplate()) {
+              <app-message-field #messageField [ratePerPart]="p.creditsPerMessagePart ?? 0" />
+            }
             <app-sender-id-field #senderField [policy]="p" />
           }
 
@@ -145,6 +151,7 @@ export class BulkSendComponent {
 
   private readonly messageField = viewChild(MessageFieldComponent);
   private readonly senderField = viewChild(SenderIdFieldComponent);
+  private readonly templatePicker = viewChild(TemplatePickerComponent);
 
   constructor() {
     void this.loadAll();
@@ -162,10 +169,23 @@ export class BulkSendComponent {
   }
 
   protected async submit(): Promise<void> {
+    const picker = this.templatePicker();
+    const useTemplate = picker?.useTemplate() ?? false;
     const message = this.messageField()?.message() ?? '';
+    const templateId = picker?.templateId() ?? 0;
+    const templateVariables = picker?.variables() ?? {};
     const senderId = this.senderField()?.effectiveSenderId() ?? '';
 
-    if (!this.campaignId() || !message.trim()) {
+    if (!this.campaignId()) {
+      this.flash.error('Select a campaign.');
+      return;
+    }
+    if (useTemplate) {
+      if (!templateId || !(picker?.isValid() ?? false)) {
+        this.flash.error('Select a template and fill in a value for every placeholder it uses.');
+        return;
+      }
+    } else if (!message.trim()) {
       this.flash.error('Select a campaign and enter a message.');
       return;
     }
@@ -176,13 +196,19 @@ export class BulkSendComponent {
 
     this.sending.set(true);
     try {
+      const content = useTemplate ? { templateId, templateVariables } : { message };
       if (this.scheduled()) {
-        const created = await this.scheduledSends.create(this.campaignId(), message, senderId, this.scheduledAt());
+        const created = await this.scheduledSends.create({
+          campaignId: this.campaignId(),
+          senderId,
+          scheduledAt: this.scheduledAt(),
+          ...content,
+        });
         this.flash.success(`Scheduled for ${new Date(created.scheduledAtUtc).toLocaleString()}.`);
         this.scheduled.set(false);
         this.scheduledAt.set('');
       } else {
-        const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), message, senderId });
+        const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), senderId, ...content });
         this.flash.success(
           `Queued ${summary.recipientCount} message(s), cost ${(summary.totalCost ?? 0).toFixed(4)}. Remaining balance: ${(summary.remainingBalance ?? 0).toFixed(4)}.`,
         );

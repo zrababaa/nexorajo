@@ -4901,6 +4901,260 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sms-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lists your saved templates, newest first. */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfSmsTemplateListItemDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Creates a template. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateSmsTemplateApiRequest"];
+                    "text/json": components["schemas"]["CreateSmsTemplateApiRequest"];
+                    "application/*+json": components["schemas"]["CreateSmsTemplateApiRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmsTemplateDetailDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sms-templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One template, including its full body and the placeholders found in it. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmsTemplateDetailDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        /** Renames a template and replaces its body. */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSmsTemplateApiRequest"];
+                    "text/json": components["schemas"]["UpdateSmsTemplateApiRequest"];
+                    "application/*+json": components["schemas"]["UpdateSmsTemplateApiRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmsTemplateDetailDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /**
+         * Deletes one of your templates. If a still-pending scheduled send was created from it, that
+         *     send will fail (not silently send stale content) when it fires - same as deleting a
+         *     Campaign a scheduled send still points to.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5075,8 +5329,20 @@ export interface components {
              * @description Id of a saved recipient list belonging to the caller.
              */
             campaignId?: number;
-            message: string;
+            /** @description The literal message text. Ignored when SMPP.Web.Controllers.Api.BulkSendApiRequest.TemplateId is set. */
+            message?: string | null;
             senderId?: string | null;
+            /**
+             * Format: int32
+             * @description Id of a saved SMS Template belonging to the caller. When set, this is rendered per
+             *     recipient (with Customer-matched values for [Name]/[CompanyName]/[Email]/[Phone]/[Address])
+             *     instead of using SMPP.Web.Controllers.Api.BulkSendApiRequest.Message.
+             */
+            templateId?: number | null;
+            /** @description Values for the template's other placeholders (e.g. {"Date": "Friday 10am"}), same for every recipient. Required when the template uses any. */
+            templateVariables?: {
+                [key: string]: string;
+            } | null;
         };
         CampaignDetailDto: {
             /** Format: int32 */
@@ -5167,13 +5433,28 @@ export interface components {
         CreateScheduledSendApiRequest: {
             /** Format: int32 */
             campaignId?: number;
-            message: string;
+            /** @description The literal message text. Ignored when SMPP.Web.Controllers.Api.CreateScheduledSendApiRequest.TemplateId is set. */
+            message?: string | null;
             senderId?: string | null;
             /**
              * Format: date-time
              * @description Server local time. Must be in the future.
              */
             scheduledAt: string;
+            /**
+             * Format: int32
+             * @description Id of a saved SMS Template belonging to the caller, rendered per recipient at dispatch time instead of using SMPP.Web.Controllers.Api.CreateScheduledSendApiRequest.Message.
+             */
+            templateId?: number | null;
+            /** @description Values for the template's other placeholders (e.g. {"Date": "Friday 10am"}), same for every recipient. Required when the template uses any. */
+            templateVariables?: {
+                [key: string]: string;
+            } | null;
+        };
+        CreateSmsTemplateApiRequest: {
+            name: string;
+            /** @description The SMS text, with `[Placeholder]` tokens for whatever varies (e.g. "Hello [Name], please come at this [Date]"). */
+            body: string;
         };
         CreateSpamKeywordApiRequest: {
             keyword: string;
@@ -5531,6 +5812,17 @@ export interface components {
             /** Format: int32 */
             readonly totalPages?: number;
         };
+        PagedResultOfSmsTemplateListItemDto: {
+            items?: components["schemas"]["SmsTemplateListItemDto"][] | null;
+            /** Format: int32 */
+            totalCount?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
         PagedResultOfTransactionReportRowDto: {
             items?: components["schemas"]["TransactionReportRowDto"][] | null;
             /** Format: int32 */
@@ -5621,6 +5913,7 @@ export interface components {
             status?: components["schemas"]["ScheduledSendStatus"];
             batchId?: string | null;
             errorMessage?: string | null;
+            templateName?: string | null;
         };
         /** @enum {string} */
         ScheduledSendStatus: "Pending" | "Sent" | "Failed" | "Cancelled";
@@ -5659,6 +5952,26 @@ export interface components {
             startTime?: string;
             /** Format: time */
             endTime?: string;
+        };
+        SmsTemplateDetailDto: {
+            /** Format: int32 */
+            id?: number;
+            name?: string | null;
+            body?: string | null;
+            placeholders?: string[] | null;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string | null;
+        };
+        SmsTemplateListItemDto: {
+            /** Format: int32 */
+            id?: number;
+            name?: string | null;
+            body?: string | null;
+            placeholders?: string[] | null;
+            /** Format: date-time */
+            createdAt?: string;
         };
         SpamKeywordListItemDto: {
             /** Format: int32 */
@@ -5744,6 +6057,10 @@ export interface components {
             address?: string | null;
             notes?: string | null;
             status?: components["schemas"]["CustomerStatus"];
+        };
+        UpdateSmsTemplateApiRequest: {
+            name: string;
+            body: string;
         };
         UploadedFileApiResponse: {
             path?: string | null;

@@ -131,6 +131,110 @@ public class SendCore
     }
 
     /// <summary>
+    /// Same pipeline as <see cref="ExecuteAsync"/>, but for a send whose message text can differ
+    /// per recipient (a rendered SMS Template). Recipients are grouped by their exact rendered
+    /// text; when every recipient ends up with the same text (e.g. a template with no per-recipient
+    /// placeholders), this degrades to a single call to <see cref="ExecuteAsync"/> - one
+    /// <see cref="UnderProcess"/> row, same as a plain Bulk Send. Otherwise it writes one row per
+    /// distinct text (not per recipient) sharing one batch id, after checking every group against
+    /// the content filter and pricing the whole send up front so a block or an insufficient balance
+    /// aborts before anything is charged or queued.
+    /// </summary>
+    public async Task<SendSummaryDto> ExecuteGroupedAsync(
+        int userId,
+        IReadOnlyDictionary<string, string> numberToMessage,
+        string senderId,
+        MessageSource source,
+        TransactionSource txSource,
+        CancellationToken ct,
+        string? campaignName = null)
+    {
+        if (numberToMessage.Count == 0)
+        {
+            throw new AppException("No valid phone numbers were found.");
+        }
+
+        var groups = numberToMessage
+            .GroupBy(kvp => kvp.Value, kvp => kvp.Key)
+            .Select(g => (Message: g.Key, Numbers: g.ToList()))
+            .ToList();
+
+        if (groups.Count == 1)
+        {
+            return await ExecuteAsync(userId, groups[0].Numbers, groups[0].Message, senderId, source, txSource, ct, campaignName);
+        }
+
+        if (source == MessageSource.BulkSend)
+        {
+            await _sendingWindow.EnsureBulkSendAllowedNowAsync(ct);
+        }
+
+        var user = await _db.Users.FirstAsync(u => u.Id == userId, ct);
+        var batchId = NewCampaignId(source);
+
+        // Every group is checked against the content filter before any group is rewritten,
+        // priced, or queued - one blocked variant aborts the whole send, matching the
+        // single-message behavior in ExecuteAsync.
+        foreach (var group in groups)
+        {
+            var filterResult = await _spamFilter.CheckAsync(group.Message, ct);
+            if (filterResult.IsBlocked)
+            {
+                var matchedTerms = filterResult.MatchedKeywords.Concat(filterResult.MatchedUrls).ToList();
+                await _spamFilter.LogBlockedAttemptAsync(userId, source, senderId, numberToMessage.Count, matchedTerms, group.Message, ct);
+                throw new SpamBlockedException(matchedTerms);
+            }
+        }
+
+        senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);
+
+        var isFree = user.Role == UserRole.Superadmin;
+        var totalCost = 0m;
+        var maxSegments = 0;
+        var rendered = new List<(string Message, List<string> Numbers)>();
+
+        foreach (var group in groups)
+        {
+            var rewritten = await _linkTracking.RewriteMessageAsync(group.Message, batchId, userId, ct);
+            var segments = _segmentCounter.CountSegments(rewritten);
+            maxSegments = Math.Max(maxSegments, segments);
+            totalCost += isFree ? 0m : MessagePricing.CostOf(group.Numbers.Count, segments);
+            rendered.Add((rewritten, group.Numbers));
+        }
+
+        if (totalCost > user.Balance)
+        {
+            throw new AppException(
+                $"Insufficient balance: this send costs {totalCost:0.####} " +
+                $"({numberToMessage.Count} recipient(s)) and the balance is {user.Balance:0.####}.");
+        }
+
+        if (totalCost > 0)
+        {
+            await _ledger.ApplyAsync(new BalanceLedgerRequest(userId, userId, totalCost, TransactionKind.Debit, txSource, batchId), ct);
+        }
+
+        foreach (var (message, numbers) in rendered)
+        {
+            _db.UnderProcessBatches.Add(new UnderProcess
+            {
+                CampaignId = batchId,
+                SenderId = senderId,
+                Message = message,
+                CampaignNumbers = string.Join(",", numbers),
+                CampaignName = campaignName,
+                PushType = source == MessageSource.BulkSend ? PushType.CampaignNumbers : PushType.DirectNumbers,
+                Priority = source == MessageSource.PublicApi ? SendPriority.Api : SendPriority.Interactive,
+                UserId = userId,
+            });
+        }
+        await _db.SaveChangesAsync(ct);
+
+        var remainingBalance = await _db.Users.Where(u => u.Id == userId).Select(u => u.Balance).FirstAsync(ct);
+        return new SendSummaryDto(batchId, numberToMessage.Count, maxSegments, totalCost, remainingBalance);
+    }
+
+    /// <summary>
     /// Legacy's camp_id shape: a short source prefix plus random characters. Kept under 25
     /// characters because that is the width of the daemon's camp_id column.
     /// </summary>

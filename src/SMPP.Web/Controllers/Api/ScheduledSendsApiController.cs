@@ -12,14 +12,20 @@ public record CreateScheduledSendApiRequest
     [Range(1, int.MaxValue)]
     public int CampaignId { get; init; }
 
-    [Required]
-    public string Message { get; init; } = string.Empty;
+    /// <summary>The literal message text. Ignored when <see cref="TemplateId"/> is set.</summary>
+    public string? Message { get; init; }
 
     public string? SenderId { get; init; }
 
     /// <summary>Server local time. Must be in the future.</summary>
     [Required]
     public DateTime ScheduledAt { get; init; }
+
+    /// <summary>Id of a saved SMS Template belonging to the caller, rendered per recipient at dispatch time instead of using <see cref="Message"/>.</summary>
+    public int? TemplateId { get; init; }
+
+    /// <summary>Values for the template's other placeholders (e.g. {"Date": "Friday 10am"}), same for every recipient. Required when the template uses any.</summary>
+    public IReadOnlyDictionary<string, string>? TemplateVariables { get; init; }
 }
 
 public record ScheduledSendApiResponse(
@@ -30,7 +36,8 @@ public record ScheduledSendApiResponse(
     DateTime ScheduledAtUtc,
     ScheduledSendStatus Status,
     string? BatchId,
-    string? ErrorMessage);
+    string? ErrorMessage,
+    string? TemplateName);
 
 /// <summary>
 /// Bulk Sends scheduled to fire at a future exact time instead of immediately. Same pipeline as
@@ -54,7 +61,8 @@ public class ScheduledSendsApiController : ApiControllerBase
     {
         var id = await _scheduledSends.CreateAsync(
             CurrentUserId,
-            new CreateScheduledSendRequest(request.CampaignId, request.Message, request.SenderId ?? string.Empty, request.ScheduledAt),
+            new CreateScheduledSendRequest(
+                request.CampaignId, request.Message, request.SenderId ?? string.Empty, request.ScheduledAt, request.TemplateId, request.TemplateVariables),
             ct);
 
         var created = await _scheduledSends.GetByIdAsync(id, CurrentUserId, ct)
@@ -89,5 +97,5 @@ public class ScheduledSendsApiController : ApiControllerBase
     }
 
     private static ScheduledSendApiResponse ToResponse(ScheduledSendListItemDto dto) => new(
-        dto.Id, dto.CampaignName, dto.Message, dto.SenderId, dto.ScheduledAtUtc, dto.Status, dto.BatchId, dto.ErrorMessage);
+        dto.Id, dto.CampaignName, dto.Message, dto.SenderId, dto.ScheduledAtUtc, dto.Status, dto.BatchId, dto.ErrorMessage, dto.TemplateName);
 }

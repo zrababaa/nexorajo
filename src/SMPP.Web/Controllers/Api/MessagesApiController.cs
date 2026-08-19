@@ -28,10 +28,20 @@ public record BulkSendApiRequest
     [Range(1, int.MaxValue)]
     public int CampaignId { get; init; }
 
-    [Required]
-    public string Message { get; init; } = string.Empty;
+    /// <summary>The literal message text. Ignored when <see cref="TemplateId"/> is set.</summary>
+    public string? Message { get; init; }
 
     public string? SenderId { get; init; }
+
+    /// <summary>
+    /// Id of a saved SMS Template belonging to the caller. When set, this is rendered per
+    /// recipient (with Customer-matched values for [Name]/[CompanyName]/[Email]/[Phone]/[Address])
+    /// instead of using <see cref="Message"/>.
+    /// </summary>
+    public int? TemplateId { get; init; }
+
+    /// <summary>Values for the template's other placeholders (e.g. {"Date": "Friday 10am"}), same for every recipient. Required when the template uses any.</summary>
+    public IReadOnlyDictionary<string, string>? TemplateVariables { get; init; }
 }
 
 public record SendPolicyApiResponse(
@@ -167,7 +177,9 @@ public class MessagesApiController : ApiControllerBase
     public async Task<IActionResult> BulkSend([FromBody] BulkSendApiRequest request, CancellationToken ct)
     {
         var summary = await _bulkSend.SubmitAsync(
-            CurrentUserId, new BulkSendRequest(request.CampaignId, request.Message, request.SenderId ?? string.Empty), ct);
+            CurrentUserId,
+            new BulkSendRequest(request.CampaignId, request.Message, request.SenderId ?? string.Empty, request.TemplateId, request.TemplateVariables),
+            ct);
 
         return Accepted(summary);
     }

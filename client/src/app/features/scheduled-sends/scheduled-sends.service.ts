@@ -14,15 +14,32 @@ export interface ScheduledSend {
   status: ScheduledSendStatus;
   batchId: string | null;
   errorMessage: string | null;
+  templateName: string | null;
+}
+
+export interface CreateScheduledSendOptions {
+  campaignId: number;
+  senderId: string;
+  scheduledAt: string;
+  message?: string;
+  templateId?: number;
+  templateVariables?: Record<string, string>;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ScheduledSendsService {
   private readonly http = inject(HttpClient);
 
-  create(campaignId: number, message: string, senderId: string, scheduledAt: string): Promise<ScheduledSend> {
+  create(options: CreateScheduledSendOptions): Promise<ScheduledSend> {
     return firstValueFrom(
-      this.http.post<ScheduledSend>('/api/v1/scheduled-sends', { campaignId, message, senderId: senderId || null, scheduledAt }),
+      this.http.post<ScheduledSend>('/api/v1/scheduled-sends', {
+        campaignId: options.campaignId,
+        senderId: options.senderId || null,
+        scheduledAt: options.scheduledAt,
+        message: options.message ?? null,
+        templateId: options.templateId ?? null,
+        templateVariables: options.templateVariables ?? null,
+      }),
     );
   }
 
