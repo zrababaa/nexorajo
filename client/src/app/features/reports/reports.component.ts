@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import type { Schemas } from '../../core/api/api.types';
+import type { PagedResult, Schemas } from '../../core/api/api.types';
 import { AuthService } from '../../core/auth/auth.service';
 import { FileDownloadService } from '../../core/http/file-download.service';
 import { cleanParams } from '../../core/http/params';
@@ -263,6 +263,7 @@ export class ReportsComponent {
   protected readonly accountUsageRows = signal<Schemas['AccountUsageRowDto'][]>([]);
   protected readonly transactionRows = signal<Schemas['TransactionReportRowDto'][]>([]);
   protected readonly creditRequestRows = signal<Schemas['CreditRequestRowDto'][]>([]);
+  private loadRequestId = 0;
 
   constructor() {
     if (this.auth.isSuperadmin()) {
@@ -287,6 +288,7 @@ export class ReportsComponent {
   }
 
   protected async load(page: number): Promise<void> {
+    const requestId = ++this.loadRequestId;
     const filter = this.filter();
     const type = this.activeTab().type;
 
@@ -297,35 +299,72 @@ export class ReportsComponent {
     this.transactionRows.set([]);
     this.creditRequestRows.set([]);
 
-    let result;
     switch (type) {
-      case 'messages':
-        result = await this.reports.messages(filter, page, PAGE_SIZE);
-        this.messageRows.set(result.items ?? []);
-        break;
-      case 'daily-traffic':
-        result = await this.reports.dailyTraffic(filter, page, PAGE_SIZE);
-        this.dailyTrafficRows.set(result.items ?? []);
-        break;
-      case 'batches':
-        result = await this.reports.batches(filter, page, PAGE_SIZE);
-        this.batchRows.set(result.items ?? []);
-        break;
-      case 'account-usage':
-        result = await this.reports.accountUsage(filter, page, PAGE_SIZE);
-        this.accountUsageRows.set(result.items ?? []);
-        break;
-      case 'transactions':
-        result = await this.reports.transactions(filter, page, PAGE_SIZE);
-        this.transactionRows.set(result.items ?? []);
-        break;
-      case 'credit-requests':
-        result = await this.reports.creditRequests(filter, page, PAGE_SIZE);
-        this.creditRequestRows.set(result.items ?? []);
-        break;
+      case 'messages': {
+        const apply = (result: PagedResult<Schemas['HistoryExportRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.messageRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.messages(filter, page, PAGE_SIZE, apply));
+        return;
+      }
+      case 'daily-traffic': {
+        const apply = (result: PagedResult<Schemas['DailyTrafficRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.dailyTrafficRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.dailyTraffic(filter, page, PAGE_SIZE, apply));
+        return;
+      }
+      case 'batches': {
+        const apply = (result: PagedResult<Schemas['BatchReportRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.batchRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.batches(filter, page, PAGE_SIZE, apply));
+        return;
+      }
+      case 'account-usage': {
+        const apply = (result: PagedResult<Schemas['AccountUsageRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.accountUsageRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.accountUsage(filter, page, PAGE_SIZE, apply));
+        return;
+      }
+      case 'transactions': {
+        const apply = (result: PagedResult<Schemas['TransactionReportRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.transactionRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.transactions(filter, page, PAGE_SIZE, apply));
+        return;
+      }
+      case 'credit-requests': {
+        const apply = (result: PagedResult<Schemas['CreditRequestRowDto']>) => {
+          if (requestId === this.loadRequestId) {
+            this.creditRequestRows.set(result.items ?? []);
+            this.applyPagination(result, page);
+          }
+        };
+        apply(await this.reports.creditRequests(filter, page, PAGE_SIZE, apply));
+        return;
+      }
     }
+  }
 
-    this.page.set(result.pageNumber ?? page);
+  private applyPagination(result: PagedResult<unknown>, fallbackPage: number): void {
+    this.page.set(result.pageNumber ?? fallbackPage);
     this.totalCount.set(result.totalCount ?? 0);
     this.totalPages.set(result.totalPages ?? 0);
   }

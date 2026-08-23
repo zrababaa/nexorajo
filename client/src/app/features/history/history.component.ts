@@ -180,6 +180,7 @@ export class HistoryComponent {
   protected readonly page = signal(1);
   protected readonly totalCount = signal(0);
   protected readonly totalPages = signal(0);
+  private loadRequestId = 0;
 
   private readonly filter = computed<HistoryFilter>(() => ({
     source: this.source() || undefined,
@@ -195,16 +196,28 @@ export class HistoryComponent {
   }
 
   protected async load(page: number): Promise<void> {
+    const requestId = ++this.loadRequestId;
     const filter = this.filter();
+    const applyList = (list: Awaited<ReturnType<HistoryService['list']>>) => {
+      if (requestId !== this.loadRequestId) {
+        return;
+      }
+      this.items.set(list.items ?? []);
+      this.page.set(list.pageNumber ?? page);
+      this.totalCount.set(list.totalCount ?? 0);
+      this.totalPages.set(list.totalPages ?? 0);
+    };
+    const applySummary = (summary: HistorySummary) => {
+      if (requestId === this.loadRequestId) {
+        this.summary.set(summary);
+      }
+    };
     const [list, summary] = await Promise.all([
-      this.historyService.list(filter, page, PAGE_SIZE),
-      this.historyService.summary(filter),
+      this.historyService.list(filter, page, PAGE_SIZE, applyList),
+      this.historyService.summary(filter, applySummary),
     ]);
-    this.items.set(list.items ?? []);
-    this.page.set(list.pageNumber ?? page);
-    this.totalCount.set(list.totalCount ?? 0);
-    this.totalPages.set(list.totalPages ?? 0);
-    this.summary.set(summary);
+    applyList(list);
+    applySummary(summary);
   }
 
   protected clear(): void {

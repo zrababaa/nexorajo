@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { AuthenticatedUser, TokenApiResponse } from '../api/api.types';
+import { SessionQueryCache } from '../http/session-query-cache.service';
 import { TokenStorage } from './token-storage';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly storage = inject(TokenStorage);
+  private readonly queryCache = inject(SessionQueryCache);
 
   private readonly _token = signal<string | null>(null);
   private readonly _user = signal<AuthenticatedUser | null>(null);
@@ -32,10 +34,12 @@ export class AuthService {
     const response = await firstValueFrom(
       this.http.post<TokenApiResponse>('/api/v1/auth/login', { identifier, password }),
     );
+    this.queryCache.clear();
     this.setSession(response);
   }
 
   logout(): void {
+    this.queryCache.clear();
     this._token.set(null);
     this._user.set(null);
     this.storage.clear();

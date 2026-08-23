@@ -87,7 +87,10 @@ export class DashboardComponent {
 
   constructor() {
     this.dashboard
-      .getDashboard()
+      .getDashboard((data) => {
+        this.data.set(data);
+        this.error.set(null);
+      })
       .then((data) => this.data.set(data))
       .catch(() => this.error.set('Unable to load the dashboard right now.'));
   }
