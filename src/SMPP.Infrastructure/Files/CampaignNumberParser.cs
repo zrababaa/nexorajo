@@ -26,8 +26,11 @@ public class CampaignNumberParser : ICampaignNumberParser
     /// A single-column file (or a multi-column one whose first cell is itself a number, i.e. no
     /// header row) is read as a plain number list - only column 1 matters, exactly as before. A
     /// multi-column file whose first row's first cell is text is treated as headered: row 1 names
-    /// the columns, the phone column is picked from <see cref="PhoneColumnAliases"/> (falling back
-    /// to column 1), and every other column becomes a per-recipient template variable.
+    /// the columns, the phone column used for the recipient list is picked from
+    /// <see cref="PhoneColumnAliases"/> (falling back to column 1), and every column - including
+    /// that phone column, under its own header name - becomes a per-recipient template variable,
+    /// so a template can reference a custom phone-column header directly instead of only the
+    /// built-in <c>[Phone]</c> placeholder.
     /// </summary>
     public NumberListResult ParseCsv(Stream csvStream)
     {
@@ -90,7 +93,7 @@ public class CampaignNumberParser : ICampaignNumberParser
         var seenColumns = new List<string>();
         for (var h = 0; h < headers.Length; h++)
         {
-            if (h != phoneColumnIndex && headers[h].Length > 0 && !seenColumns.Contains(headers[h], StringComparer.OrdinalIgnoreCase))
+            if (headers[h].Length > 0 && !seenColumns.Contains(headers[h], StringComparer.OrdinalIgnoreCase))
             {
                 seenColumns.Add(headers[h]);
             }
@@ -108,7 +111,7 @@ public class CampaignNumberParser : ICampaignNumberParser
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             for (var h = 0; h < headers.Length; h++)
             {
-                if (h != phoneColumnIndex && headers[h].Length > 0)
+                if (headers[h].Length > 0)
                 {
                     values[headers[h]] = (row.ElementAtOrDefault(h) ?? string.Empty).Trim();
                 }

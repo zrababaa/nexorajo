@@ -6,9 +6,9 @@ namespace SMPP.Domain.Entities;
 /// <summary>
 /// A saved recipient list (legacy called this a "campaign", but it is not a marketing campaign).
 /// Always a flat, deduplicated comma-separated number list regardless of how it was entered.
-/// When imported from a file with a header row (e.g. Phone, Name, Amount), the non-phone columns
-/// are kept as per-recipient template variables in <see cref="RecipientVariablesJson"/>/
-/// <see cref="ImportedColumnsJson"/> - see TemplateMessageResolver.
+/// When imported from a file with a header row (e.g. Phone, Name, Amount), every column - the
+/// phone column included, under its own header - is kept as a per-recipient template variable in
+/// <see cref="RecipientVariablesJson"/>/<see cref="ImportedColumnsJson"/> - see TemplateMessageResolver.
 /// </summary>
 public class Campaign : AuditableEntity, IHasCreator
 {
@@ -21,6 +21,6 @@ public class Campaign : AuditableEntity, IHasCreator
     /// <summary>JSON <c>{ number: { column: value } }</c> from a headered file import; null otherwise.</summary>
     public string? RecipientVariablesJson { get; set; }
 
-    /// <summary>JSON string array of the non-phone column names available in <see cref="RecipientVariablesJson"/>; null otherwise.</summary>
+    /// <summary>JSON string array of every column name (including the phone column) available in <see cref="RecipientVariablesJson"/>; null otherwise.</summary>
     public string? ImportedColumnsJson { get; set; }
 }

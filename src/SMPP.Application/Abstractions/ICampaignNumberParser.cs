@@ -19,7 +19,8 @@ public record NumberListResult(
 /// the DB having unused columns that suggested per-recipient names were once supported).
 ///
 /// A CSV/XLSX file whose first row is a real header (its first cell isn't itself a number) also
-/// yields the other columns as per-recipient template variables - see <see cref="NumberListResult"/>.
+/// yields every column - including the one used as the phone number itself - as a per-recipient
+/// template variable, keyed by its own header text; see <see cref="NumberListResult"/>.
 /// </summary>
 public interface ICampaignNumberParser
 {

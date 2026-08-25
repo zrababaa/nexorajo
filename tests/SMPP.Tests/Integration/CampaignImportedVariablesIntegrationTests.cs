@@ -89,7 +89,7 @@ public class CampaignImportedVariablesIntegrationTests : IClassFixture<WebApplic
         var campaignJson = await importResponse.Content.ReadFromJsonAsync<JsonElement>();
 
         var importedColumns = campaignJson.GetProperty("importedColumns").EnumerateArray().Select(e => e.GetString()).ToList();
-        Assert.Equal(new[] { "Name", "Amount" }, importedColumns);
+        Assert.Equal(new[] { "Phone", "Name", "Amount" }, importedColumns);
         var campaignId = campaignJson.GetProperty("id").GetInt32();
 
         var templateResponse = await client.PostAsJsonAsync(

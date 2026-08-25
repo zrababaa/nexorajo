@@ -52,7 +52,7 @@ public class CampaignNumberParserTests
     }
 
     [Fact]
-    public void ParseCsv_with_header_row_extracts_columns_as_recipient_variables()
+    public void ParseCsv_with_header_row_extracts_every_column_including_phone_as_recipient_variables()
     {
         using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(
             "Phone,Name,Amount\n97150111,Ali,100\n97150222,Sara,200\n"));
@@ -61,9 +61,10 @@ public class CampaignNumberParserTests
 
         Assert.Equal(2, result.Count);
         Assert.Equal("97150111,97150222", result.NormalizedNumbers);
-        Assert.Equal(new[] { "Name", "Amount" }, result.Columns);
+        Assert.Equal(new[] { "Phone", "Name", "Amount" }, result.Columns);
         Assert.NotNull(result.RowVariablesByNumber);
-        Assert.Equal("Ali", result.RowVariablesByNumber!["97150111"]["Name"]);
+        Assert.Equal("97150111", result.RowVariablesByNumber!["97150111"]["Phone"]);
+        Assert.Equal("Ali", result.RowVariablesByNumber["97150111"]["Name"]);
         Assert.Equal("100", result.RowVariablesByNumber["97150111"]["Amount"]);
         Assert.Equal("Sara", result.RowVariablesByNumber["97150222"]["Name"]);
     }
@@ -78,8 +79,9 @@ public class CampaignNumberParserTests
 
         Assert.Equal(1, result.Count);
         Assert.Equal("97150111", result.NormalizedNumbers);
-        Assert.Equal(new[] { "Name", "Amount" }, result.Columns);
+        Assert.Equal(new[] { "Name", "Mobile", "Amount" }, result.Columns);
         Assert.Equal("Ali", result.RowVariablesByNumber!["97150111"]["Name"]);
+        Assert.Equal("97150111", result.RowVariablesByNumber["97150111"]["Mobile"]);
     }
 
     private static MemoryStream BuildWorkbook(params string[] firstColumnValues)
