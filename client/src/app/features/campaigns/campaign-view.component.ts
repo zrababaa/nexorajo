@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CampaignsService, type CampaignDetail } from './campaigns.service';
@@ -78,7 +78,7 @@ import { CampaignsService, type CampaignDetail } from './campaigns.service';
   `,
 })
 export class CampaignViewComponent {
-  readonly id = input.required<string>();
+  readonly id = input<string>();
 
   private readonly campaigns = inject(CampaignsService);
 
@@ -86,6 +86,15 @@ export class CampaignViewComponent {
   protected readonly columns = computed(() => this.campaign()?.importedColumns ?? []);
 
   constructor() {
-    void this.campaigns.getById(Number(this.id())).then((c) => this.campaign.set(c));
+    // A router-bound input (withComponentInputBinding) is set via ComponentRef.setInput() after
+    // the component is constructed, not before - reading it directly in the constructor body can
+    // see it as still unset. effect() defers to the point where it's actually available, and
+    // re-runs if the route navigates to a different campaign id while reusing this instance.
+    effect(() => {
+      const id = this.id();
+      if (id) {
+        void this.campaigns.getById(Number(id)).then((c) => this.campaign.set(c));
+      }
+    });
   }
 }
