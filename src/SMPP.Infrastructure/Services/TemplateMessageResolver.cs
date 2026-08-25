@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Common;
 using SMPP.Application.SmsTemplates;
@@ -72,7 +71,7 @@ internal static class TemplateMessageResolver
         CancellationToken ct)
     {
         var importedColumns = JsonColumns.Deserialize(importedColumnsJson);
-        var recipientVariables = DeserializeRecipientVariables(recipientVariablesJson);
+        var recipientVariables = JsonColumns.DeserializeRecipientVariables(recipientVariablesJson);
 
         EnsureNoMissingGlobalKeys(templateBody, variables, importedColumns);
 
@@ -155,10 +154,6 @@ internal static class TemplateMessageResolver
 
         return globalKeys.Where(k => !supplied.Contains(k)).ToList();
     }
-
-    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>>? DeserializeRecipientVariables(string? json) =>
-        json is null ? null : JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json)
-            !.ToDictionary(kv => kv.Key, kv => (IReadOnlyDictionary<string, string>)kv.Value);
 
     private static string DigitsOnly(string value) => new(value.Where(char.IsDigit).ToArray());
 }

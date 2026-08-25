@@ -142,10 +142,13 @@ export class CampaignFormComponent {
         this.flash.success(
           `Campaign added. Detected variables: ${imported.importedColumns.map((c) => `[${c}]`).join(', ')} — use them in an SMS Template.`,
         );
+        // Land on the imported data table itself rather than the list, so the columns/values
+        // that were just detected are immediately visible for a sanity check.
+        await this.router.navigate(['/campaigns', imported.id]);
       } else {
         this.flash.success(id ? 'Campaign updated successfully.' : 'Campaign added successfully.');
+        await this.router.navigateByUrl('/campaigns');
       }
-      await this.router.navigateByUrl('/campaigns');
     } catch (error) {
       if (error instanceof HttpErrorResponse) {
         this.errorMessage.set((error.error as ApiErrorResponse)?.message ?? 'Unable to save this campaign.');

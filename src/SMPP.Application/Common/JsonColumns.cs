@@ -12,4 +12,9 @@ public static class JsonColumns
 {
     public static IReadOnlyList<string>? Deserialize(string? json) =>
         json is null ? null : JsonSerializer.Deserialize<List<string>>(json);
+
+    /// <summary>Deserializes the JSON string stored in <c>Campaign.RecipientVariablesJson</c> (<c>{ number: { column: value } }</c>).</summary>
+    public static IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>>? DeserializeRecipientVariables(string? json) =>
+        json is null ? null : JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json)
+            !.ToDictionary(kv => kv.Key, kv => (IReadOnlyDictionary<string, string>)kv.Value);
 }

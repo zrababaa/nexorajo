@@ -111,12 +111,29 @@ public class CampaignService : ICampaignService
     private Task<Campaign?> FindOwnedAsync(int id, int ownerUserId, CancellationToken ct) =>
         _db.Campaigns.FirstOrDefaultAsync(c => c.Id == id && c.CreatedByUserId == ownerUserId, ct);
 
-    private static CampaignDetailDto ToDetailDto(Campaign c) => new(
-        c.Id,
-        c.Name,
-        c.ExternalCampaignCode,
-        c.Numbers,
-        c.Numbers.Length == 0 ? 0 : c.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries).Length,
-        c.SourceType,
-        JsonColumns.Deserialize(c.ImportedColumnsJson));
+    private static CampaignDetailDto ToDetailDto(Campaign c)
+    {
+        var numbers = c.Numbers.Length == 0 ? [] : c.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var recipientVariables = JsonColumns.DeserializeRecipientVariables(c.RecipientVariablesJson);
+
+        // Ordered to match `numbers` (the campaign's own recipient order) rather than dictionary
+        // enumeration order, so the imported-data table on the campaign view reads the same way
+        // the file was uploaded.
+        var recipients = recipientVariables is null
+            ? null
+            : numbers
+                .Select(n => new CampaignRecipientRowDto(
+                    n, recipientVariables.TryGetValue(n, out var values) ? values : new Dictionary<string, string>()))
+                .ToList();
+
+        return new CampaignDetailDto(
+            c.Id,
+            c.Name,
+            c.ExternalCampaignCode,
+            c.Numbers,
+            numbers.Length,
+            c.SourceType,
+            JsonColumns.Deserialize(c.ImportedColumnsJson),
+            recipients);
+    }
 }

@@ -5354,6 +5354,7 @@ export interface components {
             recipientCount?: number;
             sourceType?: components["schemas"]["CampaignSourceType"];
             importedColumns?: string[] | null;
+            recipients?: components["schemas"]["CampaignRecipientRowDto"][] | null;
         };
         CampaignListItemDto: {
             /** Format: int32 */
@@ -5366,6 +5367,12 @@ export interface components {
             /** Format: date-time */
             createdAt?: string;
             importedColumns?: string[] | null;
+        };
+        CampaignRecipientRowDto: {
+            number?: string | null;
+            values?: {
+                [key: string]: string;
+            } | null;
         };
         /** @enum {string} */
         CampaignSourceType: "Pasted" | "CsvUpload";

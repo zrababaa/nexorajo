@@ -43,6 +43,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/campaigns/campaign-form.component').then((m) => m.CampaignFormComponent),
       },
       {
+        path: 'campaigns/:id',
+        loadComponent: () => import('./features/campaigns/campaign-view.component').then((m) => m.CampaignViewComponent),
+      },
+      {
         path: 'sms-templates',
         loadComponent: () =>
           import('./features/sms-templates/sms-templates-list.component').then((m) => m.SmsTemplatesListComponent),

@@ -41,13 +41,16 @@ const PAGE_SIZE = 10;
             }
             @for (c of items(); track c.id) {
               <tr class="border-t border-border">
-                <td class="px-4 py-2">{{ c.name }}</td>
+                <td class="px-4 py-2">
+                  <a [routerLink]="['/campaigns', c.id]" class="text-primary-600 hover:underline">{{ c.name }}</a>
+                </td>
                 <td class="px-4 py-2"><code>{{ c.externalCampaignCode }}</code></td>
                 <td class="px-4 py-2">{{ c.sourceType }}</td>
                 <td class="px-4 py-2">{{ c.recipientCount }}</td>
                 <td class="px-4 py-2">{{ c.createdAt | slice: 0 : 16 }}</td>
                 <td class="px-4 py-2 text-right">
-                  <a [routerLink]="['/campaigns', c.id, 'edit']" class="text-primary-600 hover:underline">{{ 'Edit' | transloco }}</a>
+                  <a [routerLink]="['/campaigns', c.id]" class="text-primary-600 hover:underline">{{ 'View' | transloco }}</a>
+                  <a [routerLink]="['/campaigns', c.id, 'edit']" class="ml-3 text-primary-600 hover:underline">{{ 'Edit' | transloco }}</a>
                   <button type="button" class="ml-3 text-danger hover:underline" (click)="remove(c)">{{ 'Delete' | transloco }}</button>
                 </td>
               </tr>
