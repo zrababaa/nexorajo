@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Common;
 using SMPP.Application.SmsTemplates;
@@ -12,10 +13,14 @@ namespace SMPP.Infrastructure.Services;
 /// scheduled one firing later (<c>ScheduledSendDispatchJob</c>), so a template is always rendered
 /// the same way regardless of when it's sent.
 ///
-/// A template's placeholders are split in two: names matching a Customer field
-/// (<see cref="CustomerFields"/>) are resolved per recipient by matching the recipient's number
-/// to an account Customer by phone (digits-only comparison, since Campaign numbers are stored
-/// digits-only but a Customer's phone is free text); every other placeholder must be supplied in
+/// A template's placeholders are split in three, in resolution order: (1) a Campaign imported
+/// from a headered file supplies its own per-recipient columns via
+/// <see cref="Campaign.RecipientVariablesJson"/>/<see cref="Campaign.ImportedColumnsJson"/>; (2)
+/// names matching a Customer field (<see cref="CustomerFields"/>) fall back to a per-recipient
+/// lookup by matching the recipient's number to an account Customer by phone (digits-only
+/// comparison, since Campaign numbers are stored digits-only but a Customer's phone is free
+/// text) - an imported column of the same name overrides this, since it's the more specific
+/// source for this particular send; (3) every other placeholder must be supplied in
 /// <paramref name="variables"/> up front and is the same for every recipient in the send.
 /// </summary>
 internal static class TemplateMessageResolver
@@ -28,12 +33,14 @@ internal static class TemplateMessageResolver
     public static async Task<IReadOnlyDictionary<string, string>> ResolveAsync(
         SmppDbContext db,
         int ownerUserId,
-        IReadOnlyCollection<string> numbers,
+        Campaign campaign,
         string? message,
         int? templateId,
         IReadOnlyDictionary<string, string>? variables,
         CancellationToken ct)
     {
+        var numbers = campaign.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
         if (templateId is null)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -47,18 +54,12 @@ internal static class TemplateMessageResolver
         var template = await db.SmsTemplates.AsNoTracking().FirstOrDefaultAsync(t => t.Id == templateId && t.CreatedByUserId == ownerUserId, ct)
             ?? throw new AppException("SMS template not found.");
 
-        return await RenderAsync(db, ownerUserId, numbers, template.Body, variables, ct);
+        return await RenderAsync(db, ownerUserId, numbers, template.Body, variables, campaign.RecipientVariablesJson, campaign.ImportedColumnsJson, ct);
     }
 
     /// <summary>Validates a template body against a set of global variable values without needing recipient numbers - used when saving a template-based scheduled send.</summary>
-    public static void ValidateGlobalVariables(string body, IReadOnlyDictionary<string, string>? variables)
-    {
-        var missing = MissingGlobalKeys(body, variables);
-        if (missing.Count > 0)
-        {
-            throw new AppException($"Missing a value for placeholder(s): {string.Join(", ", missing.Select(k => $"[{k}]"))}.");
-        }
-    }
+    public static void ValidateGlobalVariables(string body, IReadOnlyDictionary<string, string>? variables, string? importedColumnsJson) =>
+        EnsureNoMissingGlobalKeys(body, variables, JsonColumns.Deserialize(importedColumnsJson));
 
     public static async Task<IReadOnlyDictionary<string, string>> RenderAsync(
         SmppDbContext db,
@@ -66,9 +67,14 @@ internal static class TemplateMessageResolver
         IReadOnlyCollection<string> numbers,
         string templateBody,
         IReadOnlyDictionary<string, string>? variables,
+        string? recipientVariablesJson,
+        string? importedColumnsJson,
         CancellationToken ct)
     {
-        ValidateGlobalVariables(templateBody, variables);
+        var importedColumns = JsonColumns.Deserialize(importedColumnsJson);
+        var recipientVariables = DeserializeRecipientVariables(recipientVariablesJson);
+
+        EnsureNoMissingGlobalKeys(templateBody, variables, importedColumns);
 
         var globalValues = variables is null
             ? new Dictionary<string, string>()
@@ -103,16 +109,41 @@ internal static class TemplateMessageResolver
                 ["Address"] = customer?.Address ?? string.Empty,
             };
 
+            if (recipientVariables is not null && recipientVariables.TryGetValue(number, out var rowValues))
+            {
+                foreach (var (key, value) in rowValues)
+                {
+                    perRecipientValues[key] = value;
+                }
+            }
+
             result[number] = TemplatePlaceholders.Render(afterGlobals, perRecipientValues);
         }
 
         return result;
     }
 
-    private static IReadOnlyList<string> MissingGlobalKeys(string body, IReadOnlyDictionary<string, string>? variables)
+    private static void EnsureNoMissingGlobalKeys(
+        string body, IReadOnlyDictionary<string, string>? variables, IReadOnlyList<string>? importedColumns)
+    {
+        var missing = MissingGlobalKeys(body, variables, importedColumns);
+        if (missing.Count > 0)
+        {
+            throw new AppException($"Missing a value for placeholder(s): {string.Join(", ", missing.Select(k => $"[{k}]"))}.");
+        }
+    }
+
+    private static IReadOnlyList<string> MissingGlobalKeys(
+        string body, IReadOnlyDictionary<string, string>? variables, IReadOnlyList<string>? importedColumns)
     {
         var placeholders = TemplatePlaceholders.Extract(body);
-        var globalKeys = placeholders.Where(p => !CustomerFields.Contains(p)).ToList();
+        var resolvedAutomatically = new HashSet<string>(CustomerFields, StringComparer.OrdinalIgnoreCase);
+        if (importedColumns is not null)
+        {
+            resolvedAutomatically.UnionWith(importedColumns);
+        }
+
+        var globalKeys = placeholders.Where(p => !resolvedAutomatically.Contains(p)).ToList();
         if (globalKeys.Count == 0)
         {
             return [];
@@ -124,6 +155,10 @@ internal static class TemplateMessageResolver
 
         return globalKeys.Where(k => !supplied.Contains(k)).ToList();
     }
+
+    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>>? DeserializeRecipientVariables(string? json) =>
+        json is null ? null : JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json)
+            !.ToDictionary(kv => kv.Key, kv => (IReadOnlyDictionary<string, string>)kv.Value);
 
     private static string DigitsOnly(string value) => new(value.Where(char.IsDigit).ToArray());
 }

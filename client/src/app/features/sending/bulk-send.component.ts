@@ -1,6 +1,6 @@
 import { SlicePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -60,7 +60,7 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
             </select>
           </div>
 
-          <app-template-picker #templatePicker />
+          <app-template-picker #templatePicker [importedColumns]="selectedCampaignColumns()" />
 
           @if (policy(); as p) {
             @if (!templatePicker.useTemplate()) {
@@ -148,6 +148,10 @@ export class BulkSendComponent {
   protected readonly blockedTerms = signal<readonly string[] | null>(null);
   protected readonly scheduled = signal(false);
   protected readonly scheduledAt = signal('');
+
+  protected readonly selectedCampaignColumns = computed(
+    () => this.campaigns().find((c) => c.id === this.campaignId())?.importedColumns ?? [],
+  );
 
   private readonly messageField = viewChild(MessageFieldComponent);
   private readonly senderField = viewChild(SenderIdFieldComponent);

@@ -27,11 +27,8 @@ public class ScheduledSendService : IScheduledSendService
 
     public async Task<int> CreateAsync(int userId, CreateScheduledSendRequest request, CancellationToken ct = default)
     {
-        var campaignOwned = await _db.Campaigns.AnyAsync(c => c.Id == request.CampaignId && c.CreatedByUserId == userId, ct);
-        if (!campaignOwned)
-        {
-            throw new AppException("Campaign not found.");
-        }
+        var campaign = await _db.Campaigns.AsNoTracking().FirstOrDefaultAsync(c => c.Id == request.CampaignId && c.CreatedByUserId == userId, ct)
+            ?? throw new AppException("Campaign not found.");
 
         // Interpreted as server local time, matching how the sending window's own start/end times
         // are interpreted (see ISendingWindowService) - there is no per-user timezone in this app.
@@ -56,7 +53,7 @@ public class ScheduledSendService : IScheduledSendService
             var template = await _db.SmsTemplates.AsNoTracking().FirstOrDefaultAsync(t => t.Id == templateId && t.CreatedByUserId == userId, ct)
                 ?? throw new AppException("SMS template not found.");
 
-            TemplateMessageResolver.ValidateGlobalVariables(template.Body, request.TemplateVariables);
+            TemplateMessageResolver.ValidateGlobalVariables(template.Body, request.TemplateVariables, campaign.ImportedColumnsJson);
 
             previewMessage = TemplatePlaceholders.Render(template.Body, request.TemplateVariables ?? new Dictionary<string, string>());
             templateVariablesJson = JsonSerializer.Serialize(request.TemplateVariables ?? new Dictionary<string, string>());

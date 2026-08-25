@@ -15,8 +15,12 @@ export function extractPlaceholders(body: string): string[] {
   return [...found];
 }
 
-/** Placeholders that aren't resolved per-recipient from a Customer, i.e. must be given a value at send time. */
-export function globalPlaceholdersOf(body: string): string[] {
-  const customerFieldsLower = new Set(CUSTOMER_FIELDS.map((f) => f.toLowerCase()));
-  return extractPlaceholders(body).filter((p) => !customerFieldsLower.has(p.toLowerCase()));
+/**
+ * Placeholders that aren't resolved per-recipient - from a Customer, or from the selected
+ * campaign's imported file columns (`extraKnownFields`, e.g. Name/Amount from a headered
+ * CSV/XLSX import) - i.e. must be given a single value up front for the whole send.
+ */
+export function globalPlaceholdersOf(body: string, extraKnownFields: readonly string[] = []): string[] {
+  const knownLower = new Set([...CUSTOMER_FIELDS, ...extraKnownFields].map((f) => f.toLowerCase()));
+  return extractPlaceholders(body).filter((p) => !knownLower.has(p.toLowerCase()));
 }

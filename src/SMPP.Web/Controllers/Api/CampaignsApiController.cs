@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Campaigns;
@@ -153,7 +154,12 @@ public class CampaignsApiController : ApiControllerBase
             : code.Trim();
 
         var id = await _campaigns.CreateAsync(CurrentUserId, new CreateCampaignRequest(
-            name.Trim(), code, parsed.NormalizedNumbers, sourceType), ct);
+            name.Trim(),
+            code,
+            parsed.NormalizedNumbers,
+            sourceType,
+            parsed.RowVariablesByNumber is null ? null : JsonSerializer.Serialize(parsed.RowVariablesByNumber),
+            parsed.Columns), ct);
 
         return CreatedAtAction(nameof(GetById), new { id }, await _campaigns.GetByIdAsync(id, CurrentUserId, ct));
     }

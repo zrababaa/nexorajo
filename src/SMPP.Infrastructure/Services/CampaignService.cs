@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SMPP.Application.Campaigns;
 using SMPP.Application.Common;
@@ -20,10 +21,11 @@ public class CampaignService : ICampaignService
         var query = _db.Campaigns.AsNoTracking().Where(c => c.CreatedByUserId == ownerUserId).OrderByDescending(c => c.CreatedAt);
 
         var totalCount = await query.CountAsync(ct);
-        var items = await query
+        var rows = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(c => new CampaignListItemDto(
+            .Select(c => new
+            {
                 c.Id,
                 c.Name,
                 c.ExternalCampaignCode,
@@ -31,10 +33,20 @@ public class CampaignService : ICampaignService
                 // has no MySQL translation, so EF would evaluate it on the client - which means
                 // pulling every list's full longtext of numbers back just to size it, and the send
                 // screens ask for up to 500 lists at a time.
-                c.Numbers.Length == 0 ? 0 : c.Numbers.Length - c.Numbers.Replace(",", string.Empty).Length + 1,
+                RecipientCount = c.Numbers.Length == 0 ? 0 : c.Numbers.Length - c.Numbers.Replace(",", string.Empty).Length + 1,
                 c.SourceType,
-                c.CreatedAt))
+                c.CreatedAt,
+                c.ImportedColumnsJson,
+            })
             .ToListAsync(ct);
+
+        // JsonColumns.Deserialize has no SQL translation, so it runs client-side over the already
+        // page-limited rows rather than inside the query above.
+        var items = rows
+            .Select(r => new CampaignListItemDto(
+                r.Id, r.Name, r.ExternalCampaignCode, r.RecipientCount, r.SourceType, r.CreatedAt,
+                JsonColumns.Deserialize(r.ImportedColumnsJson)))
+            .ToList();
 
         return new PagedResult<CampaignListItemDto>
         {
@@ -66,6 +78,8 @@ public class CampaignService : ICampaignService
             Numbers = request.NormalizedNumbers,
             SourceType = request.SourceType,
             CreatedByUserId = ownerUserId,
+            RecipientVariablesJson = request.RecipientVariablesJson,
+            ImportedColumnsJson = request.ImportedColumns is null ? null : JsonSerializer.Serialize(request.ImportedColumns),
         };
 
         _db.Campaigns.Add(campaign);
@@ -103,5 +117,6 @@ public class CampaignService : ICampaignService
         c.ExternalCampaignCode,
         c.Numbers,
         c.Numbers.Length == 0 ? 0 : c.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries).Length,
-        c.SourceType);
+        c.SourceType,
+        JsonColumns.Deserialize(c.ImportedColumnsJson));
 }

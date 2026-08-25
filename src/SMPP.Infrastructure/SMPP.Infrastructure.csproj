@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SMPP.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Read by DatabaseBootstrapper at startup, so it has to travel inside the assembly. -->
     <EmbeddedResource Include="Persistence\Scripts\CreateAppTables.sql" />
   </ItemGroup>

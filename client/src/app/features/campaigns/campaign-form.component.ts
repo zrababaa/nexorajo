@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { ApiErrorResponse } from '../../core/api/api.types';
 import { FlashService } from '../../shared/flash/flash.service';
-import { CampaignsService } from './campaigns.service';
+import { CampaignsService, type CampaignDetail } from './campaigns.service';
 
 @Component({
   selector: 'app-campaign-form',
@@ -129,15 +129,22 @@ export class CampaignFormComponent {
     this.saving.set(true);
     try {
       const id = this.id();
+      let imported: CampaignDetail | undefined;
       if (id) {
         await this.campaigns.update(Number(id), this.name().trim(), this.pastedNumbers());
       } else if (hasFile) {
-        await this.campaigns.import(this.name().trim(), this.file!, this.code().trim() || undefined);
+        imported = await this.campaigns.import(this.name().trim(), this.file!, this.code().trim() || undefined);
       } else {
         await this.campaigns.create(this.name().trim(), this.pastedNumbers(), this.code().trim() || undefined);
       }
 
-      this.flash.success(id ? 'Campaign updated successfully.' : 'Campaign added successfully.');
+      if (imported?.importedColumns?.length) {
+        this.flash.success(
+          `Campaign added. Detected variables: ${imported.importedColumns.map((c) => `[${c}]`).join(', ')} — use them in an SMS Template.`,
+        );
+      } else {
+        this.flash.success(id ? 'Campaign updated successfully.' : 'Campaign added successfully.');
+      }
       await this.router.navigateByUrl('/campaigns');
     } catch (error) {
       if (error instanceof HttpErrorResponse) {

@@ -139,3 +139,6 @@ static Task WriteApiStatusOrRedirect(RedirectContext<CookieAuthenticationOptions
             ? "Authentication required. Send an 'Authorization: Bearer <token>' header - get a token from POST /api/v1/auth/login."
             : "Your account does not have access to this resource."));
 }
+
+/// <summary>Lets WebApplicationFactory&lt;Program&gt; (see SMPP.Tests) reach this top-level-statement entry point.</summary>
+public partial class Program;

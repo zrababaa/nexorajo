@@ -1,9 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SmsTemplatesService, type SmsTemplateListItem } from './sms-templates.service';
-import { globalPlaceholdersOf } from './template-placeholders';
+import { extractPlaceholders, globalPlaceholdersOf } from './template-placeholders';
 
 /**
  * Lets a Bulk Send / Scheduled Send form pick either a raw message (unchanged behavior) or an
@@ -52,6 +52,12 @@ import { globalPlaceholdersOf } from './template-placeholders';
       @if (selectedTemplate(); as t) {
         <div class="mb-3 rounded-card border border-border bg-surface-muted p-3 text-xs text-text-muted">{{ t.body }}</div>
 
+        @if (autoFilledFromCampaign().length > 0) {
+          <div class="mb-3 text-xs text-text-muted">
+            {{ 'Auto-filled per recipient from the campaign:' | transloco }} {{ autoFilledFromCampaign().join(', ') }}
+          </div>
+        }
+
         @for (key of globalPlaceholders(); track key) {
           <div class="mb-3">
             <label [for]="'tplvar-' + key" class="mb-1 block text-sm font-medium">[{{ key }}]</label>
@@ -70,13 +76,22 @@ import { globalPlaceholdersOf } from './template-placeholders';
 export class TemplatePickerComponent {
   private readonly templatesService = inject(SmsTemplatesService);
 
+  /** The selected campaign's imported file columns (e.g. Name, Amount), if any - see campaigns.service.ts. */
+  readonly importedColumns = input<readonly string[]>([]);
+
   readonly useTemplate = signal(false);
   readonly templateId = signal(0);
   readonly variables = signal<Record<string, string>>({});
   readonly templates = signal<SmsTemplateListItem[]>([]);
 
   protected readonly selectedTemplate = computed(() => this.templates().find((t) => t.id === this.templateId()) ?? null);
-  protected readonly globalPlaceholders = computed(() => globalPlaceholdersOf(this.selectedTemplate()?.body ?? ''));
+  protected readonly globalPlaceholders = computed(() =>
+    globalPlaceholdersOf(this.selectedTemplate()?.body ?? '', this.importedColumns()),
+  );
+  protected readonly autoFilledFromCampaign = computed(() => {
+    const columnsLower = new Set(this.importedColumns().map((c) => c.toLowerCase()));
+    return extractPlaceholders(this.selectedTemplate()?.body ?? '').filter((p) => columnsLower.has(p.toLowerCase()));
+  });
 
   readonly isValid = computed(() => {
     if (!this.useTemplate()) {

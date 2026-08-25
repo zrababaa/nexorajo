@@ -46,8 +46,6 @@ public class ScheduledSendDispatchJob : IJob
             return;
         }
 
-        var numbers = campaign.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
         try
         {
             IReadOnlyDictionary<string, string>? templateVariables = scheduledSend.TemplateVariablesJson is null
@@ -55,7 +53,7 @@ public class ScheduledSendDispatchJob : IJob
                 : JsonSerializer.Deserialize<Dictionary<string, string>>(scheduledSend.TemplateVariablesJson);
 
             var numberToMessage = await TemplateMessageResolver.ResolveAsync(
-                _db, scheduledSend.CreatedByUserId, numbers, scheduledSend.Message, scheduledSend.TemplateId, templateVariables, ct);
+                _db, scheduledSend.CreatedByUserId, campaign, scheduledSend.Message, scheduledSend.TemplateId, templateVariables, ct);
 
             var summary = await _sendCore.ExecuteGroupedAsync(
                 scheduledSend.CreatedByUserId,

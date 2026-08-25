@@ -22,9 +22,8 @@ public class BulkSendService : IBulkSendService
         var campaign = await _db.Campaigns.FirstOrDefaultAsync(c => c.Id == request.CampaignId && c.CreatedByUserId == userId, ct)
             ?? throw new AppException("Campaign not found.");
 
-        var numbers = campaign.Numbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
         var numberToMessage = await TemplateMessageResolver.ResolveAsync(
-            _db, userId, numbers, request.Message, request.TemplateId, request.TemplateVariables, ct);
+            _db, userId, campaign, request.Message, request.TemplateId, request.TemplateVariables, ct);
 
         return await _sendCore.ExecuteGroupedAsync(userId, numberToMessage, request.SenderId, MessageSource.BulkSend, TransactionSource.BulkSend, ct, campaign.Name);
     }
