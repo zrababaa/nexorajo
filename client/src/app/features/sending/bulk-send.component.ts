@@ -51,7 +51,7 @@ import { SendPolicyService, type SendPolicy } from './send-policy.service';
               id="campaignId"
               class="w-full rounded-card border border-border px-3 py-2 text-sm"
               [ngModel]="campaignId()"
-              (ngModelChange)="campaignId.set($event)"
+              (ngModelChange)="campaignId.set(+$event)"
             >
               <option [value]="0">{{ 'Select a campaign...' | transloco }}</option>
               @for (c of campaigns(); track c.id) {
