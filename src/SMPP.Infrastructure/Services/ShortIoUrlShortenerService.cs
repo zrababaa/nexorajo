@@ -10,15 +10,23 @@ using SMPP.Application.UrlShortening;
 namespace SMPP.Infrastructure.Services;
 
 /// <summary>
-/// <see cref="IUrlShortenerService"/> backed by Short.io's REST API (<c>POST https://api.short.io/links</c>).
-/// Registered as a typed HttpClient (see DependencyInjection.AddInfrastructure) so IHttpClientFactory
-/// owns the handler lifetime. The API key comes from configuration (<c>ShortIo:ApiKey</c>) and is
-/// sent in the Authorization header only - it is never written to logs or surfaced in an exception.
+/// <see cref="IUrlShortenerService"/> backed by Short.io's REST API. Registered as a typed
+/// HttpClient (see DependencyInjection.AddInfrastructure) so IHttpClientFactory owns the handler
+/// lifetime. The API key comes from configuration (<c>ShortIo:ApiKey</c>) and is sent in the
+/// Authorization header only - it is never written to logs or surfaced in an exception.
+///
+/// A Short.io <b>secret</b> key uses <c>POST /links</c>; a <b>public</b> key (prefixed
+/// <c>pk_</c>) is only accepted by <c>POST /links/public</c>. Both take the same
+/// <c>{originalURL, domain}</c> body and return the same <c>shortURL</c>, so the only difference
+/// is the path, picked from the key prefix.
 /// </summary>
 public sealed class ShortIoUrlShortenerService : IUrlShortenerService
 {
-    /// <summary>Relative to the client's <c>https://api.short.io/</c> base address.</summary>
-    private const string CreateLinkPath = "links";
+    private const string PublicKeyPrefix = "pk_";
+
+    /// <summary>Paths relative to the client's <c>https://api.short.io/</c> base address.</summary>
+    private const string SecretKeyLinkPath = "links";
+    private const string PublicKeyLinkPath = "links/public";
 
     private const int MaxLoggedBodyChars = 500;
 
@@ -57,7 +65,11 @@ public sealed class ShortIoUrlShortenerService : IUrlShortenerService
             throw new AppException("URL shortening is not configured.");
         }
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, CreateLinkPath)
+        var path = _options.ApiKey.StartsWith(PublicKeyPrefix, StringComparison.Ordinal)
+            ? PublicKeyLinkPath
+            : SecretKeyLinkPath;
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
             Content = JsonContent.Create(
                 new ShortIoCreateLinkRequest(parsed.ToString(), _options.Domain), options: SerializerOptions),
