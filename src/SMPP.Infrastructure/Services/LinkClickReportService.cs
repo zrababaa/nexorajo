@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SMPP.Application.Abstractions;
@@ -13,12 +14,36 @@ public class LinkClickReportService : ILinkClickReportService
     private readonly SmppDbContext _db;
     private readonly IUserScopeResolver _scopeResolver;
     private readonly LinkTrackingOptions _options;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public LinkClickReportService(SmppDbContext db, IUserScopeResolver scopeResolver, IOptions<LinkTrackingOptions> options)
+    public LinkClickReportService(
+        SmppDbContext db,
+        IUserScopeResolver scopeResolver,
+        IOptions<LinkTrackingOptions> options,
+        IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
         _scopeResolver = scopeResolver;
         _options = options.Value;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <summary>
+    /// Origin for display-only <c>/l/{token}</c> links on the report: the configured
+    /// <c>LinkTracking:BaseUrl</c>, else the current request's own scheme+host, else empty (the
+    /// link is then rendered relative).
+    /// </summary>
+    private string ResolveBaseUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            return _options.BaseUrl.TrimEnd('/');
+        }
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        return request is { Host.HasValue: true }
+            ? $"{request.Scheme}://{request.Host}{request.PathBase}".TrimEnd('/')
+            : string.Empty;
     }
 
     public async Task<PagedResult<TrackedLinkRowDto>> GetLinksAsync(
@@ -55,7 +80,7 @@ public class LinkClickReportService : ILinkClickReportService
             })
             .ToListAsync(ct);
 
-        var baseUrl = (_options.BaseUrl ?? string.Empty).TrimEnd('/');
+        var baseUrl = ResolveBaseUrl();
         var items = rows
             .Select(r => new TrackedLinkRowDto(
                 r.Token,

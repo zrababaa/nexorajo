@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,24 +19,50 @@ public class LinkTrackingService : ILinkTrackingService
     private readonly SmppDbContext _db;
     private readonly LinkTrackingOptions _options;
     private readonly IUrlShortenerService _urlShortener;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<LinkTrackingService> _logger;
 
     public LinkTrackingService(
         SmppDbContext db,
         IOptions<LinkTrackingOptions> options,
         IUrlShortenerService urlShortener,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<LinkTrackingService> logger)
     {
         _db = db;
         _options = options.Value;
         _urlShortener = urlShortener;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// The origin tracking links are built on: the configured <c>LinkTracking:BaseUrl</c> when set,
+    /// otherwise the current request's own scheme+host (the app serves <c>/l/{token}</c> itself, so
+    /// that is the right origin). Null only when neither is available - a background send with no
+    /// config - in which case rewriting is skipped rather than emitting a host-less link.
+    /// </summary>
+    private string? ResolveBaseUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            return _options.BaseUrl.TrimEnd('/');
+        }
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is null || !request.Host.HasValue)
+        {
+            return null;
+        }
+
+        return $"{request.Scheme}://{request.Host}{request.PathBase}".TrimEnd('/');
     }
 
     public async Task<string> RewriteMessageAsync(
         string message, string batchId, int userId, bool shortenLinks = false, CancellationToken ct = default)
     {
-        if (string.IsNullOrEmpty(_options.BaseUrl))
+        var baseUrl = ResolveBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
         {
             return message;
         }
@@ -46,8 +73,7 @@ public class LinkTrackingService : ILinkTrackingService
             return message;
         }
 
-        var baseUrl = _options.BaseUrl.TrimEnd('/');
-        var ownHost = TryGetHost(_options.BaseUrl);
+        var ownHost = TryGetHost(baseUrl);
 
         // Links minted ahead of this send by PrepareLinkAsync and not yet claimed by a batch. If
         // one turns up in the message it is already a tracking link, so this send just claims it
@@ -63,7 +89,7 @@ public class LinkTrackingService : ILinkTrackingService
         var urlList = urls.ToList();
         var claimable = await _db.TrackedLinks
             .Where(t => t.BatchId == "" && t.CreatedByUserId == userId
-                && (candidateTokens.Contains(t.Token) || urlList.Contains(t.ShortUrl)))
+                && (candidateTokens.Contains(t.Token) || (t.ShortUrl != null && urlList.Contains(t.ShortUrl))))
             .ToListAsync(ct);
 
         var newLinks = new List<(string Url, TrackedLink Row)>();
@@ -134,13 +160,13 @@ public class LinkTrackingService : ILinkTrackingService
             throw new AppException("Enter a full http:// or https:// link to track.");
         }
 
-        if (string.IsNullOrEmpty(_options.BaseUrl))
+        var baseUrl = ResolveBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
         {
             throw new AppException("Link tracking is not configured.");
         }
 
-        var baseUrl = _options.BaseUrl.TrimEnd('/');
-        var ownHost = TryGetHost(_options.BaseUrl);
+        var ownHost = TryGetHost(baseUrl);
 
         if (ownHost is not null && string.Equals(parsed.Host, ownHost, StringComparison.OrdinalIgnoreCase))
         {

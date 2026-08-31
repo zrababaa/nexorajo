@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -18,10 +19,22 @@ public class LinkTrackingServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
-    private static LinkTrackingService BuildService(SmppDbContext db, IUrlShortenerService? shortener = null) =>
+    private static IHttpContextAccessor NoRequest() => new HttpContextAccessor();
+
+    private static IHttpContextAccessor RequestOn(string scheme, string host)
+    {
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Scheme = scheme;
+        ctx.Request.Host = new HostString(host);
+        return new HttpContextAccessor { HttpContext = ctx };
+    }
+
+    private static LinkTrackingService BuildService(
+        SmppDbContext db, IUrlShortenerService? shortener = null, string? baseUrl = BaseUrl, IHttpContextAccessor? http = null) =>
         new(db,
-            Options.Create(new LinkTrackingOptions { BaseUrl = BaseUrl }),
+            Options.Create(new LinkTrackingOptions { BaseUrl = baseUrl ?? string.Empty }),
             shortener ?? new StubShortener(_ => throw new AppException("shortener off")),
+            http ?? NoRequest(),
             NullLogger<LinkTrackingService>.Instance);
 
     [Fact]
@@ -76,6 +89,26 @@ public class LinkTrackingServiceTests
 
         await Assert.ThrowsAsync<AppException>(() => service.PrepareLinkAsync("ftp://x/y", 1, false));
         Assert.Empty(db.TrackedLinks);
+    }
+
+    [Fact]
+    public async Task PrepareLinkAsync_uses_the_request_host_when_BaseUrl_is_not_configured()
+    {
+        using var db = BuildDb();
+        var service = BuildService(db, baseUrl: null, http: RequestOn("http", "85.159.216.122:5000"));
+
+        var prepared = await service.PrepareLinkAsync("https://dest.example/p", userId: 1, shorten: false);
+
+        Assert.StartsWith("http://85.159.216.122:5000/l/", prepared.TrackingUrl);
+    }
+
+    [Fact]
+    public async Task PrepareLinkAsync_still_throws_when_BaseUrl_is_blank_and_there_is_no_request()
+    {
+        using var db = BuildDb();
+        var service = BuildService(db, baseUrl: null);
+
+        await Assert.ThrowsAsync<AppException>(() => service.PrepareLinkAsync("https://dest.example/p", 1, false));
     }
 
     [Fact]
