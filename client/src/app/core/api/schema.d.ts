@@ -5343,6 +5343,8 @@ export interface components {
             templateVariables?: {
                 [key: string]: string;
             } | null;
+            /** @description When true, every http(s) link in a literal message is turned into a tracked link and then shortened via the configured URL shortener. Template sends always use full-length tracking links. */
+            shortenLinks?: boolean;
         };
         CampaignDetailDto: {
             /** Format: int32 */
@@ -5644,6 +5646,32 @@ export interface components {
             /** Format: date-time */
             lastClickedAt?: string | null;
         };
+        TrackedLinkRowDto: {
+            token?: string | null;
+            shortUrl?: string | null;
+            destinationUrl?: string | null;
+            batchId?: string | null;
+            /** Format: int32 */
+            clickCount?: number;
+            /** Format: date-time */
+            firstClickedAt?: string | null;
+            /** Format: date-time */
+            lastClickedAt?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+            ownerUsername?: string | null;
+        };
+        PagedResultOfTrackedLinkRowDto: {
+            items?: components["schemas"]["TrackedLinkRowDto"][] | null;
+            /** Format: int32 */
+            totalCount?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+        };
         LoginApiRequest: {
             /** @description Username or email address. */
             identifier: string;
@@ -5876,6 +5904,8 @@ export interface components {
             message: string;
             /** @description Leave empty to send under the account's first assigned Sender ID. */
             senderId?: string | null;
+            /** @description When true, every http(s) link in the message is turned into a tracked link and then shortened via the configured URL shortener. When false (default), links are still tracked but sent at full length. */
+            shortenLinks?: boolean;
         };
         /**
          * @description SMPP.Application.Sending.SendSummaryDto plus each recipient's delivery status as read from History a

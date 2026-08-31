@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SMPP.Application.Abstractions;
 using SMPP.Application.Common;
 using SMPP.Application.LinkTracking;
@@ -11,11 +12,67 @@ public class LinkClickReportService : ILinkClickReportService
 {
     private readonly SmppDbContext _db;
     private readonly IUserScopeResolver _scopeResolver;
+    private readonly LinkTrackingOptions _options;
 
-    public LinkClickReportService(SmppDbContext db, IUserScopeResolver scopeResolver)
+    public LinkClickReportService(SmppDbContext db, IUserScopeResolver scopeResolver, IOptions<LinkTrackingOptions> options)
     {
         _db = db;
         _scopeResolver = scopeResolver;
+        _options = options.Value;
+    }
+
+    public async Task<PagedResult<TrackedLinkRowDto>> GetLinksAsync(
+        int currentUserId, UserRole role, int page, int pageSize, CancellationToken ct = default)
+    {
+        var visibleUserIds = await _scopeResolver.GetVisibleUserIdsAsync(currentUserId, role, ct);
+        var includeOwner = role == UserRole.Superadmin;
+
+        var query = _db.TrackedLinks
+            .AsNoTracking()
+            .Where(t => visibleUserIds.Contains(t.CreatedByUserId))
+            .OrderByDescending(t => t.Id);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var rows = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(t => new
+            {
+                t.Token,
+                t.DestinationUrl,
+                t.BatchId,
+                t.ClickCount,
+                t.FirstClickedAt,
+                t.LastClickedAt,
+                t.CreatedAt,
+                OwnerUsername = includeOwner
+                    ? _db.Users.Where(u => u.Id == t.CreatedByUserId).Select(u => u.UserName).FirstOrDefault()
+                    : null,
+            })
+            .ToListAsync(ct);
+
+        var baseUrl = (_options.BaseUrl ?? string.Empty).TrimEnd('/');
+        var items = rows
+            .Select(r => new TrackedLinkRowDto(
+                r.Token,
+                baseUrl.Length == 0 ? $"/l/{r.Token}" : $"{baseUrl}/l/{r.Token}",
+                r.DestinationUrl,
+                r.BatchId,
+                r.ClickCount,
+                r.FirstClickedAt,
+                r.LastClickedAt,
+                r.CreatedAt,
+                r.OwnerUsername))
+            .ToList();
+
+        return new PagedResult<TrackedLinkRowDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = page,
+            PageSize = pageSize,
+        };
     }
 
     public async Task<BatchLinkStatsDto?> GetBatchStatsAsync(string batchId, int currentUserId, UserRole role, CancellationToken ct = default)

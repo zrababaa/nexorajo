@@ -75,6 +75,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/reports/reports.component').then((m) => m.ReportsComponent),
       },
       {
+        path: 'tracking-links',
+        loadComponent: () => import('./features/link-clicks/tracking-links.component').then((m) => m.TrackingLinksComponent),
+      },
+      {
         path: 'link-clicks/:batchId',
         loadComponent: () => import('./features/link-clicks/link-clicks.component').then((m) => m.LinkClicksComponent),
       },

@@ -25,6 +25,8 @@ public class BulkSendService : IBulkSendService
         var numberToMessage = await TemplateMessageResolver.ResolveAsync(
             _db, userId, campaign, request.Message, request.TemplateId, request.TemplateVariables, ct);
 
-        return await _sendCore.ExecuteGroupedAsync(userId, numberToMessage, request.SenderId, MessageSource.BulkSend, TransactionSource.BulkSend, ct, campaign.Name);
+        return await _sendCore.ExecuteGroupedAsync(
+            userId, numberToMessage, request.SenderId, MessageSource.BulkSend, TransactionSource.BulkSend, ct,
+            campaign.Name, request.ShortenLinks);
     }
 }

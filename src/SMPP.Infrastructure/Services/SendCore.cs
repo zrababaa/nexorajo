@@ -59,7 +59,8 @@ public class SendCore
         MessageSource source,
         TransactionSource txSource,
         CancellationToken ct,
-        string? campaignName = null)
+        string? campaignName = null,
+        bool shortenLinks = false)
     {
         if (numbers.Count == 0)
         {
@@ -91,7 +92,7 @@ public class SendCore
         // rewriting first would let a sender hide a blocked destination behind our own tracking
         // domain. Segment count and cost below run on the rewritten text, since that's what's
         // actually transmitted (and billed for).
-        message = await _linkTracking.RewriteMessageAsync(message, batchId, userId, ct);
+        message = await _linkTracking.RewriteMessageAsync(message, batchId, userId, shortenLinks, ct);
 
         senderId = await _sendPolicy.ResolveSenderIdAsync(userId, senderId, ct);
 
@@ -147,7 +148,8 @@ public class SendCore
         MessageSource source,
         TransactionSource txSource,
         CancellationToken ct,
-        string? campaignName = null)
+        string? campaignName = null,
+        bool shortenLinks = false)
     {
         if (numberToMessage.Count == 0)
         {
@@ -161,7 +163,8 @@ public class SendCore
 
         if (groups.Count == 1)
         {
-            return await ExecuteAsync(userId, groups[0].Numbers, groups[0].Message, senderId, source, txSource, ct, campaignName);
+            return await ExecuteAsync(
+                userId, groups[0].Numbers, groups[0].Message, senderId, source, txSource, ct, campaignName, shortenLinks);
         }
 
         if (source == MessageSource.BulkSend)
@@ -195,7 +198,7 @@ public class SendCore
 
         foreach (var group in groups)
         {
-            var rewritten = await _linkTracking.RewriteMessageAsync(group.Message, batchId, userId, ct);
+            var rewritten = await _linkTracking.RewriteMessageAsync(group.Message, batchId, userId, shortenLinks, ct);
             var segments = _segmentCounter.CountSegments(rewritten);
             maxSegments = Math.Max(maxSegments, segments);
             totalCost += isFree ? 0m : MessagePricing.CostOf(group.Numbers.Count, segments);

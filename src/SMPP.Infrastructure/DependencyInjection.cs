@@ -20,6 +20,7 @@ using SMPP.Application.Sending;
 using SMPP.Application.SendingWindow;
 using SMPP.Application.SmsTemplates;
 using SMPP.Application.SpamKeywords;
+using SMPP.Application.UrlShortening;
 using SMPP.Infrastructure.Email;
 using SMPP.Infrastructure.Files;
 using SMPP.Infrastructure.Identity;
@@ -68,6 +69,16 @@ public static class DependencyInjection
         services.Configure<LinkTrackingOptions>(configuration.GetSection(LinkTrackingOptions.SectionName));
         services.AddScoped<ILinkTrackingService, LinkTrackingService>();
         services.AddScoped<ILinkClickReportService, LinkClickReportService>();
+
+        // Short.io URL shortener, used when a send opts into "shorten links" and by
+        // POST /api/v1/url-shortener. Typed HttpClient so IHttpClientFactory pools the handler;
+        // BaseAddress is Short.io's API root and every call is expected to finish well under 10s.
+        services.Configure<ShortIoOptions>(configuration.GetSection(ShortIoOptions.SectionName));
+        services.AddHttpClient<IUrlShortenerService, ShortIoUrlShortenerService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.short.io/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
 
         services.AddScoped<ISegmentCounter, SegmentCounter>();
         services.AddScoped<ISendPolicyService, SendPolicyService>();

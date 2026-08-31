@@ -15,6 +15,14 @@ namespace SMPP.Application.LinkTracking;
 /// </summary>
 public interface ILinkClickReportService
 {
+    /// <summary>
+    /// Every tracked link visible to the caller, newest first, for the standalone Tracking Links
+    /// page. Scoped through IUserScopeResolver the same way GetBatchStatsAsync is: an Account sees
+    /// only its own links, a Superadmin sees all of them (with OwnerUsername filled in).
+    /// </summary>
+    Task<PagedResult<TrackedLinkRowDto>> GetLinksAsync(
+        int currentUserId, UserRole role, int page, int pageSize, CancellationToken ct = default);
+
     Task<BatchLinkStatsDto?> GetBatchStatsAsync(string batchId, int currentUserId, UserRole role, CancellationToken ct = default);
 
     Task<PagedResult<LinkClickRowDto>?> GetBatchClicksAsync(

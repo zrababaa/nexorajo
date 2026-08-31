@@ -313,5 +313,20 @@
   "SMS Template": "قالب الرسالة",
   "Select a template...": "اختر قالبًا...",
   "You have no SMS templates yet.": "لا توجد لديك قوالب رسائل نصية بعد.",
-  "via": "عبر"
+  "via": "عبر",
+  "Tracking Links": "روابط التتبع",
+  "Every link found in a sent message is rewritten to a short tracking URL. Each visit is counted here.": "تتم إعادة كتابة كل رابط موجود في الرسالة المُرسَلة إلى رابط تتبع قصير، ويتم احتساب كل زيارة هنا.",
+  "Destination": "الوجهة",
+  "Short link": "الرابط القصير",
+  "Owner": "المالك",
+  "No tracking links yet.": "لا توجد روابط تتبع بعد.",
+  "Copy": "نسخ",
+  "Link copied.": "تم نسخ الرابط.",
+  "Could not copy the link.": "تعذّر نسخ الرابط.",
+  "https://example.com/page": "https://example.com/page",
+  "Insert link": "إدراج رابط",
+  "Enter a full http:// or https:// URL.": "أدخل رابطًا كاملًا يبدأ بـ http:// أو https://.",
+  "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "سيتم تتبع {count} رابط في هذه الرسالة. تظهر النقرات في صفحة روابط التتبع.",
+  "Keep the full link": "الإبقاء على الرابط كاملًا",
+  "Shorten the link": "اختصار الرابط"
 }

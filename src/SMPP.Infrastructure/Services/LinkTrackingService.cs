@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SMPP.Application.Common;
 using SMPP.Application.LinkTracking;
+using SMPP.Application.UrlShortening;
 using SMPP.Domain.Entities;
 using SMPP.Infrastructure.Persistence;
 
@@ -13,24 +16,33 @@ public class LinkTrackingService : ILinkTrackingService
 
     private readonly SmppDbContext _db;
     private readonly LinkTrackingOptions _options;
+    private readonly IUrlShortenerService _urlShortener;
+    private readonly ILogger<LinkTrackingService> _logger;
 
-    public LinkTrackingService(SmppDbContext db, IOptions<LinkTrackingOptions> options)
+    public LinkTrackingService(
+        SmppDbContext db,
+        IOptions<LinkTrackingOptions> options,
+        IUrlShortenerService urlShortener,
+        ILogger<LinkTrackingService> logger)
     {
         _db = db;
         _options = options.Value;
+        _urlShortener = urlShortener;
+        _logger = logger;
     }
 
-    public Task<string> RewriteMessageAsync(string message, string batchId, int userId, CancellationToken ct = default)
+    public async Task<string> RewriteMessageAsync(
+        string message, string batchId, int userId, bool shortenLinks = false, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(_options.BaseUrl))
         {
-            return Task.FromResult(message);
+            return message;
         }
 
         var urls = UrlExtractor.ExtractDistinct(message);
         if (urls.Count == 0)
         {
-            return Task.FromResult(message);
+            return message;
         }
 
         var ownHost = TryGetHost(_options.BaseUrl);
@@ -63,10 +75,35 @@ public class LinkTrackingService : ILinkTrackingService
         // replacing the shorter one first would corrupt the longer one's occurrence too.
         foreach (var (url, token) in replacements.OrderByDescending(r => r.Url.Length))
         {
-            message = message.Replace(url, $"{_options.BaseUrl}/l/{token}");
+            var trackingUrl = $"{_options.BaseUrl}/l/{token}";
+            var replacement = shortenLinks
+                ? await ShortenOrFallbackAsync(trackingUrl, batchId, ct)
+                : trackingUrl;
+
+            message = message.Replace(url, replacement);
         }
 
-        return Task.FromResult(message);
+        return message;
+    }
+
+    /// <summary>
+    /// The send path must not fail just because the shortener is misconfigured or briefly down:
+    /// on any shortening error the recipient still gets a working (if longer) tracking link, and
+    /// the click still lands on <c>/l/{token}</c>. A real cancellation is not swallowed - it
+    /// surfaces as <see cref="OperationCanceledException"/>, which this catch does not match.
+    /// </summary>
+    private async Task<string> ShortenOrFallbackAsync(string trackingUrl, string batchId, CancellationToken ct)
+    {
+        try
+        {
+            return await _urlShortener.ShortenUrlAsync(trackingUrl, ct);
+        }
+        catch (AppException ex)
+        {
+            _logger.LogWarning(
+                ex, "Could not shorten the tracking link for batch {BatchId}; using the full tracking URL.", batchId);
+            return trackingUrl;
+        }
     }
 
     private static string? TryGetHost(string url) => Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host : null;

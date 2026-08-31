@@ -17,6 +17,16 @@ public class LinkTrackingApiController : ApiControllerBase
         _reports = reports;
     }
 
+    /// <summary>Every tracking link visible to the caller, newest first. Superadmin sees all accounts' links.</summary>
+    [HttpGet("links")]
+    [ProducesResponseType(typeof(PagedResult<TrackedLinkRowDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Links([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+    {
+        var result = await _reports.GetLinksAsync(
+            CurrentUserId, CurrentRole, Paging.Page(page), Paging.Size(pageSize), ct);
+        return Ok(result);
+    }
+
     /// <summary>Per-link summary for a batch: destination, click count, first/last click.</summary>
     [HttpGet("batches/{batchId}")]
     [ProducesResponseType(typeof(BatchLinkStatsDto), StatusCodes.Status200OK)]

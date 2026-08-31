@@ -9,7 +9,7 @@ public record SendSummaryDto(
     decimal TotalCost,
     decimal RemainingBalance);
 
-public record QuickSendRequest(string RawNumbers, string Message, string SenderId);
+public record QuickSendRequest(string RawNumbers, string Message, string SenderId, bool ShortenLinks = false);
 
 /// <summary>
 /// Exactly one of <paramref name="Message"/> or <paramref name="TemplateId"/> is used - a
@@ -23,7 +23,8 @@ public record BulkSendRequest(
     string? Message,
     string SenderId,
     int? TemplateId = null,
-    IReadOnlyDictionary<string, string>? TemplateVariables = null);
+    IReadOnlyDictionary<string, string>? TemplateVariables = null,
+    bool ShortenLinks = false);
 
 /// <summary>See <see cref="BulkSendRequest"/> for how <paramref name="TemplateId"/>/<paramref name="TemplateVariables"/> interact with <paramref name="Message"/>.</summary>
 public record CreateScheduledSendRequest(

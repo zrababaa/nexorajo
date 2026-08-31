@@ -8,5 +8,11 @@ namespace SMPP.Application.LinkTracking;
 /// </summary>
 public interface ILinkTrackingService
 {
-    Task<string> RewriteMessageAsync(string message, string batchId, int userId, CancellationToken ct = default);
+    /// <param name="shortenLinks">
+    /// When true, each <c>{BaseUrl}/l/{token}</c> tracking link is additionally run through the
+    /// configured URL shortener (Short.io) before it goes into the message. A shortening failure
+    /// is non-fatal: the full tracking link is used instead so the send still goes out.
+    /// </param>
+    Task<string> RewriteMessageAsync(
+        string message, string batchId, int userId, bool shortenLinks = false, CancellationToken ct = default);
 }

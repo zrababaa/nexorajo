@@ -31,6 +31,8 @@ public class QuickSendService : IQuickSendService
         }
 
         var numbers = parsed.NormalizedNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        return _sendCore.ExecuteAsync(userId, numbers, request.Message, request.SenderId, MessageSource.QuickSend, TransactionSource.QuickSend, ct);
+        return _sendCore.ExecuteAsync(
+            userId, numbers, request.Message, request.SenderId, MessageSource.QuickSend, TransactionSource.QuickSend, ct,
+            shortenLinks: request.ShortenLinks);
     }
 }

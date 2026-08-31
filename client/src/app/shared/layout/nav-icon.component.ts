@@ -92,6 +92,10 @@ import { Component, input } from '@angular/core';
           <rect x="3" y="4" width="18" height="16" rx="2" />
           <path d="M7 9h5M7 13h10M7 17h7" />
         }
+        @case ('link') {
+          <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.4 1.4" />
+          <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.4-1.4" />
+        }
       }
     </svg>
   `,

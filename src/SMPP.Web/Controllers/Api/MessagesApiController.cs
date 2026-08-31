@@ -20,6 +20,13 @@ public record QuickSendApiRequest
 
     /// <summary>Leave empty to send under the account's first assigned Sender ID.</summary>
     public string? SenderId { get; init; }
+
+    /// <summary>
+    /// When true, every http(s) link in the message is turned into a tracked link and then
+    /// shortened via the configured URL shortener. When false (default), links are still tracked
+    /// but sent at full length. Ignored when link tracking is not configured.
+    /// </summary>
+    public bool ShortenLinks { get; init; }
 }
 
 public record BulkSendApiRequest
@@ -42,6 +49,13 @@ public record BulkSendApiRequest
 
     /// <summary>Values for the template's other placeholders (e.g. {"Date": "Friday 10am"}), same for every recipient. Required when the template uses any.</summary>
     public IReadOnlyDictionary<string, string>? TemplateVariables { get; init; }
+
+    /// <summary>
+    /// When true, every http(s) link in the message is turned into a tracked link and then
+    /// shortened via the configured URL shortener. Applies to a literal <see cref="Message"/> only;
+    /// template sends always use full-length tracking links.
+    /// </summary>
+    public bool ShortenLinks { get; init; }
 }
 
 public record SendPolicyApiResponse(
@@ -155,7 +169,9 @@ public class MessagesApiController : ApiControllerBase
     public async Task<IActionResult> QuickSend([FromBody] QuickSendApiRequest request, CancellationToken ct)
     {
         var summary = await _quickSend.SubmitAsync(
-            CurrentUserId, new QuickSendRequest(request.Numbers, request.Message, request.SenderId ?? string.Empty), ct);
+            CurrentUserId,
+            new QuickSendRequest(request.Numbers, request.Message, request.SenderId ?? string.Empty, request.ShortenLinks),
+            ct);
 
         await Task.Delay(TimeSpan.FromSeconds(2), ct);
 
@@ -178,7 +194,9 @@ public class MessagesApiController : ApiControllerBase
     {
         var summary = await _bulkSend.SubmitAsync(
             CurrentUserId,
-            new BulkSendRequest(request.CampaignId, request.Message, request.SenderId ?? string.Empty, request.TemplateId, request.TemplateVariables),
+            new BulkSendRequest(
+                request.CampaignId, request.Message, request.SenderId ?? string.Empty,
+                request.TemplateId, request.TemplateVariables, request.ShortenLinks),
             ct);
 
         return Accepted(summary);

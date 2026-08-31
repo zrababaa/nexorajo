@@ -313,5 +313,20 @@
   "SMS Template": "SMS Template",
   "Select a template...": "Select a template...",
   "You have no SMS templates yet.": "You have no SMS templates yet.",
-  "via": "via"
+  "via": "via",
+  "Tracking Links": "Tracking Links",
+  "Every link found in a sent message is rewritten to a short tracking URL. Each visit is counted here.": "Every link found in a sent message is rewritten to a short tracking URL. Each visit is counted here.",
+  "Destination": "Destination",
+  "Short link": "Short link",
+  "Owner": "Owner",
+  "No tracking links yet.": "No tracking links yet.",
+  "Copy": "Copy",
+  "Link copied.": "Link copied.",
+  "Could not copy the link.": "Could not copy the link.",
+  "https://example.com/page": "https://example.com/page",
+  "Insert link": "Insert link",
+  "Enter a full http:// or https:// URL.": "Enter a full http:// or https:// URL.",
+  "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.",
+  "Keep the full link": "Keep the full link",
+  "Shorten the link": "Shorten the link"
 }
