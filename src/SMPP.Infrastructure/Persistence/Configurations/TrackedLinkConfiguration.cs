@@ -12,6 +12,7 @@ public class TrackedLinkConfiguration : IEntityTypeConfiguration<TrackedLink>
         builder.Property(t => t.Token).HasMaxLength(10).IsRequired();
         builder.Property(t => t.BatchId).HasMaxLength(25).IsRequired();
         builder.Property(t => t.DestinationUrl).HasMaxLength(2048).IsRequired();
+        builder.Property(t => t.ShortUrl).HasMaxLength(2048);
 
         builder.HasIndex(t => t.Token).IsUnique();
         builder.HasIndex(t => t.BatchId);

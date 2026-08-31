@@ -173,7 +173,6 @@ export class QuickSendComponent {
   protected async submit(): Promise<void> {
     const message = this.messageField()?.message() ?? '';
     const senderId = this.senderField()?.effectiveSenderId() ?? '';
-    const shortenLinks = this.messageField()?.shortenLinks() ?? false;
 
     if (!this.rawNumbers().trim() || !message.trim()) {
       this.flash.error('Enter recipient numbers and a message.');
@@ -182,7 +181,7 @@ export class QuickSendComponent {
 
     this.sending.set(true);
     try {
-      const summary = await this.quickSend.submit({ numbers: this.rawNumbers(), message, senderId, shortenLinks });
+      const summary = await this.quickSend.submit({ numbers: this.rawNumbers(), message, senderId });
       this.flash.success(
         `Queued ${summary.recipientCount} message(s), cost ${(summary.totalCost ?? 0).toFixed(4)}. Remaining balance: ${(summary.remainingBalance ?? 0).toFixed(4)}.`,
       );

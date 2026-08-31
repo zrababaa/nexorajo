@@ -29,7 +29,9 @@ public class LinkClickReportService : ILinkClickReportService
 
         var query = _db.TrackedLinks
             .AsNoTracking()
-            .Where(t => visibleUserIds.Contains(t.CreatedByUserId))
+            // t.BatchId == "" is a link minted by "Insert link" that no send has claimed yet -
+            // it isn't a link "found in a sent message", so it stays off this list until sent.
+            .Where(t => visibleUserIds.Contains(t.CreatedByUserId) && t.BatchId != "")
             .OrderByDescending(t => t.Id);
 
         var totalCount = await query.CountAsync(ct);
@@ -41,6 +43,7 @@ public class LinkClickReportService : ILinkClickReportService
             {
                 t.Token,
                 t.DestinationUrl,
+                t.ShortUrl,
                 t.BatchId,
                 t.ClickCount,
                 t.FirstClickedAt,
@@ -56,7 +59,8 @@ public class LinkClickReportService : ILinkClickReportService
         var items = rows
             .Select(r => new TrackedLinkRowDto(
                 r.Token,
-                baseUrl.Length == 0 ? $"/l/{r.Token}" : $"{baseUrl}/l/{r.Token}",
+                // The Short.io link when the send shortened it, otherwise the full /l/{token} form.
+                r.ShortUrl ?? (baseUrl.Length == 0 ? $"/l/{r.Token}" : $"{baseUrl}/l/{r.Token}"),
                 r.DestinationUrl,
                 r.BatchId,
                 r.ClickCount,

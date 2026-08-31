@@ -176,7 +176,6 @@ export class BulkSendComponent {
     const picker = this.templatePicker();
     const useTemplate = picker?.useTemplate() ?? false;
     const message = this.messageField()?.message() ?? '';
-    const shortenLinks = this.messageField()?.shortenLinks() ?? false;
     const templateId = picker?.templateId() ?? 0;
     const templateVariables = picker?.variables() ?? {};
     const senderId = this.senderField()?.effectiveSenderId() ?? '';
@@ -213,7 +212,7 @@ export class BulkSendComponent {
         this.scheduled.set(false);
         this.scheduledAt.set('');
       } else {
-        const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), senderId, ...content, shortenLinks });
+        const summary = await this.bulkSend.submit({ campaignId: this.campaignId(), senderId, ...content });
         this.flash.success(
           `Queued ${summary.recipientCount} message(s), cost ${(summary.totalCost ?? 0).toFixed(4)}. Remaining balance: ${(summary.remainingBalance ?? 0).toFixed(4)}.`,
         );

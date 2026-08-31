@@ -15,4 +15,15 @@ public interface ILinkTrackingService
     /// </param>
     Task<string> RewriteMessageAsync(
         string message, string batchId, int userId, bool shortenLinks = false, CancellationToken ct = default);
+
+    /// <summary>
+    /// Mints a tracking link for <paramref name="destinationUrl"/> now, before any send: saves a
+    /// TrackedLink row with an empty batch id (claimed later by the send whose message carries the
+    /// link) and returns the link to insert. When <paramref name="shorten"/> is true the
+    /// <c>{BaseUrl}/l/{token}</c> redirect is additionally run through Short.io; if that fails the
+    /// full-length link is returned instead. Throws <see cref="Common.AppException"/> when the URL
+    /// is not an absolute http(s) URL or link tracking is not configured.
+    /// </summary>
+    Task<PreparedLinkDto> PrepareLinkAsync(
+        string destinationUrl, int userId, bool shorten, CancellationToken ct = default);
 }
