@@ -328,5 +328,18 @@
   "Enter a full http:// or https:// URL.": "Enter a full http:// or https:// URL.",
   "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.",
   "Keep the full link": "Keep the full link",
-  "Shorten the link": "Shorten the link"
+  "Shorten the link": "Shorten the link",
+  "API keys": "API keys",
+  "Token ID": "Token ID",
+  "Secret key": "Secret key",
+  "Generate credentials": "Generate credentials",
+  "Loading…": "Loading…",
+  "Copied.": "Copied.",
+  "Could not copy.": "Could not copy.",
+  "Send these as the token-id and secret-key headers to POST /api/send-message-api.": "Send these as the token-id and secret-key headers to POST /api/send-message-api.",
+  "Regenerating replaces both keys immediately and breaks any integration still using the old pair.": "Regenerating replaces both keys immediately and breaks any integration still using the old pair.",
+  "This replaces the account's API token and secret. Continue?": "This replaces the account's API token and secret. Continue?",
+  "New API credentials generated.": "New API credentials generated.",
+  "Unable to load API credentials.": "Unable to load API credentials.",
+  "Unable to regenerate API credentials.": "Unable to regenerate API credentials."
 }

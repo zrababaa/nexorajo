@@ -328,5 +328,18 @@
   "Enter a full http:// or https:// URL.": "أدخل رابطًا كاملًا يبدأ بـ http:// أو https://.",
   "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "سيتم تتبع {count} رابط في هذه الرسالة. تظهر النقرات في صفحة روابط التتبع.",
   "Keep the full link": "الإبقاء على الرابط كاملًا",
-  "Shorten the link": "اختصار الرابط"
+  "Shorten the link": "اختصار الرابط",
+  "API keys": "مفاتيح API",
+  "Token ID": "معرّف الرمز (Token ID)",
+  "Secret key": "المفتاح السري (Secret key)",
+  "Generate credentials": "توليد بيانات الاعتماد",
+  "Loading…": "جارٍ التحميل…",
+  "Copied.": "تم النسخ.",
+  "Could not copy.": "تعذّر النسخ.",
+  "Send these as the token-id and secret-key headers to POST /api/send-message-api.": "أرسلهما كترويستَي token-id و secret-key عند استدعاء POST /api/send-message-api.",
+  "Regenerating replaces both keys immediately and breaks any integration still using the old pair.": "إعادة التوليد تستبدل المفتاحين فورًا وتوقف أي تكامل لا يزال يستخدم الزوج القديم.",
+  "This replaces the account's API token and secret. Continue?": "سيؤدي هذا إلى استبدال رمز واجهة البرمجة والمفتاح السري للحساب. هل تريد المتابعة؟",
+  "New API credentials generated.": "تم توليد بيانات اعتماد API جديدة.",
+  "Unable to load API credentials.": "تعذّر تحميل بيانات اعتماد API.",
+  "Unable to regenerate API credentials.": "تعذّرت إعادة توليد بيانات اعتماد API."
 }

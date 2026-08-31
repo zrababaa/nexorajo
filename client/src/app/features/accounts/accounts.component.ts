@@ -59,7 +59,7 @@ const PAGE_SIZE = 15;
                   <button type="button" class="ml-3 text-primary-600 hover:underline" (click)="openEdit(a)">{{ 'Edit' | transloco }}</button>
                   <button type="button" class="ml-3 text-success hover:underline" (click)="credit(a)">{{ 'Credit' | transloco }}</button>
                   <button type="button" class="ml-3 text-danger hover:underline" (click)="debit(a)">{{ 'Debit' | transloco }}</button>
-                  <button type="button" class="ml-3 text-text-muted hover:underline" (click)="regenerateCredentials(a)">{{ 'API keys' | transloco }}</button>
+                  <button type="button" class="ml-3 text-text-muted hover:underline" (click)="openApiKeys(a)">{{ 'API keys' | transloco }}</button>
                 </td>
               </tr>
             }
@@ -135,6 +135,78 @@ const PAGE_SIZE = 15;
         </button>
       </div>
     </app-modal>
+
+    <app-modal [open]="apiKeysOpen()" [title]="'API credentials' | transloco" (closed)="apiKeysOpen.set(false)">
+      @if (apiKeysUsername()) {
+        <p class="mb-3 text-sm text-text-muted">{{ apiKeysUsername() }}</p>
+      }
+
+      @if (apiKeysLoading()) {
+        <p class="mb-4 text-sm text-text-muted">{{ 'Loading…' | transloco }}</p>
+      } @else if (!apiKeysToken() && !apiKeysSecret()) {
+        <p class="mb-4 text-sm text-text-muted">{{ 'No API credentials generated yet.' | transloco }}</p>
+      } @else {
+        <div class="mb-3">
+          <label class="mb-1 block text-sm font-medium">{{ 'Token ID' | transloco }}</label>
+          <div class="flex items-center gap-2">
+            <input
+              #tokenField
+              readonly
+              [value]="apiKeysToken()"
+              (focus)="tokenField.select()"
+              class="w-full rounded-card border border-border bg-surface-muted px-3 py-2 font-mono text-xs"
+            />
+            <button
+              type="button"
+              class="shrink-0 rounded-card border border-border px-3 py-2 text-sm hover:bg-surface-muted"
+              (click)="copyValue(apiKeysToken())"
+            >
+              {{ 'Copy' | transloco }}
+            </button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="mb-1 block text-sm font-medium">{{ 'Secret key' | transloco }}</label>
+          <div class="flex items-center gap-2">
+            <input
+              #secretField
+              readonly
+              [value]="apiKeysSecret()"
+              (focus)="secretField.select()"
+              class="w-full rounded-card border border-border bg-surface-muted px-3 py-2 font-mono text-xs"
+            />
+            <button
+              type="button"
+              class="shrink-0 rounded-card border border-border px-3 py-2 text-sm hover:bg-surface-muted"
+              (click)="copyValue(apiKeysSecret())"
+            >
+              {{ 'Copy' | transloco }}
+            </button>
+          </div>
+        </div>
+        <p class="mb-4 text-xs text-text-muted">
+          {{ 'Send these as the token-id and secret-key headers to POST /api/send-message-api.' | transloco }}
+        </p>
+      }
+
+      <p class="mb-4 text-xs text-danger">
+        {{ 'Regenerating replaces both keys immediately and breaks any integration still using the old pair.' | transloco }}
+      </p>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" class="rounded-card border border-border px-4 py-2 text-sm hover:bg-surface-muted" (click)="apiKeysOpen.set(false)">
+          {{ 'Close' | transloco }}
+        </button>
+        <button
+          type="button"
+          class="rounded-card bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+          [disabled]="apiKeysBusy() || apiKeysLoading()"
+          (click)="regenerate()"
+        >
+          {{ apiKeysToken() ? ('Regenerate credentials' | transloco) : ('Generate credentials' | transloco) }}
+        </button>
+      </div>
+    </app-modal>
   `,
 })
 export class AccountsComponent {
@@ -152,6 +224,14 @@ export class AccountsComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly apiKeysOpen = signal(false);
+  protected readonly apiKeysLoading = signal(false);
+  protected readonly apiKeysBusy = signal(false);
+  protected readonly apiKeysAccountId = signal<number | null>(null);
+  protected readonly apiKeysUsername = signal('');
+  protected readonly apiKeysToken = signal<string | null>(null);
+  protected readonly apiKeysSecret = signal<string | null>(null);
 
   protected readonly username = signal('');
   protected readonly email = signal('');
@@ -272,17 +352,58 @@ export class AccountsComponent {
     }
   }
 
-  protected async regenerateCredentials(account: AccountListItem): Promise<void> {
-    if (!confirm(this.transloco.translate('This replaces the account\'s API token/secret. Continue?'))) {
+  protected async openApiKeys(account: AccountListItem): Promise<void> {
+    this.apiKeysAccountId.set(account.id ?? null);
+    this.apiKeysUsername.set(account.username ?? '');
+    this.apiKeysToken.set(null);
+    this.apiKeysSecret.set(null);
+    this.apiKeysOpen.set(true);
+    this.apiKeysLoading.set(true);
+    try {
+      const detail = await this.accounts.getById(account.id!);
+      this.apiKeysToken.set(detail.apiToken ?? null);
+      this.apiKeysSecret.set(detail.apiSecret ?? null);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse) {
+        this.flash.error((error.error as ApiErrorResponse)?.message ?? 'Unable to load API credentials.');
+      }
+    } finally {
+      this.apiKeysLoading.set(false);
+    }
+  }
+
+  protected async regenerate(): Promise<void> {
+    const id = this.apiKeysAccountId();
+    if (id === null) {
       return;
     }
+    if (!confirm(this.transloco.translate('This replaces the account\'s API token and secret. Continue?'))) {
+      return;
+    }
+    this.apiKeysBusy.set(true);
     try {
-      const result = await this.accounts.regenerateApiCredentials(account.id!);
-      this.flash.success(`New API token: ${result.apiToken}`);
+      const result = await this.accounts.regenerateApiCredentials(id);
+      this.apiKeysToken.set(result.apiToken ?? null);
+      this.apiKeysSecret.set(result.apiSecret ?? null);
+      this.flash.success('New API credentials generated.');
     } catch (error) {
       if (error instanceof HttpErrorResponse) {
         this.flash.error((error.error as ApiErrorResponse)?.message ?? 'Unable to regenerate API credentials.');
       }
+    } finally {
+      this.apiKeysBusy.set(false);
+    }
+  }
+
+  protected async copyValue(value: string | null): Promise<void> {
+    if (!value) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(value);
+      this.flash.success('Copied.');
+    } catch {
+      this.flash.error('Could not copy.');
     }
   }
 
