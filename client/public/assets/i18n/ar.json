@@ -329,7 +329,7 @@
   "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "سيتم تتبع {count} رابط في هذه الرسالة. تظهر النقرات في صفحة روابط التتبع.",
   "Shorten link": "اختصار الرابط",
   "Preparing link…": "جارٍ تجهيز الرابط…",
-  "Shortening was unavailable — inserted the full tracking link.": "خدمة الاختصار غير متاحة — تم إدراج رابط التتبع الكامل.",
+  "Could not shorten the link — check the Short.io API key and domain. The full tracking link was inserted instead.": "تعذّر اختصار الرابط — تحقّق من مفتاح Short.io والنطاق. تم إدراج رابط التتبع الكامل بدلاً من ذلك.",
   "Could not create the tracking link.": "تعذّر إنشاء رابط التتبع.",
   "API keys": "مفاتيح API",
   "Token ID": "معرّف الرمز (Token ID)",

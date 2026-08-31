@@ -329,7 +329,7 @@
   "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.": "{count} link(s) in this message will be tracked. Clicks show on the Tracking Links page.",
   "Shorten link": "Shorten link",
   "Preparing link…": "Preparing link…",
-  "Shortening was unavailable — inserted the full tracking link.": "Shortening was unavailable — inserted the full tracking link.",
+  "Could not shorten the link — check the Short.io API key and domain. The full tracking link was inserted instead.": "Could not shorten the link — check the Short.io API key and domain. The full tracking link was inserted instead.",
   "Could not create the tracking link.": "Could not create the tracking link.",
   "API keys": "API keys",
   "Token ID": "Token ID",

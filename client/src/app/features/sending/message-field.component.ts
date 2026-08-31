@@ -53,8 +53,6 @@ const URL_PATTERN = /https?:\/\/\S+/gi;
 
       @if (linkError()) {
         <p class="mt-1 text-xs text-danger">{{ linkError() }}</p>
-      } @else if (linkNotice()) {
-        <p class="mt-1 text-xs text-text-muted">{{ linkNotice() }}</p>
       }
       @if (trackedLinkCount() > 0) {
         <p class="mt-1 text-xs text-text-muted">🔗 {{ trackedNotice() }}</p>
@@ -72,7 +70,6 @@ export class MessageFieldComponent {
 
   protected readonly linkUrl = signal('');
   protected readonly linkError = signal<string | null>(null);
-  protected readonly linkNotice = signal<string | null>(null);
   protected readonly shorten = signal(false);
   protected readonly inserting = signal(false);
 
@@ -108,7 +105,6 @@ export class MessageFieldComponent {
   protected onLinkUrlChange(value: string): void {
     this.linkUrl.set(value);
     this.linkError.set(null);
-    this.linkNotice.set(null);
   }
 
   /**
@@ -127,14 +123,17 @@ export class MessageFieldComponent {
     }
 
     this.linkError.set(null);
-    this.linkNotice.set(null);
     this.inserting.set(true);
     try {
       const prepared = await this.linkTracking.prepare(url, this.shorten());
       this.insertAtCaret(prepared.trackingUrl);
       this.linkUrl.set('');
       if (this.shorten() && !prepared.shortened) {
-        this.linkNotice.set(this.transloco.translate('Shortening was unavailable — inserted the full tracking link.'));
+        this.linkError.set(
+          this.transloco.translate(
+            'Could not shorten the link — check the Short.io API key and domain. The full tracking link was inserted instead.',
+          ),
+        );
       }
     } catch (error) {
       const message =
