@@ -1614,6 +1614,60 @@ html[dir="rtl"] .footer-col h4 { letter-spacing: 0; }
   animation: heroGlow 6s ease-in-out infinite, bgShift 10s ease-in-out infinite;
 }
 
+/* ─── Video demo cards (CRM / BSS & SMS) ─── */
+.video-card {
+  position: relative;
+  margin-top: 28px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+}
+
+.video-card video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: var(--bg-card);
+}
+
+.video-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(7,13,26,0) 40%, rgba(7,13,26,.55) 100%);
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+
+.video-card.playing::after { opacity: 0; }
+
+.video-play-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 1px solid var(--border-hover);
+  background: var(--blue-gradient);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 8px rgba(0,207,255,.08), 0 8px 24px rgba(0,0,0,.35);
+  transition: transform .25s ease, opacity .25s ease;
+}
+
+.video-play-btn svg { margin-left: 3px; }
+
+.video-play-btn:hover { transform: translate(-50%, -50%) scale(1.08); }
+
+.video-card.playing .video-play-btn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.8);
+}
+
 /* ─── Responsive hide ─── */
 @media (max-width: 900px) {
   .float-badge, .float-hex, .float-orb-1, .float-orb-3 { display: none; }

@@ -360,4 +360,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.35 });
   sections.forEach(s => secObs.observe(s));
 
+
+  /* ══════════════════════════════════════
+     VIDEO DEMO CARDS (CRM / BSS & SMS)
+  ══════════════════════════════════════ */
+  document.querySelectorAll('.video-card').forEach(card => {
+    const video = card.querySelector('video');
+    const playBtn = card.querySelector('.video-play-btn');
+    if (!video || !playBtn) return;
+
+    playBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      video.play();
+    });
+
+    video.addEventListener('click', () => {
+      if (video.paused) video.play();
+      else video.pause();
+    });
+
+    video.addEventListener('play',  () => card.classList.add('playing'));
+    video.addEventListener('pause', () => card.classList.remove('playing'));
+    video.addEventListener('ended', () => card.classList.remove('playing'));
+  });
+
 });
