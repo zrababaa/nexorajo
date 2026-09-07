@@ -1631,7 +1631,16 @@ html[dir="rtl"] .footer-col h4 { letter-spacing: 0; }
   height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center center;
   background: var(--bg-card);
+}
+
+/* CRM demo clip is portrait-framed with the subject's head near the
+   top of frame — center-cropping to the 16:9 card cuts it off, so
+   anchor the crop to the top instead. Scoped to this card only so it
+   doesn't affect the SMS video, which crops fine centered. */
+.video-card--crm video {
+  object-position: center 20%;
 }
 
 .video-card::after {
