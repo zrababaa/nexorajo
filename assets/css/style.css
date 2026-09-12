@@ -257,21 +257,26 @@ html[dir="rtl"] .nav-links a::after { left: auto; right: 0; }
 .nav-dropdown-toggle svg { transition: transform var(--transition); }
 
 .nav-dropdown:hover .nav-dropdown-toggle svg,
-.nav-dropdown:focus-within .nav-dropdown-toggle svg { transform: rotate(180deg); }
+.nav-dropdown:focus-within .nav-dropdown-toggle svg,
+.nav-dropdown.open .nav-dropdown-toggle svg { transform: rotate(180deg); }
 
+/* No margin-top here on purpose: the panel sits flush against the
+   trigger's own box (top:100%, zero gap) so there's no dead zone for
+   the pointer to cross while moving from the trigger into the panel.
+   Visual breathing room is added via padding-top instead, which is
+   still inside the hoverable/clickable box. */
 .nav-dropdown-menu {
   list-style: none;
   position: absolute;
   top: 100%;
   left: 50%;
   transform: translateX(-50%) translateY(6px);
-  margin-top: 14px;
   min-width: 200px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-card);
-  padding: 8px;
+  padding: 16px 8px 8px;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -280,7 +285,8 @@ html[dir="rtl"] .nav-links a::after { left: auto; right: 0; }
 }
 
 .nav-dropdown:hover .nav-dropdown-menu,
-.nav-dropdown:focus-within .nav-dropdown-menu {
+.nav-dropdown:focus-within .nav-dropdown-menu,
+.nav-dropdown.open .nav-dropdown-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -733,7 +739,11 @@ html[dir="rtl"] .hero-title { letter-spacing: 0; }
 /* ══════════════════════════════════
    BSS
 ══════════════════════════════════ */
-#bss { background: var(--bg-primary); }
+/* Large scroll-margin-top so a cross-page link like "bss-sms.html#bss"
+   clamps to the very top of the page (same as a plain link) instead of
+   scrolling past the page-header — this id is the page's first/primary
+   section right after the header, so there's nothing worth skipping. */
+#bss { background: var(--bg-primary); scroll-margin-top: 2000px; }
 
 .two-col {
   display: grid;
@@ -895,7 +905,7 @@ html[dir="rtl"] .mockup-title { margin-left: 0; margin-right: 4px; }
 /* ══════════════════════════════════
    AI SOLUTIONS
 ══════════════════════════════════ */
-#ai { background: var(--bg-secondary); }
+#ai { background: var(--bg-secondary); scroll-margin-top: 2000px; }
 
 .ai-cards {
   display: grid;
@@ -935,7 +945,7 @@ html[dir="rtl"] .mockup-title { margin-left: 0; margin-right: 4px; }
 /* ══════════════════════════════════
    CRM
 ══════════════════════════════════ */
-#crm { background: var(--bg-primary); }
+#crm { background: var(--bg-primary); scroll-margin-top: 2000px; }
 
 .crm-card {
   background: var(--bg-card);
@@ -1220,7 +1230,7 @@ html[dir="rtl"] .msg-bubble.user-msg { border-bottom-right-radius: 13px; border-
 /* ══════════════════════════════════
    MARKETING
 ══════════════════════════════════ */
-#marketing { background: var(--bg-secondary); }
+#marketing { background: var(--bg-secondary); scroll-margin-top: 2000px; }
 
 .marketing-grid {
   display: grid;

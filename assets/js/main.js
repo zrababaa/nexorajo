@@ -92,6 +92,32 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   /* ══════════════════════════════════════
+     NAV DROPDOWN (Services) — hover-intent
+     Keeps the panel open for a short grace period after the pointer
+     leaves the trigger/panel, so moving the mouse down into the menu
+     doesn't get raced by the CSS :hover being lost mid-travel.
+  ══════════════════════════════════════ */
+  document.querySelectorAll('.nav-dropdown').forEach(dd => {
+    let closeTimer = null;
+
+    const open = () => {
+      clearTimeout(closeTimer);
+      dd.classList.add('open');
+    };
+    const scheduleClose = () => {
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => dd.classList.remove('open'), 300);
+    };
+
+    dd.addEventListener('mouseenter', open);
+    dd.addEventListener('mouseleave', scheduleClose);
+    dd.addEventListener('focusin', open);
+    dd.addEventListener('focusout', e => {
+      if (!dd.contains(e.relatedTarget)) scheduleClose();
+    });
+  });
+
+  /* ══════════════════════════════════════
      MOBILE "SERVICES" ACCORDION
   ══════════════════════════════════════ */
   document.querySelectorAll('.mobile-dropdown-toggle').forEach(btn => {
