@@ -91,6 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
     a.addEventListener('click', () => mobileMenu.classList.remove('open'))
   );
 
+  /* ══════════════════════════════════════
+     MOBILE "SERVICES" ACCORDION
+  ══════════════════════════════════════ */
+  document.querySelectorAll('.mobile-dropdown-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.mobile-dropdown')?.classList.toggle('open');
+    });
+  });
+
 
   /* ══════════════════════════════════════
      SCROLL REVEAL
@@ -226,7 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
      CHATBOT DEMO SEND BUTTON
   ══════════════════════════════════════ */
   document.querySelector('.chat-send')?.addEventListener('click', () => {
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.location.href = 'contact.html#contact';
+    }
   });
 
 
@@ -343,18 +357,26 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         navLinks.forEach(l => l.classList.remove('active'));
-        document.querySelector(`.nav-links a[href="#${e.target.id}"]`)?.classList.add('active');
+        document.querySelector(`.nav-links a[href$="#${e.target.id}"]`)?.classList.add('active');
       }
     });
   }, { threshold: 0.35 }).forEach
     ? null
     : void 0;
 
+  function syncDropdownActive() {
+    document.querySelectorAll('.nav-dropdown, .mobile-dropdown').forEach(dd => {
+      const hasActive = dd.querySelector('a.active');
+      dd.querySelector('.nav-dropdown-toggle, .mobile-dropdown-toggle')?.classList.toggle('active', !!hasActive);
+    });
+  }
+
   const secObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         navLinks.forEach(l => l.classList.remove('active'));
-        document.querySelector(`.nav-links a[href="#${e.target.id}"]`)?.classList.add('active');
+        document.querySelector(`.nav-links a[href$="#${e.target.id}"]`)?.classList.add('active');
+        syncDropdownActive();
       }
     });
   }, { threshold: 0.35 });
