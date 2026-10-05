@@ -432,4 +432,110 @@ document.addEventListener('DOMContentLoaded', () => {
     video.addEventListener('ended', () => card.classList.remove('playing'));
   });
 
+
+  /* ── LIVE AI CHATBOT ── */
+  const chatbotLauncher = document.getElementById('chatbotLauncher');
+  const chatbotPanel = document.getElementById('chatbotPanel');
+  const chatbotClose = document.getElementById('chatbotClose');
+  const chatbotForm = document.getElementById('chatbotForm');
+  const chatbotInput = document.getElementById('chatbotInput');
+  const chatbotMessages = document.getElementById('chatbotMessages');
+
+  if (chatbotLauncher && chatbotPanel && chatbotForm && chatbotInput && chatbotMessages) {
+    const getConversationId = () => {
+      try {
+        const existing = sessionStorage.getItem('nexora-chat-id');
+        if (existing) return existing;
+
+        const created = globalThis.crypto?.randomUUID?.() ||
+          `web-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        sessionStorage.setItem('nexora-chat-id', created);
+        return created;
+      } catch {
+        return `web-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+    };
+
+    let conversationId = getConversationId();
+
+    const setOpen = open => {
+      chatbotPanel.hidden = !open;
+      chatbotLauncher.setAttribute('aria-expanded', String(open));
+      if (open) setTimeout(() => chatbotInput.focus(), 50);
+    };
+
+    const addMessage = (text, role, isError = false) => {
+      const message = document.createElement('div');
+      message.className = `chatbot-message chatbot-message--${role}`;
+      if (isError) message.classList.add('chatbot-message--error');
+      message.textContent = text;
+      chatbotMessages.appendChild(message);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      return message;
+    };
+
+    const addTyping = () => {
+      const typing = document.createElement('div');
+      typing.className = 'chatbot-message chatbot-message--assistant chatbot-typing';
+      typing.setAttribute('aria-label', 'Assistant is typing');
+      typing.innerHTML = '<i></i><i></i><i></i>';
+      chatbotMessages.appendChild(typing);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      return typing;
+    };
+
+    chatbotLauncher.addEventListener('click', () => setOpen(chatbotPanel.hidden));
+    chatbotClose?.addEventListener('click', () => setOpen(false));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !chatbotPanel.hidden) setOpen(false);
+    });
+
+    chatbotForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const text = chatbotInput.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      chatbotInput.value = '';
+      chatbotInput.disabled = true;
+      const submitButton = chatbotForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      const typing = addTyping();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, message: text })
+        });
+
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(body.detail || `Request failed (${response.status})`);
+        }
+
+        conversationId = body.conversationId || conversationId;
+        try { sessionStorage.setItem('nexora-chat-id', conversationId); } catch { /* optional */ }
+        typing.remove();
+        addMessage(body.message || 'I could not generate a response.', 'assistant');
+      } catch (error) {
+        typing.remove();
+        const isAr = HTML.getAttribute('lang') === 'ar';
+        addMessage(
+          isAr
+            ? 'عذراً، تعذّر الاتصال بالمساعد حالياً. حاول مرة أخرى بعد قليل.'
+            : 'Sorry, I could not reach the assistant. Please try again shortly.',
+          'assistant',
+          true
+        );
+        console.error('Chatbot request failed:', error);
+      } finally {
+        chatbotInput.disabled = false;
+        submitButton.disabled = false;
+        chatbotInput.focus();
+      }
+    });
+  }
+
 });

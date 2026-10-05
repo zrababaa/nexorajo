@@ -477,6 +477,57 @@
   </div>
 </footer>
 
+<!-- AI chatbot -->
+<aside class="chatbot-widget" id="chatbotWidget" aria-label="Nexora AI assistant">
+  <section class="chatbot-panel" id="chatbotPanel" aria-live="polite" hidden>
+    <header class="chatbot-header">
+      <div class="chatbot-identity">
+        <span class="chatbot-avatar" aria-hidden="true">
+          <img src="assets/images/icon.png" alt="" />
+        </span>
+        <div>
+          <strong data-en="Nexora Assistant" data-ar="مساعد نكسورا">Nexora Assistant</strong>
+          <span data-en="Online · AI powered" data-ar="متصل · مدعوم بالذكاء الاصطناعي">Online · AI powered</span>
+        </div>
+      </div>
+      <button class="chatbot-close" id="chatbotClose" type="button" aria-label="Close chat">×</button>
+    </header>
+
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="chatbot-message chatbot-message--assistant"
+           data-en="Hi! I’m Nexora’s AI assistant. How can I help you today?"
+           data-ar="مرحباً! أنا مساعد نكسورا الذكي. كيف يمكنني مساعدتك اليوم؟">
+        Hi! I’m Nexora’s AI assistant. How can I help you today?
+      </div>
+    </div>
+
+    <form class="chatbot-form" id="chatbotForm">
+      <label class="sr-only" for="chatbotInput" data-en="Your message" data-ar="رسالتك">Your message</label>
+      <input id="chatbotInput"
+             name="message"
+             type="text"
+             maxlength="2000"
+             autocomplete="off"
+             required
+             data-en="Ask us anything…"
+             data-ar="اسألنا أي شيء…"
+             placeholder="Ask us anything…" />
+      <button type="submit" aria-label="Send message">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+        </svg>
+      </button>
+    </form>
+  </section>
+
+  <button class="chatbot-launcher" id="chatbotLauncher" type="button" aria-controls="chatbotPanel" aria-expanded="false">
+    <svg class="chatbot-launcher-open" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>
+    </svg>
+    <span data-en="Chat with us" data-ar="تحدث معنا">Chat with us</span>
+  </button>
+</aside>
+
 <script src="assets/js/main.js"></script>
 </body>
 </html>
